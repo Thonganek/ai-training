@@ -274,8 +274,8 @@
                         <div class="flex items-center gap-2">
                             <!-- Response Source Selector -->
                             <div class="flex items-center bg-[var(--bg-main)] rounded-lg border border-[var(--border-color)] px-2 py-1">
-                                <span class="text-[16px] opacity-60 mr-2">กรุณาเลือก Source:</span>
-                                <select id="chat-source" onchange="handleSourceChange(this)" class="bg-transparent text-xs font-bold outline-none cursor-pointer text-[var(--text-main)] max-w-[150px]">
+                                <span class="text-[16px] opacity-60 mr-2">Source:</span>
+                                <select id="chat-source" onchange="handleSourceChange(this)" class="bg-transparent text-xs font-bold outline-none cursor-pointer text-[var(--text-main)] max-w-[100px] md:max-w-[150px]">
                                     <option value="api">1. 🌐 General AI</option>
                                     <option value="hybrid">2. 🧠 Trained Memory (Hybrid)</option>
                                     <option value="strict">3. 🔒 Only Data Training</option>
@@ -283,8 +283,18 @@
                                 </select>
                             </div>
 
+                            <!-- NEW: Response Length Selector (Token Control) -->
+                            <div class="flex items-center bg-[var(--bg-main)] rounded-lg border border-[var(--border-color)] px-2 py-1 hidden md:flex" title="Limit Response Length to save tokens">
+                                <span class="text-[10px] opacity-60 mr-2"><i data-lucide="scissors" class="w-3 h-3"></i>:</span>
+                                <select id="chat-length" class="bg-transparent text-xs font-bold outline-none cursor-pointer text-[var(--text-main)]">
+                                    <option value="short">⚡ Short (ประหยัด)</option>
+                                    <option value="medium" selected>📝 Normal</option>
+                                    <option value="long">📚 Detailed</option>
+                                </select>
+                            </div>
+
                             <button onclick="clearChat()" class="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg flex items-center gap-2 text-xs font-bold transition-all">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i> New Chat
+                                <i data-lucide="trash-2" class="w-4 h-4"></i> <span class="hidden md:inline">New Chat</span>
                             </button>
                         </div>
                     </div>
@@ -1239,23 +1249,21 @@
 
                 } catch (e) {
                     lastError = e;
-                    // If strictly network error, might want to stop? 
-                    // But assume rotation is safest for reliability.
                     if (!e.message.includes("Quota") && !e.message.includes("429")) {
-                        // If it's a logic error (400), don't rotate, just throw.
-                        throw e;
+                        throw e; // Non-quota error, fail immediately
                     }
                 }
             }
-            throw new Error(`System Busy: All 5 API keys are currently exhausted. Please wait a minute. (${lastError?.message})`);
+            throw new Error(`System Busy: All 5 API keys are exhausted. (${lastError?.message})`);
         }
 
-        // --- CHAT LOGIC (UPDATED) ---
+        // --- CHAT LOGIC (UPDATED WITH TOKEN CONTROL) ---
         async function handleChatSubmit(e) {
             e.preventDefault();
             const input = document.getElementById('user-input');
             const msg = input.value.trim();
             const source = document.getElementById('chat-source').value;
+            const lengthMode = document.getElementById('chat-length').value; // Get length preference
             
             if (!msg && !currentChatFile) return;
 
@@ -1281,8 +1289,8 @@
                 }
             }
 
+            // ... Offline Logic Block (Same as before) ...
             if (source === 'offline') {
-                // ... Offline Logic ...
                 const tempId = "thinking-" + Date.now();
                 const box = document.getElementById('chat-box');
                 const div = document.createElement('div');
@@ -1308,19 +1316,31 @@
                 return;
             }
 
+            // --- TOKEN & STYLE CONFIGURATION ---
+            let maxTokens = 500; // Default Medium
+            let styleInstruction = "Answer clearly and moderately.";
+
+            if (lengthMode === 'short') {
+                maxTokens = 150;
+                styleInstruction = "Answer very briefly and concisely. Do not elaborate unnecessarily. Limit to 2-3 key sentences.";
+            } else if (lengthMode === 'long') {
+                maxTokens = 2000;
+                styleInstruction = "Answer in detail. Provide comprehensive explanations, examples, or breakdowns if applicable.";
+            }
+
             // Prompt Engineering
             let prompt = "";
             const context = memory.join('\n\n--- NEXT DOCUMENT ---\n\n');
 
             if(source === 'strict') {
-                prompt = `You are a strict research assistant AI. Answer using ONLY the CONTEXT below. If not found, say "Not found in Trained Memory".\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
+                prompt = `You are a strict research assistant AI. Answer using ONLY the CONTEXT below. If not found, say "Not found in Trained Memory".\n\nINSTRUCTION: ${styleInstruction}\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
             } else if (source === 'hybrid') {
-                prompt = `You are a smart research assistant AI. Use CONTEXT as primary truth but can use general knowledge.\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
+                prompt = `You are a smart research assistant AI. Use CONTEXT as primary truth but can use general knowledge.\n\nINSTRUCTION: ${styleInstruction}\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
             } else {
-                prompt = `You are a helpful AI Research Assistant. Answer the following question in Thai:\n\n${contextMsg}`;
+                prompt = `You are a helpful AI Research Assistant. Answer the following question in Thai.\n\nINSTRUCTION: ${styleInstruction}\n\nQ: ${contextMsg}`;
             }
 
-            // Call Gemini WITH ROTATION
+            // Call Gemini WITH ROTATION + GENERATION CONFIG
             try {
                 const tempId = "thinking-" + Date.now();
                 const box = document.getElementById('chat-box');
@@ -1332,8 +1352,16 @@
                 box.scrollTop = box.scrollHeight;
                 lucide.createIcons();
 
-                // USE NEW FUNCTION
-                const data = await callGeminiAPI({ contents: [{ parts: [{ text: prompt }] }] });
+                // Payload construction with generationConfig
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        maxOutputTokens: maxTokens, // Hard limit at API level
+                        temperature: 0.7 // Standard creativity
+                    }
+                };
+
+                const data = await callGeminiAPI(payload);
                 
                 document.getElementById(tempId).remove();
 
