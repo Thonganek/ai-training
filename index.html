@@ -635,970 +635,962 @@
         </div>
     </div>
 
-    <script>
-        // ใส่ API Key ของคุณที่นี่ (จะวนใช้ทีละตัวถ้าตัวก่อนหน้าใช้ไม่ได้)
-        const API_KEYS = [
-            "AIzaSyDwEO11lXEehpjPA3K-xRLj2LkxnsTI2mw",
-            "AIzaSyCcr-1DrCu2unZMdXVULUqbDgIVXDbAWw8",
-            "AIzaSyAXn2RnKle5RdJsD74PHVQbQAcOkPffkb4",
-            "AIzaSyBLUrqgqMoJ0hIwft5l-RjSTvOvo0QlSlU",
-            "AIzaSyATWMM_E0icR3lIUX-88DS3hGw2RGrA4Wo",
-            "AIzaSyAuGmhGGfVIgdcBS-bDPu06I_fQpIy2Sng",
-            "AIzaSyBW_DCpCRdME_d1oT8PmsppdDDxNcPRq84",
-            "AIzaSyB--mv-d2ps80wX8ANivxVPD9VEc3AE4dE",
-            "tgp_v1_lhsHriKp-a-w8CLY7V_f4fIp3NHfKihOKqz8OmicrQs",
-        ];
-        
-        // Extended Status Tracking
-        let keyHealth = API_KEYS.map((k, i) => ({
-            id: i + 1,
-            key: k,
-            status: 'ready', // ready, working, active, dead
-            msg: 'Ready'
-        }));
+<script>
+    // ใส่ API Key ของคุณที่นี่ (จะวนใช้ทีละตัวถ้าตัวก่อนหน้าใช้ไม่ได้)
+    const API_KEYS = [
+        "AIzaSyDwEO11lXEehpjPA3K-xRLj2LkxnsTI2mw",
+        "AIzaSyCcr-1DrCu2unZMdXVULUqbDgIVXDbAWw8",
+        "AIzaSyAXn2RnKle5RdJsD74PHVQbQAcOkPffkb4",
+        "AIzaSyBLUrqgqMoJ0hIwft5l-RjSTvOvo0QlSlU",
+        "AIzaSyATWMM_E0icR3lIUX-88DS3hGw2RGrA4Wo",
+        "AIzaSyAuGmhGGfVIgdcBS-bDPu06I_fQpIy2Sng",
+        "AIzaSyBW_DCpCRdME_d1oT8PmsppdDDxNcPRq84",
+        "AIzaSyB--mv-d2ps80wX8ANivxVPD9VEc3AE4dE",
+        "tgp_v1_lhsHriKp-a-w8CLY7V_f4fIp3NHfKihOKqz8OmicrQs",
+    ];
+    
+    // Extended Status Tracking
+    let keyHealth = API_KEYS.map((k, i) => ({
+        id: i + 1,
+        key: k,
+        status: 'ready', // ready, working, active, dead
+        msg: 'Ready'
+    }));
 
-        let currentKeyIndex = 0;
-        
-        // Initial Memory with Developer Credit
-        let memory = ["คุณคือ AI ผู้ช่วยวิจัย ที่พัฒนาโดย นายจรัญญู ทองเอนก"];
-        
-        // --- STORAGE LOGIC ---
-        function loadMemory() {
-            const saved = localStorage.getItem('ai_memory');
-            if(saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    if(parsed.length > 0) memory = parsed;
-                } catch(e) { console.error("Load Memory Error", e); }
-            }
+    let currentKeyIndex = 0;
+    
+    // Initial Memory with Developer Credit
+    let memory = ["คุณคือ AI ผู้ช่วยวิจัย ที่พัฒนาโดย นายจรัญญู ทองเอนก"];
+    
+    // --- STORAGE LOGIC ---
+    function loadMemory() {
+        const saved = localStorage.getItem('ai_memory');
+        if(saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if(parsed.length > 0) memory = parsed;
+            } catch(e) { console.error("Load Memory Error", e); }
         }
+    }
 
-        function saveMemoryToStorage() {
-            localStorage.setItem('ai_memory', JSON.stringify(memory));
+    function saveMemoryToStorage() {
+        localStorage.setItem('ai_memory', JSON.stringify(memory));
+    }
+
+    // Listen for changes from other tabs (training.html)
+    window.addEventListener('storage', (e) => {
+        if(e.key === 'ai_memory') {
+            loadMemory();
+            showAlert("System Sync", "ได้รับข้อมูลใหม่จาก Training Center เรียบร้อยแล้ว!");
         }
+    });
 
-        // Listen for changes from other tabs (training.html)
-        window.addEventListener('storage', (e) => {
-            if(e.key === 'ai_memory') {
-                loadMemory();
-                showAlert("System Sync", "ได้รับข้อมูลใหม่จาก Training Center เรียบร้อยแล้ว!");
+    // Initialize
+    loadMemory();
+
+    let visualDataset = [];
+    let isDrawing = false;
+    let trainInterval;
+    let trainStream = null;
+    let currentChatFile = null;
+    let lastUserQuestion = ""; // For Learning/Teaching
+
+    // --- THEME ---
+    function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+    }
+
+    // --- NAVIGATION ---
+    function switchMode(mode) {
+        document.getElementById('mode-text').classList.toggle('hidden', mode !== 'text');
+        document.getElementById('mode-visual').classList.toggle('hidden', mode !== 'visual');
+        
+        // Update Tab States
+        const tabs = ['text', 'visual'];
+        tabs.forEach(t => {
+            const btn = document.getElementById(`btn-${t}`);
+            if (t === mode) {
+                btn.className = "tab-active px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2";
+            } else {
+                btn.className = "tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2";
             }
         });
+    }
 
-        // Initialize
-        loadMemory();
+    // --- TEXT TRAINING (DEEP & DETAILED) ---
+    function handleFileUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
 
-        let visualDataset = [];
-        let isDrawing = false;
-        let trainInterval;
-        let trainStream = null;
-        let currentChatFile = null;
-        let lastUserQuestion = ""; // For Learning/Teaching
-
-        // --- THEME ---
-        function setTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-        }
-
-        // --- NAVIGATION ---
-        function switchMode(mode) {
-            document.getElementById('mode-text').classList.toggle('hidden', mode !== 'text');
-            document.getElementById('mode-visual').classList.toggle('hidden', mode !== 'visual');
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const textArea = document.getElementById('knowledge-input');
+            const timestamp = new Date().toLocaleTimeString();
+            textArea.value += (textArea.value ? "\n\n" : "") + `[File: ${file.name} @ ${timestamp}]\n` + text;
             
-            // Update Tab States
-            const tabs = ['text', 'visual'];
-            tabs.forEach(t => {
-                const btn = document.getElementById(`btn-${t}`);
-                if (t === mode) {
-                    btn.className = "tab-active px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2";
-                } else {
-                    btn.className = "tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2";
-                }
-            });
+            // Trigger token count update
+            document.getElementById('token-count').innerText = textArea.value.length + " chars";
+            showAlert("File Attached", `Successfully loaded content from ${file.name}`);
+        };
+        // Read as text for text/csv/json/md files
+        reader.readAsText(file);
+    }
+
+    function handleSheetImport() {
+        const url = prompt("Enter CSV/Google Sheet URL:");
+        if(url) {
+            const textArea = document.getElementById('knowledge-input');
+            textArea.value += (textArea.value ? "\n\n" : "") + `[Linked URL: ${url}]\nSimulated data load...`;
+            document.getElementById('token-count').innerText = textArea.value.length + " chars";
         }
+    }
 
-        // --- TEXT TRAINING (DEEP & DETAILED) ---
-        function handleFileUpload(input) {
-            const file = input.files[0];
-            if (!file) return;
+    // --- NEW: ADVANCED TRAINING PROCESS VISUALIZER ---
+    async function startTextTraining() {
+        const input = document.getElementById('knowledge-input').value.trim();
+        if(!input) return showAlert("Error", "Please enter data or attach a file first");
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = e.target.result;
-                const textArea = document.getElementById('knowledge-input');
-                const timestamp = new Date().toLocaleTimeString();
-                textArea.value += (textArea.value ? "\n\n" : "") + `[File: ${file.name} @ ${timestamp}]\n` + text;
+        // UI Setup
+        document.getElementById('nlp-visualizer').classList.remove('hidden');
+        document.getElementById('btn-start-train').classList.add('hidden');
+        
+        // Clear previous
+        const visTokens = document.getElementById('vis-tokens');
+        visTokens.innerHTML = '';
+        document.getElementById('vis-vectors').innerHTML = '';
+        
+        // Tokenization Simulation (Split by spacing/newline for visual)
+        let tokens = input.split(/[\s\n]+/);
+        // Handle massive text blocks without spaces (Thai) by chunking chars if needed
+        if(tokens.length < input.length / 20) {
+            // Heuristic: If tokens are too few relative to length, it might be unspaced Thai.
+            // We'll split visually by character chunks for the "Stream" effect.
+            tokens = input.match(/.{1,10}/g) || [];
+        }
+        
+        const totalTokens = tokens.length;
+        let processedCount = 0;
+        
+        // Initial Status
+        document.getElementById('step-1-status').innerHTML = `<span class="animate-pulse text-yellow-500">Initializing Pipeline...</span>`;
+
+        // CHUNK PROCESSING SYSTEM (Optimized for 10,000+ words)
+        const chunkSize = 20; // Words per frame
+        let index = 0;
+        let startTime = Date.now();
+
+        function processChunk() {
+            const chunkEnd = Math.min(index + chunkSize, totalTokens);
+            let fragment = document.createDocumentFragment();
+            
+            for (let i = index; i < chunkEnd; i++) {
+                const token = tokens[i];
+                if (!token) continue;
                 
-                // Trigger token count update
-                document.getElementById('token-count').innerText = textArea.value.length + " chars";
-                showAlert("File Attached", `Successfully loaded content from ${file.name}`);
-            };
-            // Read as text for text/csv/json/md files
-            reader.readAsText(file);
-        }
-
-        function handleSheetImport() {
-            const url = prompt("Enter CSV/Google Sheet URL:");
-            if(url) {
-                const textArea = document.getElementById('knowledge-input');
-                textArea.value += (textArea.value ? "\n\n" : "") + `[Linked URL: ${url}]\nSimulated data load...`;
-                document.getElementById('token-count').innerText = textArea.value.length + " chars";
+                const span = document.createElement('span');
+                // Smart Highlighting: Highlight longer words/concepts
+                const isConcept = token.length > 5 || /[\u0E00-\u0E7F]/.test(token); // Simple heuristic
+                
+                span.className = isConcept 
+                    ? "inline-block px-1.5 py-0.5 m-0.5 bg-blue-500/20 text-blue-300 text-[10px] rounded border border-blue-500/30 animate-fade-in" 
+                    : "inline-block px-1 m-0.5 text-slate-500 text-[10px]";
+                span.innerText = token;
+                fragment.appendChild(span);
             }
-        }
-
-        // --- NEW: ADVANCED TRAINING PROCESS VISUALIZER ---
-        async function startTextTraining() {
-            const input = document.getElementById('knowledge-input').value.trim();
-            if(!input) return showAlert("Error", "Please enter data or attach a file first");
-
-            // UI Setup
-            document.getElementById('nlp-visualizer').classList.remove('hidden');
-            document.getElementById('btn-start-train').classList.add('hidden');
             
-            // Clear previous
-            const visTokens = document.getElementById('vis-tokens');
-            visTokens.innerHTML = '';
-            document.getElementById('vis-vectors').innerHTML = '';
+            visTokens.appendChild(fragment);
             
-            // Tokenization Simulation (Split by spacing/newline for visual)
-            let tokens = input.split(/[\s\n]+/);
-            // Handle massive text blocks without spaces (Thai) by chunking chars if needed
-            if(tokens.length < input.length / 20) {
-                // Heuristic: If tokens are too few relative to length, it might be unspaced Thai.
-                // We'll split visually by character chunks for the "Stream" effect.
-                tokens = input.match(/.{1,10}/g) || [];
-            }
+            // Auto Scroll
+            visTokens.scrollTop = visTokens.scrollHeight;
             
-            const totalTokens = tokens.length;
-            let processedCount = 0;
-            
-            // Initial Status
-            document.getElementById('step-1-status').innerHTML = `<span class="animate-pulse text-yellow-500">Initializing Pipeline...</span>`;
-
-            // CHUNK PROCESSING SYSTEM (Optimized for 10,000+ words)
-            const chunkSize = 20; // Words per frame
-            let index = 0;
-            let startTime = Date.now();
-
-            function processChunk() {
-                const chunkEnd = Math.min(index + chunkSize, totalTokens);
-                let fragment = document.createDocumentFragment();
-                
-                for (let i = index; i < chunkEnd; i++) {
-                    const token = tokens[i];
-                    if (!token) continue;
-                    
-                    const span = document.createElement('span');
-                    // Smart Highlighting: Highlight longer words/concepts
-                    const isConcept = token.length > 5 || /[\u0E00-\u0E7F]/.test(token); // Simple heuristic
-                    
-                    span.className = isConcept 
-                        ? "inline-block px-1.5 py-0.5 m-0.5 bg-blue-500/20 text-blue-300 text-[10px] rounded border border-blue-500/30 animate-fade-in" 
-                        : "inline-block px-1 m-0.5 text-slate-500 text-[10px]";
-                    span.innerText = token;
-                    fragment.appendChild(span);
-                }
-                
-                visTokens.appendChild(fragment);
-                
-                // Auto Scroll
-                visTokens.scrollTop = visTokens.scrollHeight;
-                
-                // DOM Memory Management (Rolling Window: Keep last ~300 items)
-                if (visTokens.children.length > 300) {
-                    for(let k=0; k<chunkSize; k++) {
-                        if(visTokens.firstChild) visTokens.removeChild(visTokens.firstChild);
-                    }
-                }
-
-                processedCount = chunkEnd;
-                
-                // Calculate Speed
-                const elapsed = (Date.now() - startTime) / 1000;
-                const speed = Math.round(processedCount / (elapsed || 1));
-                document.getElementById('proc-speed').innerText = `${speed} words/s`;
-                document.getElementById('step-1-status').innerHTML = `<span class="text-yellow-500">Scanning & Tokenizing: ${processedCount}/${totalTokens}</span>`;
-
-                index += chunkSize;
-
-                if (index < totalTokens) {
-                    requestAnimationFrame(processChunk);
-                } else {
-                    document.getElementById('step-1-status').innerHTML = `<span class="text-green-500 font-bold">Extraction Complete (${totalTokens} tokens)</span>`;
-                    startDeepVectorization();
+            // DOM Memory Management (Rolling Window: Keep last ~300 items)
+            if (visTokens.children.length > 300) {
+                for(let k=0; k<chunkSize; k++) {
+                    if(visTokens.firstChild) visTokens.removeChild(visTokens.firstChild);
                 }
             }
 
-            processChunk();
-        }
-
-        function startDeepVectorization() {
-            // Matrix Rain Effect for Vectorization
-            const visVectors = document.getElementById('vis-vectors');
-            document.getElementById('step-2-status').innerHTML = `<span class="animate-pulse text-blue-400">Generatiing Embeddings...</span>`;
+            processedCount = chunkEnd;
             
-            let progress = 0;
-            visVectors.innerHTML = "";
+            // Calculate Speed
+            const elapsed = (Date.now() - startTime) / 1000;
+            const speed = Math.round(processedCount / (elapsed || 1));
+            document.getElementById('proc-speed').innerText = `${speed} words/s`;
+            document.getElementById('step-1-status').innerHTML = `<span class="text-yellow-500">Scanning & Tokenizing: ${processedCount}/${totalTokens}</span>`;
 
-            const interval = setInterval(() => {
-                // Generate simulated vector data (Hex dumps / Floats)
-                const chunk = Array(12).fill(0).map(() => Math.random().toFixed(4)).join(' ');
-                const row = document.createElement('div');
-                row.className = "text-[8px] whitespace-nowrap opacity-0 animate-fade-in text-emerald-500 font-mono";
-                row.innerText = `[VEC-${progress}] ${chunk} ...`;
-                visVectors.appendChild(row);
-                visVectors.scrollTop = visVectors.scrollHeight;
+            index += chunkSize;
 
-                progress += 5; // increment
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    document.getElementById('step-2-status').innerHTML = `<span class="text-green-500 font-bold">Vectorized 1024-Dimensions Ready</span>`;
-                    
-                    // Show Save Button
-                    document.getElementById('train-confirm-area').classList.remove('hidden');
-                }
-            }, 50); // Speed of matrix rain
-        }
-
-        function confirmTraining() {
-            const input = document.getElementById('knowledge-input').value;
-            memory.push(input);
-            saveMemoryToStorage(); // SYNC
-            
-            showAlert("Training Complete", "Data has been vectorized and saved to Trained Memory.");
-            
-            // Reset UI
-            document.getElementById('knowledge-input').value = '';
-            document.getElementById('token-count').innerText = "0 chars";
-            document.getElementById('nlp-visualizer').classList.add('hidden');
-            document.getElementById('train-confirm-area').classList.add('hidden');
-            document.getElementById('btn-start-train').classList.remove('hidden');
-        }
-
-        // --- VISUAL TRAINING ---
-        function visualStep(step) {
-            for(let i=1; i<=4; i++) {
-                const card = document.getElementById(`v-step-${i}`);
-                const content = document.getElementById(`visual-content-${i}`);
-                if(i === step) {
-                    card.className = "step-card-active p-4 rounded-xl border cursor-pointer transition-all";
-                    content.classList.remove('hidden');
-                    content.classList.add('flex');
-                    if(step === 3) startTrainingSim();
-                    if(step === 4) initCanvas();
-                } else {
-                    card.className = "step-card-inactive p-4 rounded-xl border cursor-pointer transition-all";
-                    content.classList.add('hidden');
-                    content.classList.remove('flex');
-                }
-            }
-        }
-
-        // Training Camera Logic
-        async function toggleTrainCamera() {
-            const container = document.getElementById('train-camera-container');
-            if (container.classList.contains('hidden')) {
-                container.classList.remove('hidden');
-                container.classList.add('flex');
-                try {
-                    trainStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    document.getElementById('train-webcam').srcObject = trainStream;
-                } catch(e) {
-                    showAlert("Error", "Camera access denied");
-                    closeTrainCamera();
-                }
+            if (index < totalTokens) {
+                requestAnimationFrame(processChunk);
             } else {
+                document.getElementById('step-1-status').innerHTML = `<span class="text-green-500 font-bold">Extraction Complete (${totalTokens} tokens)</span>`;
+                startDeepVectorization();
+            }
+        }
+
+        processChunk();
+    }
+
+    function startDeepVectorization() {
+        // Matrix Rain Effect for Vectorization
+        const visVectors = document.getElementById('vis-vectors');
+        document.getElementById('step-2-status').innerHTML = `<span class="animate-pulse text-blue-400">Generating Embeddings...</span>`;
+        
+        let progress = 0;
+        visVectors.innerHTML = "";
+
+        const interval = setInterval(() => {
+            // Generate simulated vector data (Hex dumps / Floats)
+            const chunk = Array(12).fill(0).map(() => Math.random().toFixed(4)).join(' ');
+            const row = document.createElement('div');
+            row.className = "text-[8px] whitespace-nowrap opacity-0 animate-fade-in text-emerald-500 font-mono";
+            row.innerText = `[VEC-${progress}] ${chunk} ...`;
+            visVectors.appendChild(row);
+            visVectors.scrollTop = visVectors.scrollHeight;
+
+            progress += 5; // increment
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                document.getElementById('step-2-status').innerHTML = `<span class="text-green-500 font-bold">Vectorized 1024-Dimensions Ready</span>`;
+                
+                // Show Save Button
+                document.getElementById('train-confirm-area').classList.remove('hidden');
+            }
+        }, 50); // Speed of matrix rain
+    }
+
+    function confirmTraining() {
+        const input = document.getElementById('knowledge-input').value;
+        memory.push(input);
+        saveMemoryToStorage(); // SYNC
+        
+        showAlert("Training Complete", "Data has been vectorized and saved to Trained Memory.");
+        
+        // Reset UI
+        document.getElementById('knowledge-input').value = '';
+        document.getElementById('token-count').innerText = "0 chars";
+        document.getElementById('nlp-visualizer').classList.add('hidden');
+        document.getElementById('train-confirm-area').classList.add('hidden');
+        document.getElementById('btn-start-train').classList.remove('hidden');
+    }
+
+    // --- VISUAL TRAINING ---
+    function visualStep(step) {
+        for(let i=1; i<=4; i++) {
+            const card = document.getElementById(`v-step-${i}`);
+            const content = document.getElementById(`visual-content-${i}`);
+            if(i === step) {
+                card.className = "step-card-active p-4 rounded-xl border cursor-pointer transition-all";
+                content.classList.remove('hidden');
+                content.classList.add('flex');
+                if(step === 3) startTrainingSim();
+                if(step === 4) initCanvas();
+            } else {
+                card.className = "step-card-inactive p-4 rounded-xl border cursor-pointer transition-all";
+                content.classList.add('hidden');
+                content.classList.remove('flex');
+            }
+        }
+    }
+
+    // Training Camera Logic
+    async function toggleTrainCamera() {
+        const container = document.getElementById('train-camera-container');
+        if (container.classList.contains('hidden')) {
+            container.classList.remove('hidden');
+            container.classList.add('flex');
+            try {
+                trainStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('train-webcam').srcObject = trainStream;
+            } catch(e) {
+                showAlert("Error", "Camera access denied");
                 closeTrainCamera();
             }
+        } else {
+            closeTrainCamera();
         }
+    }
 
-        function closeTrainCamera() {
-            const container = document.getElementById('train-camera-container');
-            container.classList.add('hidden');
-            container.classList.remove('flex');
-            if (trainStream) {
-                trainStream.getTracks().forEach(track => track.stop());
-                trainStream = null;
-            }
+    function closeTrainCamera() {
+        const container = document.getElementById('train-camera-container');
+        container.classList.add('hidden');
+        container.classList.remove('flex');
+        if (trainStream) {
+            trainStream.getTracks().forEach(track => track.stop());
+            trainStream = null;
         }
+    }
 
-        function captureTrainingImage() {
-            const video = document.getElementById('train-webcam');
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            const dataUrl = canvas.toDataURL('image/jpeg');
-            
-            const label = document.getElementById('label-selector').value;
-            addToDataset(dataUrl, label);
-        }
-
-        function handleVisualUpload(input) {
-            const label = document.getElementById('label-selector').value;
-            const files = Array.from(input.files);
-            
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = e => addToDataset(e.target.result, label);
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function addToDataset(imgSrc, label) {
-            const grid = document.getElementById('dataset-grid');
-            if(visualDataset.length === 0) grid.innerHTML = ''; 
-
-            const div = document.createElement('div');
-            div.className = "relative group h-20 bg-black/20 rounded-lg overflow-hidden border border-[var(--border-color)] animate-fade-in";
-            div.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 right-0 bg-black/60 text-[8px] text-white p-1 truncate">${label}</div>`;
-            grid.appendChild(div);
-            visualDataset.push({ img: imgSrc, label });
-
-            document.getElementById('btn-next-step1').disabled = false;
-            document.getElementById('btn-next-step1').classList.remove('opacity-50', 'cursor-not-allowed');
-            document.getElementById('btn-next-step1').classList.add('bg-blue-600', 'text-white');
-        }
-
-        function startTrainingSim() {
-            let epoch = 0;
-            let loss = 0.99;
-            let acc = 0;
-            const bg = document.getElementById('matrix-bg');
-            // Gen matrix
-            let html = '';
-            for(let i=0; i<144; i++) html += `<div class="bg-green-500 rounded-full transition-opacity duration-300" style="opacity:${Math.random()}"></div>`;
-            bg.innerHTML = html;
-
-            trainInterval = setInterval(() => {
-                epoch++;
-                loss -= 0.02;
-                acc += 2;
-                if(loss < 0.01) loss = 0.01;
-                if(acc > 98) acc = 99;
-
-                document.getElementById('train-progress').style.width = (epoch * 2) + "%";
-                document.getElementById('epoch-status').innerText = `Epoch ${epoch}/50`;
-                document.getElementById('loss-display').innerText = `Loss: ${loss.toFixed(2)}`;
-                document.getElementById('acc-display').innerText = `Acc: ${acc}%`;
-
-                // Randomize matrix
-                Array.from(bg.children).forEach(d => d.style.opacity = Math.random());
-
-                if(epoch >= 50) {
-                    clearInterval(trainInterval);
-                    setTimeout(() => visualStep(4), 1000);
-                }
-            }, 100);
-        }
-
-        // --- INFERENCE (DRAW/CAM/UPLOAD) ---
-        function setInferMode(mode) {
-            document.querySelectorAll('.infer-panel').forEach(p => p.classList.add('hidden'));
-            document.querySelectorAll('.infer-panel').forEach(p => p.classList.remove('flex'));
-            document.getElementById(`infer-${mode}`).classList.remove('hidden');
-            document.getElementById(`infer-${mode}`).classList.add('flex');
-            
-            // Update buttons style
-            ['draw','upload','camera'].forEach(m => {
-                const btn = document.getElementById(`btn-infer-${m}`);
-                if(m === mode) {
-                    btn.classList.remove('opacity-60', 'hover:bg-white/5');
-                    btn.classList.add('bg-white/10', 'font-bold');
-                } else {
-                    btn.classList.add('opacity-60', 'hover:bg-white/5');
-                    btn.classList.remove('bg-white/10', 'font-bold');
-                }
-            });
-        }
-
-        // Canvas Logic
-        function initCanvas() {
-            const canvas = document.getElementById('draw-canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = "white";
-            ctx.fillRect(0,0,250,250);
-            
-            let painting = false;
-            
-            function startPosition(e) { painting = true; draw(e); }
-            function finishedPosition() { painting = false; ctx.beginPath(); }
-            function draw(e) {
-                if(!painting) return;
-                const rect = canvas.getBoundingClientRect();
-                ctx.lineWidth = 10;
-                ctx.lineCap = 'round';
-                ctx.strokeStyle = 'black';
-                
-                ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-            }
-            
-            canvas.addEventListener('mousedown', startPosition);
-            canvas.addEventListener('mouseup', finishedPosition);
-            canvas.addEventListener('mousemove', draw);
-        }
-
-        function clearCanvas() {
-            const canvas = document.getElementById('draw-canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = "white";
-            ctx.fillRect(0,0,250,250);
-        }
-
-        // Camera Logic
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                const video = document.getElementById('webcam');
-                video.srcObject = stream;
-                document.getElementById('cam-placeholder').classList.add('hidden');
-            } catch(e) {
-                showAlert("Error", "Camera not accessible (HTTPS required)");
-            }
-        }
-
-        // Upload Logic
-        function handleTestImage(input) {
-            const file = input.files[0];
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const img = document.getElementById('test-preview');
-                    img.src = e.target.result;
-                    img.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // ============================================
-        // REAL PREDICTION LOGIC
-        // ============================================
+    function captureTrainingImage() {
+        const video = document.getElementById('train-webcam');
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const dataUrl = canvas.toDataURL('image/jpeg');
         
-        async function getPixelData(source, w=64, h=64) {
-            return new Promise((resolve) => {
-                const canvas = document.createElement('canvas');
-                canvas.width = w;
-                canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.imageSmoothingEnabled = false;
+        const label = document.getElementById('label-selector').value;
+        addToDataset(dataUrl, label);
+    }
 
-                if (typeof source === 'string') {
-                    const img = new Image();
-                    img.onload = () => {
-                        ctx.drawImage(img, 0, 0, w, h);
-                        resolve(ctx.getImageData(0, 0, w, h).data);
-                    };
-                    img.src = source;
-                } else {
-                    ctx.drawImage(source, 0, 0, w, h);
-                    resolve(ctx.getImageData(0, 0, w, h).data);
-                }
-            });
-        }
+    function handleVisualUpload(input) {
+        const label = document.getElementById('label-selector').value;
+        const files = Array.from(input.files);
+        
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = e => addToDataset(e.target.result, label);
+            reader.readAsDataURL(file);
+        });
+    }
 
-        function calculateSimilarity(pixels1, pixels2) {
-            let diff = 0;
-            for (let i = 0; i < pixels1.length; i += 4) {
-                diff += Math.abs(pixels1[i] - pixels2[i]);       // R
-                diff += Math.abs(pixels1[i+1] - pixels2[i+1]); // G
-                diff += Math.abs(pixels1[i+2] - pixels2[i+2]); // B
+    function addToDataset(imgSrc, label) {
+        const grid = document.getElementById('dataset-grid');
+        if(visualDataset.length === 0) grid.innerHTML = ''; 
+
+        const div = document.createElement('div');
+        div.className = "relative group h-20 bg-black/20 rounded-lg overflow-hidden border border-[var(--border-color)] animate-fade-in";
+        div.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 right-0 bg-black/60 text-[8px] text-white p-1 truncate">${label}</div>`;
+        grid.appendChild(div);
+        visualDataset.push({ img: imgSrc, label });
+
+        document.getElementById('btn-next-step1').disabled = false;
+        document.getElementById('btn-next-step1').classList.remove('opacity-50', 'cursor-not-allowed');
+        document.getElementById('btn-next-step1').classList.add('bg-blue-600', 'text-white');
+    }
+
+    function startTrainingSim() {
+        let epoch = 0;
+        let loss = 0.99;
+        let acc = 0;
+        const bg = document.getElementById('matrix-bg');
+        // Gen matrix
+        let html = '';
+        for(let i=0; i<144; i++) html += `<div class="bg-green-500 rounded-full transition-opacity duration-300" style="opacity:${Math.random()}"></div>`;
+        bg.innerHTML = html;
+
+        trainInterval = setInterval(() => {
+            epoch++;
+            loss -= 0.02;
+            acc += 2;
+            if(loss < 0.01) loss = 0.01;
+            if(acc > 98) acc = 99;
+
+            document.getElementById('train-progress').style.width = (epoch * 2) + "%";
+            document.getElementById('epoch-status').innerText = `Epoch ${epoch}/50`;
+            document.getElementById('loss-display').innerText = `Loss: ${loss.toFixed(2)}`;
+            document.getElementById('acc-display').innerText = `Acc: ${acc}%`;
+
+            // Randomize matrix
+            Array.from(bg.children).forEach(d => d.style.opacity = Math.random());
+
+            if(epoch >= 50) {
+                clearInterval(trainInterval);
+                setTimeout(() => visualStep(4), 1000);
             }
-            const maxDiff = (pixels1.length / 4) * 255 * 3;
-            return Math.max(0, 100 * (1 - (diff / maxDiff)));
-        }
+        }, 100);
+    }
 
-        async function predict() {
-            // 1. Check Data
-            if(visualDataset.length === 0) return showAlert("AI Memory Empty", "Please go to Step 1 and upload/label training data first.");
+    // --- INFERENCE (DRAW/CAM/UPLOAD) ---
+    function setInferMode(mode) {
+        document.querySelectorAll('.infer-panel').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.infer-panel').forEach(p => p.classList.remove('flex'));
+        document.getElementById(`infer-${mode}`).classList.remove('hidden');
+        document.getElementById(`infer-${mode}`).classList.add('flex');
+        
+        // Update buttons style
+        ['draw','upload','camera'].forEach(m => {
+            const btn = document.getElementById(`btn-infer-${m}`);
+            if(m === mode) {
+                btn.classList.remove('opacity-60', 'hover:bg-white/5');
+                btn.classList.add('bg-white/10', 'font-bold');
+            } else {
+                btn.classList.add('opacity-60', 'hover:bg-white/5');
+                btn.classList.remove('bg-white/10', 'font-bold');
+            }
+        });
+    }
 
-            const btn = document.getElementById('btn-predict');
-            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> Analyzing...`;
+    // Canvas Logic
+    function initCanvas() {
+        const canvas = document.getElementById('draw-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = "white";
+        ctx.fillRect(0,0,250,250);
+        
+        let painting = false;
+        
+        function startPosition(e) { painting = true; draw(e); }
+        function finishedPosition() { painting = false; ctx.beginPath(); }
+        function draw(e) {
+            if(!painting) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'black';
             
-            // 2. Identify Input Source
-            let inputSource;
-            if (!document.getElementById('infer-draw').classList.contains('hidden')) {
-                inputSource = document.getElementById('draw-canvas');
-            } else if (!document.getElementById('infer-upload').classList.contains('hidden')) {
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+        
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', finishedPosition);
+        canvas.addEventListener('mousemove', draw);
+    }
+
+    function clearCanvas() {
+        const canvas = document.getElementById('draw-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = "white";
+        ctx.fillRect(0,0,250,250);
+    }
+
+    // Camera Logic
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const video = document.getElementById('webcam');
+            video.srcObject = stream;
+            document.getElementById('cam-placeholder').classList.add('hidden');
+        } catch(e) {
+            showAlert("Error", "Camera not accessible (HTTPS required)");
+        }
+    }
+
+    // Upload Logic
+    function handleTestImage(input) {
+        const file = input.files[0];
+        if(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
                 const img = document.getElementById('test-preview');
-                if(!img.src) { btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`; return showAlert("Alert", "Please upload an image first."); }
-                inputSource = img.src;
-            } else {
-                 const vid = document.getElementById('webcam');
-                 if(vid.paused) { btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`; return showAlert("Alert", "Camera not active"); }
-                 inputSource = vid;
-            }
-
-            // 3. Process Input
-            const inputPixels = await getPixelData(inputSource);
-            
-            // 4. Compare All & Store
-            let matches = [];
-            for (let data of visualDataset) {
-                const trainPixels = await getPixelData(data.img);
-                const similarity = calculateSimilarity(inputPixels, trainPixels);
-                matches.push({ label: data.label, score: similarity, img: data.img });
-            }
-
-            // 5. Sort matches (High to Low)
-            matches.sort((a, b) => b.score - a.score);
-
-            // 6. Check for 100% (or very close > 99.5%)
-            const perfectMatch = matches.find(m => m.score > 99.5);
-            const resultsList = document.getElementById('match-results-list');
-            resultsList.innerHTML = ''; // Clear old
-
-            if (perfectMatch) {
-                // EXCLUSIVE DISPLAY
-                document.getElementById('bars-container').classList.add('hidden'); // Hide bars
-                
-                resultsList.innerHTML = `
-                    <div class="bg-green-500/10 border border-green-500 rounded-xl p-4 flex flex-col items-center animate-pulse">
-                        <div class="text-green-400 font-bold text-lg mb-2 flex items-center gap-2"><i data-lucide="check-circle-2"></i> PERFECT MATCH FOUND!</div>
-                        <img src="${perfectMatch.img}" class="w-32 h-32 object-cover rounded-lg border-2 border-green-500 mb-2">
-                        <div class="text-white font-bold text-xl">${perfectMatch.label}</div>
-                        <div class="text-green-400 text-sm">Confidence: 100%</div>
-                    </div>
-                `;
-            } else {
-                // STANDARD SORTED DISPLAY (Top 3)
-                document.getElementById('bars-container').classList.remove('hidden'); // Show bars
-                
-                // Show heading
-                resultsList.innerHTML = `<div class="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-2">Closest Training Images:</div>`;
-                
-                matches.slice(0, 3).forEach((m, idx) => {
-                    const colorClass = m.label === 'Normal' ? 'text-green-400' : (m.label === 'Abnormal' ? 'text-red-400' : 'text-orange-400');
-                    resultsList.innerHTML += `
-                        <div class="flex items-center gap-3 bg-black/20 p-2 rounded-lg border border-[var(--border-color)]">
-                            <span class="text-xs font-mono opacity-50">#${idx+1}</span>
-                            <img src="${m.img}" class="w-10 h-10 object-cover rounded">
-                            <div class="flex-1">
-                                <div class="text-xs font-bold ${colorClass}">${m.label}</div>
-                                <div class="text-left text-[10px] opacity-70">Similarity: ${m.score.toFixed(1)}%</div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                // Update Bars based on max scores per category
-                let maxScores = { "Normal": 0, "Abnormal": 0, "Risk": 0 };
-                matches.forEach(m => {
-                    if(m.score > maxScores[m.label]) maxScores[m.label] = m.score;
-                });
-                updateBars(maxScores);
-            }
-
-            btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`;
-            lucide.createIcons();
+                img.src = e.target.result;
+                img.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
         }
+    }
 
-        function updateBars(scores) {
-            const n = scores['Normal'] || 0;
-            const a = scores['Abnormal'] || 0;
-            const r = scores['Risk'] || 0;
+    // ============================================
+    // REAL PREDICTION LOGIC
+    // ============================================
+    
+    async function getPixelData(source, w=64, h=64) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
 
-            const total = n + a + r || 1; 
-            const expN = Math.exp(n/10);
-            const expA = Math.exp(a/10);
-            const expR = Math.exp(r/10);
-            const expTotal = expN + expA + expR;
-
-            document.getElementById('bar-normal').style.width = ((expN / expTotal) * 100) + "%";
-            document.getElementById('pred-normal').innerText = n.toFixed(1) + "%";
-            
-            document.getElementById('bar-abnormal').style.width = ((expA / expTotal) * 100) + "%";
-            document.getElementById('pred-abnormal').innerText = a.toFixed(1) + "%";
-
-            document.getElementById('bar-risk').style.width = ((expR / expTotal) * 100) + "%";
-            document.getElementById('pred-risk').innerText = r.toFixed(1) + "%";
-        }
-
-        function showAlert(t,m) {
-            document.getElementById('alert-title').innerText = t;
-            document.getElementById('alert-msg').innerText = m;
-            document.getElementById('alert-modal').classList.remove('hidden');
-        }
-        
-        // --- CHAT FILE HANDLING ---
-        function handleChatFileSelect(input) {
-            const file = input.files[0];
-            if (file) {
-                currentChatFile = file;
-                document.getElementById('chat-file-name').innerText = file.name;
-                document.getElementById('chat-attachment-preview').classList.remove('hidden');
-                document.getElementById('chat-attachment-preview').classList.add('flex');
-            }
-        }
-
-        function clearChatAttachment() {
-            currentChatFile = null;
-            document.getElementById('chat-file-upload').value = ""; // Reset input
-            document.getElementById('chat-attachment-preview').classList.add('hidden');
-            document.getElementById('chat-attachment-preview').classList.remove('flex');
-        }
-
-        // --- HANDLE SOURCE CHANGE ---
-        function handleSourceChange(select) {
-            const input = document.getElementById('user-input');
-            input.className = "flex-1 bg-[var(--bg-main)] border rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all"; // reset class
-            
-            if (select.value === 'hybrid') {
-                input.placeholder = "ถามแบบผสมผสาน (AI + Memory)...";
-                input.classList.add('border-blue-500');
-            } else if (select.value === 'strict') {
-                input.placeholder = "ถามเจาะจงเฉพาะข้อมูลที่เทรน (Strict Mode)...";
-                input.classList.add('border-emerald-500');
-            } else if (select.value === 'offline') {
-                input.placeholder = "ค้นหาคำเป๊ะๆ จาก Memory (ไม่ใช้ AI)...";
-                input.classList.add('border-slate-500');
-            } else {
-                input.placeholder = "ถามคำถามวิจัยทั่วไป (General Knowledge)...";
-                input.classList.add('border-[var(--border-color)]');
-            }
-        }
-
-        // --- NEW: API VISUALIZATION LOGIC ---
-        function toggleAPIModal() {
-            const modal = document.getElementById('api-modal');
-            const list = document.getElementById('api-status-list');
-            
-            if(modal.classList.contains('hidden')) {
-                renderAPIStatus(); // Refresh data
-                modal.classList.remove('hidden');
-            } else {
-                modal.classList.add('hidden');
-            }
-        }
-
-        function renderAPIStatus() {
-            const list = document.getElementById('api-status-list');
-            list.innerHTML = "";
-            
-            keyHealth.forEach((k, index) => {
-                let colorClass = "status-ready";
-                let textClass = "text-[var(--text-muted)]";
-                
-                if (k.status === 'working') { colorClass = "status-working"; textClass = "text-yellow-400"; }
-                if (k.status === 'active') { colorClass = "status-active"; textClass = "text-green-400"; }
-                if (k.status === 'dead') { colorClass = "status-dead"; textClass = "text-red-400 line-through opacity-50"; }
-                
-                // Mask Key
-                const maskedKey = k.key.substring(0, 4) + "••••••••" + k.key.substring(k.key.length - 4);
-                
-                const div = document.createElement('div');
-                div.className = "flex items-center justify-between p-2 rounded-lg bg-black/10 border border-[var(--border-color)]";
-                div.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="status-dot ${colorClass}"></div>
-                        <div>
-                            <div class="text-xs font-bold ${textClass}">Key #${index + 1}</div>
-                            <div class="text-[10px] opacity-40 font-mono">${maskedKey}</div>
-                        </div>
-                    </div>
-                    <div class="text-[10px] font-bold ${textClass}">${k.msg}</div>
-                `;
-                list.appendChild(div);
-            });
-        }
-        
-        // --- SMART API KEY ROTATION WITH VISUAL FEEDBACK ---
-        async function callGeminiAPI(payload, loadingId) {
-            let lastError = null;
-            const startKeyIndex = currentKeyIndex; // Remember where we started
-
-            // Loop through ALL keys, starting from current one
-            for (let i = 0; i < API_KEYS.length; i++) {
-                // Calculate actual index (wrapping around array)
-                const actualIndex = (startKeyIndex + i) % API_KEYS.length;
-                const apiKey = API_KEYS[actualIndex];
-
-                // Update Visual Status: WORKING
-                if(keyHealth[actualIndex].status !== 'dead') {
-                    keyHealth[actualIndex].status = 'working';
-                    keyHealth[actualIndex].msg = 'Connecting...';
-                    renderAPIStatus(); // Update UI if open
-                }
-
-                try {
-                    // Update UI to show current attempt
-                    if (loadingId) {
-                        const loadingElem = document.querySelector(`#${loadingId} .glass-panel`);
-                        if (loadingElem) {
-                             loadingElem.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Processing... (Key #${actualIndex + 1})`;
-                             lucide.createIcons();
-                        }
-                    }
-
-                    // Attempt Fetch
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                        method: 'POST', 
-                        headers: {'Content-Type':'application/json'},
-                        body: JSON.stringify(payload)
-                    });
-
-                    // Check for Quota Exceeded (429) or other errors
-                    if (res.status === 429) {
-                        throw new Error("Quota Exceeded (429)");
-                    }
-                    if (!res.ok) {
-                        const errData = await res.json().catch(() => ({}));
-                        throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
-                    }
-
-                    // If SUCCESS:
-                    // 1. Mark this key as ACTIVE (Green)
-                    keyHealth[actualIndex].status = 'active';
-                    keyHealth[actualIndex].msg = 'Active (200 OK)';
-                    
-                    // 2. Mark previous Active keys as Ready (Reset)
-                    keyHealth.forEach((k, idx) => {
-                        if(idx !== actualIndex && k.status === 'active') {
-                             k.status = 'ready'; k.msg = 'Ready'; 
-                        }
-                    });
-                    
-                    renderAPIStatus();
-                    currentKeyIndex = actualIndex; // Stick with this good key
-                    
-                    return await res.json(); // Return data immediately
-
-                } catch (e) {
-                    lastError = e;
-                    console.warn(`Key #${actualIndex + 1} failed: ${e.message}`);
-                    
-                    // Mark as DEAD (Red)
-                    keyHealth[actualIndex].status = 'dead';
-                    keyHealth[actualIndex].msg = e.message.includes('429') ? 'Quota Exceeded' : 'Error';
-                    renderAPIStatus();
-                    
-                    // SHOW ERROR MESSAGE ON UI BEFORE SWITCHING
-                    if (loadingId) {
-                        const loadingElem = document.querySelector(`#${loadingId} .glass-panel`);
-                        if (loadingElem) {
-                            loadingElem.innerHTML = `<span class="text-orange-400 font-bold"><i data-lucide="alert-triangle" class="w-3 h-3 inline"></i> Key #${actualIndex + 1} Failed! Switching...</span>`;
-                            lucide.createIcons();
-                        }
-                    }
-                    
-                    // Small delay to let user see the error message
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            }
-
-            // If loop finishes without success
-            throw new Error(`System Busy: All ${API_KEYS.length} keys failed. Last error: ${lastError?.message}`);
-        }
-
-        // --- CHAT LOGIC (UPDATED WITH TOKEN CONTROL) ---
-        async function handleChatSubmit(e) {
-            e.preventDefault();
-            const input = document.getElementById('user-input');
-            const msg = input.value.trim();
-            const source = document.getElementById('chat-source').value;
-            const lengthMode = document.getElementById('chat-length').value; // Get length preference
-            
-            if (!msg && !currentChatFile) return;
-
-            let userDisplayMsg = msg;
-            let contextMsg = msg;
-
-            if (currentChatFile) {
-                userDisplayMsg = (msg ? msg + "<br>" : "") + `<div class='inline-flex items-center gap-2 bg-black/10 px-2 py-1 rounded text-xs mt-1'><i data-lucide='paperclip' class='w-3 h-3'></i> ${currentChatFile.name}</div>`;
-                contextMsg = (msg ? msg + "\n" : "") + `[User Attached File: ${currentChatFile.name}]`;
-            }
-            
-            lastUserQuestion = contextMsg;
-            addMsg('user', userDisplayMsg);
-            input.value = '';
-            clearChatAttachment();
-            
-            if(source !== 'api') {
-                if(memory.length <= 1) {
-                      setTimeout(() => {
-                          addMsg('ai', `⚠️ <b>Memory Empty:</b> ระบบยังไม่มีข้อมูลที่ถูกเทรนเข้ามาในหน่วยความจำครับ<br><br>กรุณาไปที่แถบ <b>"Text Research"</b> ด้านซ้าย หรือ <b>"Templates"</b> แล้วนำเข้าข้อมูลก่อนครับ`);
-                      }, 500);
-                      return;
-                }
-            }
-
-            // ... Offline Logic Block ...
-            if (source === 'offline') {
-                const tempId = "thinking-" + Date.now();
-                const box = document.getElementById('chat-box');
-                const div = document.createElement('div');
-                div.id = tempId;
-                div.className = "flex gap-4";
-                div.innerHTML = `<div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0"><i data-lucide="cpu" class="w-4 h-4 text-white"></i></div><div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2"><i data-lucide="search" class="w-3 h-3 animate-bounce"></i> Searching Local Memory...</div>`;
-                box.appendChild(div);
-                box.scrollTop = box.scrollHeight;
-                lucide.createIcons();
-
-                setTimeout(() => {
-                    document.getElementById(tempId).remove();
-                    const keywords = contextMsg.toLowerCase().split(/[\s,]+/);
-                    const results = memory.filter(doc => keywords.some(k => k.length > 2 && doc.toLowerCase().includes(k)));
-
-                    if (results.length > 0) {
-                        const content = results.map(r => `> ${r.substring(0, 150)}...`).join('\n\n');
-                        addMsg('ai', `<b>[OFFLINE MODE]</b> พบข้อมูลที่ตรงกับคำค้นหา ${results.length} รายการครับ:\n\n${content}\n\n*ระบบนี้แสดงผลการค้นหาตามคำเป๊ะๆ (Keyword Matching) ไม่ได้ใช้สมอง AI เรียบเรียงครับ*`);
-                    } else {
-                        addMsg('ai', `<b>[OFFLINE MODE]</b> ไม่พบข้อมูลที่ตรงกันใน Memory ครับ\n\nโหมดนี้ทำงานโดยการหา "คำที่เหมือนกันเป๊ะๆ" เท่านั้น ลองใช้คำค้นหาที่มีใน Template ดูครับ เช่น "งานวิจัย", "สถิติ", "Mean"`);
-                    }
-                }, 800);
-                return;
-            }
-
-            // --- TOKEN & STYLE CONFIGURATION ---
-            let maxTokens = 500; // Default Medium
-            let styleInstruction = "Answer clearly and moderately.";
-
-            if (lengthMode === 'short') {
-                maxTokens = 150;
-                styleInstruction = "Answer very briefly and concisely. Do not elaborate unnecessarily. Limit to 2-3 key sentences.";
-            } else if (lengthMode === 'long') {
-                maxTokens = 2000;
-                styleInstruction = "Answer in detail. Provide comprehensive explanations, examples, or breakdowns if applicable.";
-            }
-
-            // Prompt Engineering
-            let prompt = "";
-            const context = memory.join('\n\n--- NEXT DOCUMENT ---\n\n');
-
-            if(source === 'strict') {
-                prompt = `You are a strict research assistant AI. Answer using ONLY the CONTEXT below. If not found, say "Not found in Trained Memory".\n\nINSTRUCTION: ${styleInstruction}\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
-            } else if (source === 'hybrid') {
-                prompt = `You are a smart research assistant AI. Use CONTEXT as primary truth but can use general knowledge.\n\nINSTRUCTION: ${styleInstruction}\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
-            } else {
-                prompt = `You are a helpful AI Research Assistant. Answer the following question in Thai.\n\nINSTRUCTION: ${styleInstruction}\n\nQ: ${contextMsg}`;
-            }
-
-            // Call Gemini WITH ROTATION + GENERATION CONFIG
-            try {
-                const tempId = "thinking-" + Date.now();
-                const box = document.getElementById('chat-box');
-                const div = document.createElement('div');
-                div.id = tempId;
-                div.className = "flex gap-4";
-                div.innerHTML = `<div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div><div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2"><i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Initializing...</div>`;
-                box.appendChild(div);
-                box.scrollTop = box.scrollHeight;
-                lucide.createIcons();
-
-                // Payload construction with generationConfig
-                const payload = {
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        maxOutputTokens: maxTokens, // Hard limit at API level
-                        temperature: 0.7 // Standard creativity
-                    }
+            if (typeof source === 'string') {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, w, h);
+                    resolve(ctx.getImageData(0, 0, w, h).data);
                 };
-
-                // Pass tempId to update UI
-                const data = await callGeminiAPI(payload, tempId);
-                
-                document.getElementById(tempId).remove();
-
-                if (data.candidates && data.candidates[0].content) {
-                    addMsg('ai', data.candidates[0].content.parts[0].text);
-                } else {
-                    console.error("Gemini Error:", data);
-                    let detail = "";
-                    if (data.promptFeedback) detail = `(Safety Block: ${JSON.stringify(data.promptFeedback)})`;
-                    addMsg('ai', `Error: AI did not return a response. <br><span class="text-xs text-red-300 opacity-80">${detail}</span>`);
-                }
-            } catch(e) {
-                // Find all thinking bubbles and remove them
-                document.querySelectorAll('[id^="thinking-"]').forEach(el => el.remove());
-                addMsg('ai', `<span class="text-red-400 font-bold">Connection Failed:</span> ${e.message}`);
+                img.src = source;
+            } else {
+                ctx.drawImage(source, 0, 0, w, h);
+                resolve(ctx.getImageData(0, 0, w, h).data);
             }
+        });
+    }
+
+    function calculateSimilarity(pixels1, pixels2) {
+        let diff = 0;
+        for (let i = 0; i < pixels1.length; i += 4) {
+            diff += Math.abs(pixels1[i] - pixels2[i]);       // R
+            diff += Math.abs(pixels1[i+1] - pixels2[i+1]); // G
+            diff += Math.abs(pixels1[i+2] - pixels2[i+2]); // B
+        }
+        const maxDiff = (pixels1.length / 4) * 255 * 3;
+        return Math.max(0, 100 * (1 - (diff / maxDiff)));
+    }
+
+    async function predict() {
+        // 1. Check Data
+        if(visualDataset.length === 0) return showAlert("AI Memory Empty", "Please go to Step 1 and upload/label training data first.");
+
+        const btn = document.getElementById('btn-predict');
+        btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> Analyzing...`;
+        
+        // 2. Identify Input Source
+        let inputSource;
+        if (!document.getElementById('infer-draw').classList.contains('hidden')) {
+            inputSource = document.getElementById('draw-canvas');
+        } else if (!document.getElementById('infer-upload').classList.contains('hidden')) {
+            const img = document.getElementById('test-preview');
+            if(!img.src) { btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`; return showAlert("Alert", "Please upload an image first."); }
+            inputSource = img.src;
+        } else {
+             const vid = document.getElementById('webcam');
+             if(vid.paused) { btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`; return showAlert("Alert", "Camera not active"); }
+             inputSource = vid;
         }
 
-        function addMsg(role, text) {
-            const box = document.getElementById('chat-box');
-            const div = document.createElement('div');
-            const msgId = "msg-" + Date.now();
+        // 3. Process Input
+        const inputPixels = await getPixelData(inputSource);
+        
+        // 4. Compare All & Store
+        let matches = [];
+        for (let data of visualDataset) {
+            const trainPixels = await getPixelData(data.img);
+            const similarity = calculateSimilarity(inputPixels, trainPixels);
+            matches.push({ label: data.label, score: similarity, img: data.img });
+        }
 
-            // Create buttons for AI response
-            let actionButtons = "";
-            if(role === 'ai') {
-                actionButtons = `
-                    <div class="flex justify-end gap-2 mt-2 pt-2 border-t border-[var(--border-color)]">
-                        <button onclick="enableEdit('${msgId}')" class="text-[10px] text-blue-400 hover:underline flex items-center gap-1"><i data-lucide="edit-3" class="w-3 h-3"></i> แก้ไข/สอน (Correct)</button>
-                        <button onclick="copyToClipboard('${msgId}')" class="text-[10px] opacity-50 hover:opacity-100 flex items-center gap-1"><i data-lucide="copy" class="w-3 h-3"></i> Copy</button>
+        // 5. Sort matches (High to Low)
+        matches.sort((a, b) => b.score - a.score);
+
+        // 6. Check for 100% (or very close > 99.5%)
+        const perfectMatch = matches.find(m => m.score > 99.5);
+        const resultsList = document.getElementById('match-results-list');
+        resultsList.innerHTML = ''; // Clear old
+
+        if (perfectMatch) {
+            // EXCLUSIVE DISPLAY
+            document.getElementById('bars-container').classList.add('hidden'); // Hide bars
+            
+            resultsList.innerHTML = `
+                <div class="bg-green-500/10 border border-green-500 rounded-xl p-4 flex flex-col items-center animate-pulse">
+                    <div class="text-green-400 font-bold text-lg mb-2 flex items-center gap-2"><i data-lucide="check-circle-2"></i> PERFECT MATCH FOUND!</div>
+                    <img src="${perfectMatch.img}" class="w-32 h-32 object-cover rounded-lg border-2 border-green-500 mb-2">
+                    <div class="text-white font-bold text-xl">${perfectMatch.label}</div>
+                    <div class="text-green-400 text-sm">Confidence: 100%</div>
+                </div>
+            `;
+        } else {
+            // STANDARD SORTED DISPLAY (Top 3)
+            document.getElementById('bars-container').classList.remove('hidden'); // Show bars
+            
+            // Show heading
+            resultsList.innerHTML = `<div class="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-2">Closest Training Images:</div>`;
+            
+            matches.slice(0, 3).forEach((m, idx) => {
+                const colorClass = m.label === 'Normal' ? 'text-green-400' : (m.label === 'Abnormal' ? 'text-red-400' : 'text-orange-400');
+                resultsList.innerHTML += `
+                    <div class="flex items-center gap-3 bg-black/20 p-2 rounded-lg border border-[var(--border-color)]">
+                        <span class="text-xs font-mono opacity-50">#${idx+1}</span>
+                        <img src="${m.img}" class="w-10 h-10 object-cover rounded">
+                        <div class="flex-1">
+                            <div class="text-xs font-bold ${colorClass}">${m.label}</div>
+                            <div class="text-left text-[10px] opacity-70">Similarity: ${m.score.toFixed(1)}%</div>
+                        </div>
                     </div>
                 `;
+            });
+
+            // Update Bars based on max scores per category
+            let maxScores = { "Normal": 0, "Abnormal": 0, "Risk": 0 };
+            matches.forEach(m => {
+                if(m.score > maxScores[m.label]) maxScores[m.label] = m.score;
+            });
+            updateBars(maxScores);
+        }
+
+        btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`;
+        lucide.createIcons();
+    }
+
+    function updateBars(scores) {
+        const n = scores['Normal'] || 0;
+        const a = scores['Abnormal'] || 0;
+        const r = scores['Risk'] || 0;
+
+        const total = n + a + r || 1; 
+        const expN = Math.exp(n/10);
+        const expA = Math.exp(a/10);
+        const expR = Math.exp(r/10);
+        const expTotal = expN + expA + expR;
+
+        document.getElementById('bar-normal').style.width = ((expN / expTotal) * 100) + "%";
+        document.getElementById('pred-normal').innerText = n.toFixed(1) + "%";
+        
+        document.getElementById('bar-abnormal').style.width = ((expA / expTotal) * 100) + "%";
+        document.getElementById('pred-abnormal').innerText = a.toFixed(1) + "%";
+
+        document.getElementById('bar-risk').style.width = ((expR / expTotal) * 100) + "%";
+        document.getElementById('pred-risk').innerText = r.toFixed(1) + "%";
+    }
+
+    function showAlert(t,m) {
+        document.getElementById('alert-title').innerText = t;
+        document.getElementById('alert-msg').innerText = m;
+        document.getElementById('alert-modal').classList.remove('hidden');
+    }
+    
+    // --- CHAT FILE HANDLING ---
+    function handleChatFileSelect(input) {
+        const file = input.files[0];
+        if (file) {
+            currentChatFile = file;
+            document.getElementById('chat-file-name').innerText = file.name;
+            document.getElementById('chat-attachment-preview').classList.remove('hidden');
+            document.getElementById('chat-attachment-preview').classList.add('flex');
+        }
+    }
+
+    function clearChatAttachment() {
+        currentChatFile = null;
+        document.getElementById('chat-file-upload').value = ""; // Reset input
+        document.getElementById('chat-attachment-preview').classList.add('hidden');
+        document.getElementById('chat-attachment-preview').classList.remove('flex');
+    }
+
+    // --- HANDLE SOURCE CHANGE ---
+    function handleSourceChange(select) {
+        const input = document.getElementById('user-input');
+        input.className = "flex-1 bg-[var(--bg-main)] border rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all"; // reset class
+        
+        if (select.value === 'hybrid') {
+            input.placeholder = "ถามแบบผสมผสาน (AI + Memory)...";
+            input.classList.add('border-blue-500');
+        } else if (select.value === 'strict') {
+            input.placeholder = "ถามเจาะจงเฉพาะข้อมูลที่เทรน (Strict Mode)...";
+            input.classList.add('border-emerald-500');
+        } else if (select.value === 'offline') {
+            input.placeholder = "ค้นหาคำเป๊ะๆ จาก Memory (ไม่ใช้ AI)...";
+            input.classList.add('border-slate-500');
+        } else {
+            input.placeholder = "ถามคำถามวิจัยทั่วไป (General Knowledge)...";
+            input.classList.add('border-[var(--border-color)]');
+        }
+    }
+
+    // --- NEW: API VISUALIZATION LOGIC ---
+    function toggleAPIModal() {
+        const modal = document.getElementById('api-modal');
+        const list = document.getElementById('api-status-list');
+        
+        if(modal.classList.contains('hidden')) {
+            renderAPIStatus(); // Refresh data
+            modal.classList.remove('hidden');
+        } else {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function renderAPIStatus() {
+        const list = document.getElementById('api-status-list');
+        list.innerHTML = "";
+        
+        keyHealth.forEach((k, index) => {
+            let colorClass = "status-ready";
+            let textClass = "text-[var(--text-muted)]";
+            
+            if (k.status === 'working') { colorClass = "status-working"; textClass = "text-yellow-400"; }
+            if (k.status === 'active') { colorClass = "status-active"; textClass = "text-green-400"; }
+            if (k.status === 'dead') { colorClass = "status-dead"; textClass = "text-red-400 line-through opacity-50"; }
+            
+            // Mask Key
+            const maskedKey = k.key.substring(0, 4) + "••••••••" + k.key.substring(k.key.length - 4);
+            
+            const div = document.createElement('div');
+            div.className = "flex items-center justify-between p-2 rounded-lg bg-black/10 border border-[var(--border-color)]";
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="status-dot ${colorClass}"></div>
+                    <div>
+                        <div class="text-xs font-bold ${textClass}">Key #${index + 1}</div>
+                        <div class="text-[10px] opacity-40 font-mono">${maskedKey}</div>
+                    </div>
+                </div>
+                <div class="text-[10px] font-bold ${textClass}">${k.msg}</div>
+            `;
+            list.appendChild(div);
+        });
+    }
+    
+    // --- SMART API KEY ROTATION WITH VISUAL FEEDBACK (IMPROVED) ---
+async function callGeminiAPI(payload, loadingId) {
+let lastError = null;
+const startKeyIndex = currentKeyIndex;
+    // Loop through ALL keys
+    for (let i = 0; i < API_KEYS.length; i++) {
+        const actualIndex = (startKeyIndex + i) % API_KEYS.length;
+        const apiKey = API_KEYS[actualIndex];
+
+        // ALWAYS set to 'working' (yellow) when trying - regardless of previous status
+        keyHealth[actualIndex].status = 'working';
+        keyHealth[actualIndex].msg = 'Connecting...';
+        renderAPIStatus();
+
+        try {
+            // Update UI to show current attempt
+            if (loadingId) {
+                const loadingElem = document.querySelector(`#${loadingId} .glass-panel`);
+                if (loadingElem) {
+                     loadingElem.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Processing... (Key #${actualIndex + 1})`;
+                     lucide.createIcons();
+                }
             }
 
-            div.className = "flex gap-4 " + (role === 'user' ? "flex-row-reverse" : "");
-            div.innerHTML = `
-                <div class="w-8 h-8 rounded-full ${role==='user'?'bg-slate-500':'bg-indigo-500/20'} flex items-center justify-center flex-shrink-0"><i data-lucide="${role==='user'?'user':'bot'}" class="w-4 h-4"></i></div>
-                <div class="glass-panel p-4 rounded-2xl ${role==='user'?'bg-blue-600 border-none text-white':'rounded-tl-none'} max-w-[85%] text-sm group">
-                    <div id="${msgId}-content">${marked.parse(text)}</div>
-                    <div id="${msgId}-edit-area" class="hidden mt-2">
-                         <textarea id="${msgId}-textarea" class="w-full bg-black/20 border border-[var(--border-color)] rounded p-2 text-xs mb-2 h-24"></textarea>
-                         <button onclick="saveCorrection('${msgId}')" class="px-3 py-1 bg-green-600 text-white rounded text-xs">Save & Teach</button>
-                         <button onclick="cancelEdit('${msgId}')" class="px-3 py-1 bg-white/10 rounded text-xs ml-1">Cancel</button>
-                    </div>
-                    ${actionButtons}
-                </div>
-            `;
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-            lucide.createIcons();
-        }
+            // Attempt Fetch
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
+                method: 'POST', 
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify(payload)
+            });
 
-        // --- CORRECTION / TEACHING LOGIC ---
-        function enableEdit(msgId) {
-            const contentDiv = document.getElementById(`${msgId}-content`);
-            const editArea = document.getElementById(`${msgId}-edit-area`);
-            const textarea = document.getElementById(`${msgId}-textarea`);
-            textarea.value = contentDiv.innerText.trim();
-            contentDiv.classList.add('hidden');
-            editArea.classList.remove('hidden');
-        }
+            // Check for errors
+            if (res.status === 429) {
+                throw new Error("Quota Exceeded (429)");
+            }
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
+            }
 
-        function cancelEdit(msgId) {
-            document.getElementById(`${msgId}-content`).classList.remove('hidden');
-            document.getElementById(`${msgId}-edit-area`).classList.add('hidden');
-        }
+            // SUCCESS!
+            keyHealth[actualIndex].status = 'active';
+            keyHealth[actualIndex].msg = 'Active (200 OK)';
+            
+            // Reset other keys from 'active' to 'ready'
+            keyHealth.forEach((k, idx) => {
+                if(idx !== actualIndex && k.status === 'active') {
+                     k.status = 'ready'; 
+                     k.msg = 'Ready'; 
+                }
+            });
+            
+            renderAPIStatus();
+            currentKeyIndex = actualIndex;
+            
+            return await res.json();
 
-        function saveCorrection(msgId) {
-            const newText = document.getElementById(`${msgId}-textarea`).value;
-            document.getElementById(`${msgId}-content`).innerHTML = marked.parse(newText);
-            cancelEdit(msgId);
-            const teachingEntry = `[Human Correction]\nQ: ${lastUserQuestion}\nA: ${newText}`;
-            memory.push(teachingEntry);
-            saveMemoryToStorage(); // SYNC
-            showAlert("AI Learned!", "บันทึกคำตอบที่ถูกต้องลงใน Memory แล้ว AI จะจำคำตอบนี้ในครั้งถัดไป");
+        } catch (e) {
+            lastError = e;
+            console.warn(`Key #${actualIndex + 1} failed: ${e.message}`);
+            
+            // Mark as DEAD
+            keyHealth[actualIndex].status = 'dead';
+            keyHealth[actualIndex].msg = e.message.includes('429') ? 'Quota Exceeded' : 'Error';
+            renderAPIStatus();
+            
+            // Show error message on UI
+            if (loadingId) {
+                const loadingElem = document.querySelector(`#${loadingId} .glass-panel`);
+                if (loadingElem) {
+                    loadingElem.innerHTML = `<span class="text-orange-400 font-bold"><i data-lucide="alert-triangle" class="w-3 h-3 inline"></i> Key #${actualIndex + 1} Failed! Switching...</span>`;
+                    lucide.createIcons();
+                }
+            }
+            
+            // Delay before next attempt
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
+    }
 
-        function copyToClipboard(msgId) {
-            const text = document.getElementById(`${msgId}-content`).innerText;
-            navigator.clipboard.writeText(text);
+    // All keys failed
+    throw new Error(`System Busy: All ${API_KEYS.length} keys failed. Last error: ${lastError?.message}`);
+}
+
+// --- CHAT LOGIC (UPDATED WITH TOKEN CONTROL) ---
+async function handleChatSubmit(e) {
+    e.preventDefault();
+    const input = document.getElementById('user-input');
+    const msg = input.value.trim();
+    const source = document.getElementById('chat-source').value;
+    const lengthMode = document.getElementById('chat-length').value;
+    
+    if (!msg && !currentChatFile) return;
+
+    let userDisplayMsg = msg;
+    let contextMsg = msg;
+
+    if (currentChatFile) {
+        userDisplayMsg = (msg ? msg + "<br>" : "") + `<div class='inline-flex items-center gap-2 bg-black/10 px-2 py-1 rounded text-xs mt-1'><i data-lucide='paperclip' class='w-3 h-3'></i> ${currentChatFile.name}</div>`;
+        contextMsg = (msg ? msg + "\n" : "") + `[User Attached File: ${currentChatFile.name}]`;
+    }
+    
+    lastUserQuestion = contextMsg;
+    addMsg('user', userDisplayMsg);
+    input.value = '';
+    clearChatAttachment();
+    
+    if(source !== 'api') {
+        if(memory.length <= 1) {
+              setTimeout(() => {
+                  addMsg('ai', `⚠️ <b>Memory Empty:</b> ระบบยังไม่มีข้อมูลที่ถูกเทรนเข้ามาในหน่วยความจำครับ<br><br>กรุณาไปที่แถบ <b>"Text Research"</b> ด้านซ้าย หรือ <b>"Templates"</b> แล้วนำเข้าข้อมูลก่อนครับ`);
+              }, 500);
+              return;
         }
+    }
 
-        // CLEAR CHAT
-        function clearChat() {
-            const box = document.getElementById('chat-box');
-            box.innerHTML = `
-                <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div>
-                    <div class="glass-panel p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm">
-                        เริ่มบทสนทนาใหม่แล้วครับ (New Chat)<br>ถามข้อมูลวิจัยใหม่ได้เลยครับ
-                    </div>
-                </div>
-            `;
-            clearChatAttachment();
-            lucide.createIcons();
-            showAlert("Chat Cleared", "ล้างหน้าจอแชทเรียบร้อย (หน่วยความจำที่เทรนไว้ยังอยู่)");
-        }
-
+    // Offline Logic
+    if (source === 'offline') {
+        const tempId = "thinking-" + Date.now();
+        const box = document.getElementById('chat-box');
+        const div = document.createElement('div');
+        div.id = tempId;
+        div.className = "flex gap-4";
+        div.innerHTML = `<div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0"><i data-lucide="cpu" class="w-4 h-4 text-white"></i></div><div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2"><i data-lucide="search" class="w-3 h-3 animate-bounce"></i> Searching Local Memory...</div>`;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
         lucide.createIcons();
-    </script>
+
+        setTimeout(() => {
+            document.getElementById(tempId).remove();
+            const keywords = contextMsg.toLowerCase().split(/[\s,]+/);
+            const results = memory.filter(doc => keywords.some(k => k.length > 2 && doc.toLowerCase().includes(k)));
+
+            if (results.length > 0) {
+                const content = results.map(r => `> ${r.substring(0, 150)}...`).join('\n\n');
+                addMsg('ai', `<b>[OFFLINE MODE]</b> พบข้อมูลที่ตรงกับคำค้นหา ${results.length} รายการครับ:\n\n${content}\n\n*ระบบนี้แสดงผลการค้นหาตามคำเป๊ะๆ (Keyword Matching) ไม่ได้ใช้สมอง AI เรียบเรียงครับ*`);
+            } else {
+                addMsg('ai', `<b>[OFFLINE MODE]</b> ไม่พบข้อมูลที่ตรงกันใน Memory ครับ\n\nโหมดนี้ทำงานโดยการหา "คำที่เหมือนกันเป๊ะๆ" เท่านั้น ลองใช้คำค้นหาที่มีใน Template ดูครับ เช่น "งานวิจัย", "สถิติ", "Mean"`);
+            }
+        }, 800);
+        return;
+    }
+
+    // Token & Style Configuration
+    let maxTokens = 500;
+    let styleInstruction = "Answer clearly and moderately.";
+
+    if (lengthMode === 'short') {
+        maxTokens = 150;
+        styleInstruction = "Answer very briefly and concisely. Do not elaborate unnecessarily. Limit to 2-3 key sentences.";
+    } else if (lengthMode === 'long') {
+        maxTokens = 2000;
+        styleInstruction = "Answer in detail. Provide comprehensive explanations, examples, or breakdowns if applicable.";
+    }
+
+    // Prompt Engineering
+    let prompt = "";
+    const context = memory.join('\n\n--- NEXT DOCUMENT ---\n\n');
+
+    if(source === 'strict') {
+        prompt = `You are a strict research assistant AI. Answer using ONLY the CONTEXT below. If not found, say "Not found in Trained Memory".\n\nINSTRUCTION: ${styleInstruction}\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
+    } else if (source === 'hybrid') {
+        prompt = `You are a smart research assistant AI. Use CONTEXT as primary truth but can use general knowledge.\n\nINSTRUCTION: ${styleInstruction}\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
+    } else {
+        prompt = `You are a helpful AI Research Assistant. Answer the following question in Thai.\n\nINSTRUCTION: ${styleInstruction}\n\nQ: ${contextMsg}`;
+    }
+
+    // Call Gemini
+    try {
+        const tempId = "thinking-" + Date.now();
+        const box = document.getElementById('chat-box');
+        const div = document.createElement('div');
+        div.id = tempId;
+        div.className = "flex gap-4";
+        div.innerHTML = `<div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div><div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2"><i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Initializing...</div>`;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+        lucide.createIcons();
+
+        const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+                maxOutputTokens: maxTokens,
+                temperature: 0.7
+            }
+        };
+
+        const data = await callGeminiAPI(payload, tempId);
+        
+        document.getElementById(tempId).remove();
+
+        if (data.candidates && data.candidates[0].content) {
+            addMsg('ai', data.candidates[0].content.parts[0].text);
+        } else {
+            console.error("Gemini Error:", data);
+            let detail = "";
+            if (data.promptFeedback) detail = `(Safety Block: ${JSON.stringify(data.promptFeedback)})`;
+            addMsg('ai', `Error: AI did not return a response. <br><span class="text-xs text-red-300 opacity-80">${detail}</span>`);
+        }
+    } catch(e) {
+        document.querySelectorAll('[id^="thinking-"]').forEach(el => el.remove());
+        addMsg('ai', `<span class="text-red-400 font-bold">Connection Failed:</span> ${e.message}`);
+    }
+}
+
+function addMsg(role, text) {
+    const box = document.getElementById('chat-box');
+    const div = document.createElement('div');
+    const msgId = "msg-" + Date.now();
+
+    let actionButtons = "";
+    if(role === 'ai') {
+        actionButtons = `
+            <div class="flex justify-end gap-2 mt-2 pt-2 border-t border-[var(--border-color)]">
+                <button onclick="enableEdit('${msgId}')" class="text-[10px] text-blue-400 hover:underline flex items-center gap-1"><i data-lucide="edit-3" class="w-3 h-3"></i> แก้ไข/สอน (Correct)</button>
+                <button onclick="copyToClipboard('${msgId}')" class="text-[10px] opacity-50 hover:opacity-100 flex items-center gap-1"><i data-lucide="copy" class="w-3 h-3"></i> Copy</button>
+            </div>
+        `;
+    }
+
+    div.className = "flex gap-4 " + (role === 'user' ? "flex-row-reverse" : "");
+    div.innerHTML = `
+        <div class="w-8 h-8 rounded-full ${role==='user'?'bg-slate-500':'bg-indigo-500/20'} flex items-center justify-center flex-shrink-0"><i data-lucide="${role==='user'?'user':'bot'}" class="w-4 h-4"></i></div>
+        <div class="glass-panel p-4 rounded-2xl ${role==='user'?'bg-blue-600 border-none text-white':'rounded-tl-none'} max-w-[85%] text-sm group">
+            <div id="${msgId}-content">${marked.parse(text)}</div>
+            <div id="${msgId}-edit-area" class="hidden mt-2">
+                 <textarea id="${msgId}-textarea" class="w-full bg-black/20 border border-[var(--border-color)] rounded p-2 text-xs mb-2 h-24"></textarea>
+                 <button onclick="saveCorrection('${msgId}')" class="px-3 py-1 bg-green-600 text-white rounded text-xs">Save & Teach</button>
+                 <button onclick="cancelEdit('${msgId}')" class="px-3 py-1 bg-white/10 rounded text-xs ml-1">Cancel</button>
+            </div>
+            ${actionButtons}
+        </div>
+    `;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    lucide.createIcons();
+}
+
+// --- CORRECTION / TEACHING LOGIC ---
+function enableEdit(msgId) {
+    const contentDiv = document.getElementById(`${msgId}-content`);
+    const editArea = document.getElementById(`${msgId}-edit-area`);
+    const textarea = document.getElementById(`${msgId}-textarea`);
+    textarea.value = contentDiv.innerText.trim();
+    contentDiv.classList.add('hidden');
+    editArea.classList.remove('hidden');
+}
+
+function cancelEdit(msgId) {
+    document.getElementById(`${msgId}-content`).classList.remove('hidden');
+    document.getElementById(`${msgId}-edit-area`).classList.add('hidden');
+}
+
+function saveCorrection(msgId) {
+    const newText = document.getElementById(`${msgId}-textarea`).value;
+    document.getElementById(`${msgId}-content`).innerHTML = marked.parse(newText);
+    cancelEdit(msgId);
+    const teachingEntry = `[Human Correction]\nQ: ${lastUserQuestion}\nA: ${newText}`;
+    memory.push(teachingEntry);
+    saveMemoryToStorage();
+    showAlert("AI Learned!", "บันทึกคำตอบที่ถูกต้องลงใน Memory แล้ว AI จะจำคำตอบนี้ในครั้งถัดไป");
+}
+
+function copyToClipboard(msgId) {
+    const text = document.getElementById(`${msgId}-content`).innerText;
+    navigator.clipboard.writeText(text);
+}
+
+// CLEAR CHAT
+function clearChat() {
+    const box = document.getElementById('chat-box');
+    box.innerHTML = `
+        <div class="flex gap-4">
+            <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div>
+            <div class="glass-panel p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm">
+                เริ่มบทสนทนาใหม่แล้วครับ (New Chat)<br>ถามข้อมูลวิจัยใหม่ได้เลยครับ
+            </div>
+        </div>
+    `;
+    clearChatAttachment();
+    lucide.createIcons();
+    showAlert("Chat Cleared", "ล้างหน้าจอแชทเรียบร้อย (หน่วยความจำที่เทรนไว้ยังอยู่)");
+}
+
+lucide.createIcons();
+</script>
 </body>
 </html>
