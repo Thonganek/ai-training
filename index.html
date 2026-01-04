@@ -598,7 +598,14 @@
     </div>
 
     <script>
-        const GEMINI_API_KEY = "AIzaSyATWMM_E0icR3lIUX-88DS3hGw2RGrA4Wo";
+        const API_KEYS = [
+            "AIzaSyATWMM_E0icR3lIUX-88DS3hGw2RGrA4Wo",
+            "AIzaSyAXn2RnKle5RdJsD74PHVQbQAcOkPffkb4",
+            "AIzaSyAuGmhGGfVIgdcBS-bDPu06I_fQpIy2Sng",
+            "AIzaSyBW_DCpCRdME_d1oT8PmsppdDDxNcPRq84",
+            "AIzaSyB--mv-d2ps80wX8ANivxVPD9VEc3AE4dE"
+        ];
+        let currentKeyIndex = 0;
         
         // Initial Memory with Developer Credit
         let memory = ["คุณคือ AI ผู้ช่วยวิจัย ที่พัฒนาโดย นายจรัญญู ทองเอนก"];
@@ -1203,17 +1210,55 @@
             }
         }
 
-        // --- CHAT LOGIC (UPDATED FOR 3 MODES) ---
+        // --- API CALL FUNCTION WITH ROTATION ---
+        async function callGeminiAPI(payload) {
+            let lastError = null;
+            for (let i = 0; i < API_KEYS.length; i++) {
+                const apiKey = API_KEYS[currentKeyIndex];
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST', 
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify(payload)
+                    });
+
+                    // Check for Quota Exceeded (429)
+                    if (res.status === 429) {
+                        console.warn(`⚠️ Key index ${currentKeyIndex} exceeded quota. Rotating to next key...`);
+                        currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+                        lastError = new Error("Quota exceeded");
+                        continue; // Retry loop with new key
+                    }
+
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
+                    }
+
+                    return await res.json(); // Success!
+
+                } catch (e) {
+                    lastError = e;
+                    // If strictly network error, might want to stop? 
+                    // But assume rotation is safest for reliability.
+                    if (!e.message.includes("Quota") && !e.message.includes("429")) {
+                        // If it's a logic error (400), don't rotate, just throw.
+                        throw e;
+                    }
+                }
+            }
+            throw new Error(`System Busy: All 5 API keys are currently exhausted. Please wait a minute. (${lastError?.message})`);
+        }
+
+        // --- CHAT LOGIC (UPDATED) ---
         async function handleChatSubmit(e) {
             e.preventDefault();
             const input = document.getElementById('user-input');
             const msg = input.value.trim();
             const source = document.getElementById('chat-source').value;
             
-            // Check if attached or msg present
             if (!msg && !currentChatFile) return;
 
-            // Construct user message (with file tag if attached)
             let userDisplayMsg = msg;
             let contextMsg = msg;
 
@@ -1222,15 +1267,12 @@
                 contextMsg = (msg ? msg + "\n" : "") + `[User Attached File: ${currentChatFile.name}]`;
             }
             
-            // SAVE QUESTION FOR TEACHING CONTEXT
             lastUserQuestion = contextMsg;
-
             addMsg('user', userDisplayMsg);
             input.value = '';
-            clearChatAttachment(); // Reset attachment
+            clearChatAttachment();
             
-            // --- STRICT MEMORY CHECK ---
-            if(source !== 'api') { // Check for both hybrid and strict
+            if(source !== 'api') {
                 if(memory.length <= 1) {
                      setTimeout(() => {
                          addMsg('ai', `⚠️ <b>Memory Empty:</b> ระบบยังไม่มีข้อมูลที่ถูกเทรนเข้ามาในหน่วยความจำครับ<br><br>กรุณาไปที่แถบ <b>"Text Research"</b> ด้านซ้าย หรือ <b>"Templates"</b> แล้วนำเข้าข้อมูลก่อนครับ`);
@@ -1239,33 +1281,22 @@
                 }
             }
 
-            // --- 4. OFFLINE LOGIC (NO API) ---
             if (source === 'offline') {
-                // Show simplified processing UI
+                // ... Offline Logic ...
                 const tempId = "thinking-" + Date.now();
                 const box = document.getElementById('chat-box');
                 const div = document.createElement('div');
                 div.id = tempId;
                 div.className = "flex gap-4";
-                div.innerHTML = `
-                    <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0"><i data-lucide="cpu" class="w-4 h-4 text-white"></i></div>
-                    <div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2">
-                        <i data-lucide="search" class="w-3 h-3 animate-bounce"></i> Searching Local Memory...
-                    </div>
-                `;
+                div.innerHTML = `<div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0"><i data-lucide="cpu" class="w-4 h-4 text-white"></i></div><div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2"><i data-lucide="search" class="w-3 h-3 animate-bounce"></i> Searching Local Memory...</div>`;
                 box.appendChild(div);
                 box.scrollTop = box.scrollHeight;
                 lucide.createIcons();
 
                 setTimeout(() => {
                     document.getElementById(tempId).remove();
-                    
-                    // Simple logic: Keyword Search
-                    const keywords = contextMsg.toLowerCase().split(/[\s,]+/); // Split by space
-                    const results = memory.filter(doc => {
-                        // Check if ANY keyword (longer than 2 chars) exists in the doc
-                        return keywords.some(k => k.length > 2 && doc.toLowerCase().includes(k));
-                    });
+                    const keywords = contextMsg.toLowerCase().split(/[\s,]+/);
+                    const results = memory.filter(doc => keywords.some(k => k.length > 2 && doc.toLowerCase().includes(k)));
 
                     if (results.length > 0) {
                         const content = results.map(r => `> ${r.substring(0, 150)}...`).join('\n\n');
@@ -1273,9 +1304,8 @@
                     } else {
                         addMsg('ai', `<b>[OFFLINE MODE]</b> ไม่พบข้อมูลที่ตรงกันใน Memory ครับ\n\nโหมดนี้ทำงานโดยการหา "คำที่เหมือนกันเป๊ะๆ" เท่านั้น ลองใช้คำค้นหาที่มีใน Template ดูครับ เช่น "งานวิจัย", "สถิติ", "Mean"`);
                     }
-                }, 800); // Fake delay
-                
-                return; // Stop here! Don't call API.
+                }, 800);
+                return;
             }
 
             // Prompt Engineering
@@ -1283,88 +1313,41 @@
             const context = memory.join('\n\n--- NEXT DOCUMENT ---\n\n');
 
             if(source === 'strict') {
-                // STRICT RAG
-                prompt = `
-You are a strict research assistant AI.
-Your Goal: Answer the user question using ONLY the provided CONTEXT below.
-Constraints:
-1. Do NOT use your own outside knowledge.
-2. If the answer is not found in the CONTEXT, you MUST say: "ขออภัยครับ ไม่พบข้อมูลนี้ในหน่วยความจำที่คุณเทรนมา (Not found in Trained Memory)."
-3. Answer in Thai language primarily.
-
-CONTEXT:
-${context}
-
-USER QUESTION:
-${contextMsg}
-
-ANSWER:`;
-
+                prompt = `You are a strict research assistant AI. Answer using ONLY the CONTEXT below. If not found, say "Not found in Trained Memory".\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
             } else if (source === 'hybrid') {
-                // HYBRID RAG
-                prompt = `
-You are a smart research assistant AI.
-Your Goal: Answer the user question.
-Instructions:
-1. Use the provided CONTEXT below as your primary source of truth.
-2. You CAN use your own general knowledge to explain terms, fill in gaps, or make the answer smoother.
-3. If the context conflicts with general knowledge, prefer the context.
-4. Answer in Thai language primarily.
-
-CONTEXT:
-${context}
-
-USER QUESTION:
-${contextMsg}
-
-ANSWER:`;
-
+                prompt = `You are a smart research assistant AI. Use CONTEXT as primary truth but can use general knowledge.\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
             } else {
-                // General Mode
                 prompt = `You are a helpful AI Research Assistant. Answer the following question in Thai:\n\n${contextMsg}`;
             }
 
-            // Call Gemini
+            // Call Gemini WITH ROTATION
             try {
-                // Show thinking indicator
                 const tempId = "thinking-" + Date.now();
                 const box = document.getElementById('chat-box');
                 const div = document.createElement('div');
                 div.id = tempId;
                 div.className = "flex gap-4";
-                div.innerHTML = `
-                    <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div>
-                    <div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2">
-                        <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Processing...
-                    </div>
-                `;
+                div.innerHTML = `<div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div><div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2"><i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Processing...</div>`;
                 box.appendChild(div);
                 box.scrollTop = box.scrollHeight;
                 lucide.createIcons();
 
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST', headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
+                // USE NEW FUNCTION
+                const data = await callGeminiAPI({ contents: [{ parts: [{ text: prompt }] }] });
                 
-                const data = await res.json();
-                
-                // Remove thinking
                 document.getElementById(tempId).remove();
 
                 if (data.candidates && data.candidates[0].content) {
                     addMsg('ai', data.candidates[0].content.parts[0].text);
                 } else {
-                    console.error("Gemini API Error Detail:", data);
+                    console.error("Gemini Error:", data);
                     let detail = "";
-                    if (data.error) detail = `(API Error: ${data.error.message})`;
                     if (data.promptFeedback) detail = `(Safety Block: ${JSON.stringify(data.promptFeedback)})`;
-                    
                     addMsg('ai', `Error: AI did not return a response. <br><span class="text-xs text-red-300 opacity-80">${detail}</span>`);
                 }
             } catch(e) {
-                document.getElementById(tempId)?.remove();
-                addMsg('ai', "Error connecting to AI Network.");
+                document.getElementById("thinking-" + Date.now())?.remove(); // Cleanup attempt
+                addMsg('ai', `Error connecting to AI Network: ${e.message}`);
             }
         }
 
@@ -1407,10 +1390,7 @@ ANSWER:`;
             const contentDiv = document.getElementById(`${msgId}-content`);
             const editArea = document.getElementById(`${msgId}-edit-area`);
             const textarea = document.getElementById(`${msgId}-textarea`);
-            
-            // Get text (strip HTML mostly)
             textarea.value = contentDiv.innerText.trim();
-            
             contentDiv.classList.add('hidden');
             editArea.classList.remove('hidden');
         }
@@ -1422,17 +1402,11 @@ ANSWER:`;
 
         function saveCorrection(msgId) {
             const newText = document.getElementById(`${msgId}-textarea`).value;
-            
-            // 1. Update UI
             document.getElementById(`${msgId}-content`).innerHTML = marked.parse(newText);
             cancelEdit(msgId);
-
-            // 2. Teach AI (Save to Memory)
-            // Format: Q: [Question] \n A: [Corrected Answer]
             const teachingEntry = `[Human Correction]\nQ: ${lastUserQuestion}\nA: ${newText}`;
             memory.push(teachingEntry);
             saveMemoryToStorage(); // SYNC
-
             showAlert("AI Learned!", "บันทึกคำตอบที่ถูกต้องลงใน Memory แล้ว AI จะจำคำตอบนี้ในครั้งถัดไป");
         }
 
@@ -1452,7 +1426,6 @@ ANSWER:`;
                     </div>
                 </div>
             `;
-            // Note: We DO NOT clear 'memory' here, because training should persist across chats in the same session.
             clearChatAttachment();
             lucide.createIcons();
             showAlert("Chat Cleared", "ล้างหน้าจอแชทเรียบร้อย (หน่วยความจำที่เทรนไว้ยังอยู่)");
