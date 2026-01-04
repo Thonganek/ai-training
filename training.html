@@ -261,7 +261,16 @@
 
     <script>
         lucide.createIcons();
-        const GEMINI_API_KEY = "AIzaSyAXn2RnKle5RdJsD74PHVQbQAcOkPffkb4"; // Key injected by environment
+        
+        // --- 5 API KEYS FOR ROTATION ---
+        const API_KEYS = [
+            "AIzaSyATWMM_E0icR3lIUX-88DS3hGw2RGrA4Wo",
+            "AIzaSyAXn2RnKle5RdJsD74PHVQbQAcOkPffkb4",
+            "AIzaSyAuGmhGGfVIgdcBS-bDPu06I_fQpIy2Sng",
+            "AIzaSyBW_DCpCRdME_d1oT8PmsppdDDxNcPRq84",
+            "AIzaSyB--mv-d2ps80wX8ANivxVPD9VEc3AE4dE"
+        ];
+        let currentKeyIndex = 0;
 
         // --- DATA CONTENT ---
         const templates = {
@@ -361,13 +370,49 @@
    - ภาวะสมองเสื่อม (Dementia) จำเหตุการณ์ปัจจุบันไม่ได้`
         };
 
+        // --- API CALL FUNCTION WITH ROTATION ---
+        async function callGeminiAPI(payload) {
+            let lastError = null;
+            for (let i = 0; i < API_KEYS.length; i++) {
+                const apiKey = API_KEYS[currentKeyIndex];
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST', 
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify(payload)
+                    });
+
+                    // Check for Quota Exceeded (429)
+                    if (res.status === 429) {
+                        console.warn(`⚠️ Key index ${currentKeyIndex} exceeded quota. Rotating to next key...`);
+                        currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+                        lastError = new Error("Quota exceeded");
+                        continue; // Retry loop with new key
+                    }
+
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
+                    }
+
+                    return await res.json(); // Success!
+
+                } catch (e) {
+                    lastError = e;
+                    if (!e.message.includes("Quota") && !e.message.includes("429")) {
+                        throw e; // Non-quota error, fail immediately
+                    }
+                }
+            }
+            throw new Error(`System Busy: All 5 API keys are exhausted. (${lastError?.message})`);
+        }
+
         // --- FETCH / GENERATE CONTENT LOGIC ---
         
         async function simulateWebFetch() {
             const url = document.getElementById('web-url').value;
             if(!url) return alert("Please enter a URL first.");
             
-            // Toggle UI
             const btn = document.getElementById('btn-fetch');
             const processing = document.getElementById('fetch-processing');
             const hint = document.getElementById('fetch-hint');
@@ -378,35 +423,16 @@
             hint.classList.add('hidden');
             lucide.createIcons();
 
-            // Prompt asking for search/summary
             const prompt = `User provided URL: "${url}". 
             Please search for information related to this URL or topic and summarize the key educational/research/health content found.
             Format as a structured note in Thai.`;
 
             try {
-                const key = GEMINI_API_KEY || ""; 
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
-                    method: 'POST', 
-                    headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({ 
-                        contents: [{ parts: [{ text: prompt }] }],
-                        tools: [{ google_search: {} }] // Add Google Search Grounding
-                    })
+                // USE ROTATION FUNCTION
+                const data = await callGeminiAPI({ 
+                    contents: [{ parts: [{ text: prompt }] }],
+                    tools: [{ google_search: {} }] 
                 });
-
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({}));
-                    // HANDLE QUOTA ERROR
-                    if (res.status === 429) {
-                        const errMsg = errData.error?.message || "";
-                        const waitTimeMatch = errMsg.match(/retry in ([0-9\.]+)s/);
-                        const waitTime = waitTimeMatch ? Math.ceil(parseFloat(waitTimeMatch[1])) : 60;
-                        throw new Error(`Quota exceeded. Please wait ${waitTime} seconds.`);
-                    }
-                    throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
-                }
-
-                const data = await res.json();
                 
                 if (data.candidates && data.candidates[0].content) {
                     const content = data.candidates[0].content.parts[0].text;
@@ -419,16 +445,9 @@
 
             } catch(e) {
                 console.error(e);
-                let msg = e.message;
-                if(msg.includes("Quota exceeded")) {
-                    alert(`⚠️ ${msg}`);
-                } else {
-                    if(msg.includes("400")) msg += " (Check API Key or Request format)";
-                    alert(`Error fetching content: ${msg}`);
-                }
+                alert(`Error fetching content: ${e.message}`);
             }
             
-            // Restore UI
             btn.innerHTML = `<i data-lucide="download-cloud"></i> Fetch`;
             btn.disabled = false;
             processing.classList.add('hidden');
@@ -440,7 +459,6 @@
             const topic = document.getElementById('search-topic').value;
             if(!topic) return alert("Please enter a topic.");
 
-            // Toggle UI
             const btn = document.getElementById('btn-generate');
             const processing = document.getElementById('gen-processing');
             const hint = document.getElementById('gen-hint');
@@ -457,26 +475,8 @@
             Keep it concise but informative for training an AI.`;
 
             try {
-                const key = GEMINI_API_KEY || "";
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
-                    method: 'POST', 
-                    headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({}));
-                    // HANDLE QUOTA ERROR
-                    if (res.status === 429) {
-                        const errMsg = errData.error?.message || "";
-                        const waitTimeMatch = errMsg.match(/retry in ([0-9\.]+)s/);
-                        const waitTime = waitTimeMatch ? Math.ceil(parseFloat(waitTimeMatch[1])) : 60;
-                        throw new Error(`Quota exceeded. Please wait ${waitTime} seconds.`);
-                    }
-                    throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
-                }
-
-                const data = await res.json();
+                // USE ROTATION FUNCTION
+                const data = await callGeminiAPI({ contents: [{ parts: [{ text: prompt }] }] });
                 
                 if (data.candidates && data.candidates[0].content) {
                     const content = data.candidates[0].content.parts[0].text;
@@ -486,15 +486,9 @@
                 }
             } catch(e) {
                 console.error(e);
-                let msg = e.message;
-                if(msg.includes("Quota exceeded")) {
-                    alert(`⚠️ ${msg}`);
-                } else {
-                    alert(`Error generating content: ${msg}`);
-                }
+                alert(`Error generating content: ${e.message}`);
             }
 
-            // Restore UI
             btn.innerHTML = `<i data-lucide="sparkles"></i> Generate`;
             btn.disabled = false;
             processing.classList.add('hidden');
@@ -563,4 +557,3 @@
     </script>
 </body>
 </html>
-
