@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Training Center - Templates</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background-color: #020617; 
+            color: #e2e8f0;
+        }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 30px -10px rgba(14, 165, 233, 0.3); }
+        .gradient-text { background: linear-gradient(to right, #60a5fa, #34d399); -webkit-background-clip: text; color: transparent; }
+        
+        /* Modal Animation */
+        .modal { transition: opacity 0.25s ease; }
+        body.modal-active { overflow-x: hidden; overflow-y: hidden !important; }
+
+        /* Processing Animation */
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scan-line {
+            animation: scan 2s linear infinite;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen">
+
+    <!-- Header -->
+    <div class="max-w-6xl mx-auto mb-10 flex flex-col md:flex-row justify-between items-center border-b border-white/10 pb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold gradient-text mb-2">🎓 AI Knowledge Training Center</h1>
+            <p class="text-slate-400 text-sm">คลังความรู้และระบบนำเข้าข้อมูลสำหรับสอน AI โดยจรัญญู ทองเอนก</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Link back to ai_training.html -->
+            <a href="ai_training.html" class="px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all flex items-center gap-2 text-sm font-bold">
+                <i data-lucide="arrow-left"></i> Back to Main App
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto space-y-12">
+        
+        <!-- SECTION 1: WEB & SEARCH IMPORT -->
+        <div class="bg-slate-900/50 border border-blue-500/30 p-6 md:p-8 rounded-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="globe" class="w-32 h-32 text-blue-500"></i></div>
+            
+            <h2 class="text-xl font-bold text-blue-400 flex items-center gap-2 mb-6 relative z-10">
+                <i data-lucide="search"></i> Web Knowledge Import
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                <!-- URL Import -->
+                <div class="bg-black/20 p-4 rounded-xl border border-white/5 flex flex-col justify-between">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-2">Import from URL (Summarize Content)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="web-url" placeholder="https://example.com/research-topic" class="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500">
+                            <button onclick="simulateWebFetch()" id="btn-fetch" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
+                                <i data-lucide="download-cloud"></i> Fetch
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-2" id="fetch-hint">*AI จะทำการอ่านและสรุปเนื้อหาจากลิงก์ให้ (Using Search Grounding)</p>
+                    </div>
+
+                    <!-- PROCESSING VISUAL (Hidden by default) -->
+                    <div id="fetch-processing" class="hidden mt-4 p-4 bg-black/40 rounded-xl border border-blue-500/30 relative overflow-hidden">
+                        <div class="flex items-center gap-4 relative z-10">
+                            <div class="relative w-12 h-12 flex-shrink-0 bg-blue-900/20 rounded-full flex items-center justify-center border border-blue-500/20">
+                                <i data-lucide="globe" class="w-6 h-6 text-blue-400"></i>
+                                <div class="absolute inset-0 border-2 border-blue-500/50 rounded-full border-t-transparent animate-spin"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs font-bold text-blue-300 mb-1 flex justify-between">
+                                    <span>AI Agent Processing...</span>
+                                    <span class="animate-pulse">Analyzing</span>
+                                </div>
+                                <div class="h-1.5 w-full bg-slate-700 rounded-full overflow-hidden">
+                                    <div class="h-full bg-blue-500 rounded-full animate-[width_1.5s_ease-in-out_infinite]" style="width: 30%"></div>
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-1 truncate">Reading source data & summarizing...</p>
+                            </div>
+                        </div>
+                        <!-- Background Scan Effect -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent h-[50%] scan-line pointer-events-none"></div>
+                    </div>
+                </div>
+
+                <!-- Topic Search -->
+                <div class="bg-black/20 p-4 rounded-xl border border-white/5 flex flex-col justify-between">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-2">Search & Generate Knowledge</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="search-topic" placeholder="เช่น สถิติสำหรับการวิจัยทางการแพทย์..." class="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-purple-500">
+                            <button onclick="generateContent()" id="btn-generate" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
+                                <i data-lucide="sparkles"></i> Generate
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-2" id="gen-hint">*ใช้ AI สร้างชุดความรู้ตามหัวข้อที่ต้องการทันที</p>
+                    </div>
+
+                    <!-- GENERATING VISUAL (Hidden by default) -->
+                    <div id="gen-processing" class="hidden mt-4 p-4 bg-black/40 rounded-xl border border-purple-500/30 relative overflow-hidden">
+                        <div class="flex items-center gap-4 relative z-10">
+                            <div class="relative w-12 h-12 flex-shrink-0 bg-purple-900/20 rounded-full flex items-center justify-center border border-purple-500/20">
+                                <i data-lucide="brain-circuit" class="w-6 h-6 text-purple-400 animate-pulse"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs font-bold text-purple-300 mb-1">Generating Knowledge Base...</div>
+                                <div class="flex gap-1">
+                                    <div class="w-1 h-3 bg-purple-500 rounded animate-[pulse_0.6s_ease-in-out_infinite]"></div>
+                                    <div class="w-1 h-3 bg-purple-500 rounded animate-[pulse_0.6s_ease-in-out_0.2s_infinite]"></div>
+                                    <div class="w-1 h-3 bg-purple-500 rounded animate-[pulse_0.6s_ease-in-out_0.4s_infinite]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: TEMPLATES -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <!-- Column 1: Research -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-blue-400 flex items-center gap-2"><i data-lucide="file-text"></i> งานวิจัย (Research)</h2>
+                
+                <div class="bg-slate-800/50 p-6 rounded-xl border border-white/5 card-hover transition-all group">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-lg">1. โครงสร้างงานวิจัย 5 บท</h3>
+                        <button onclick="previewTemplate('research_structure')" class="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded text-xs text-blue-400" title="Preview Content"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4 line-clamp-2">
+                        บทนำ, ทบทวนวรรณกรรม, วิธีดำเนินการ, ผลการวิจัย, สรุปผล
+                    </p>
+                    <button onclick="previewTemplate('research_structure')" class="w-full py-2 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-600/50 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="upload-cloud"></i> Teach AI
+                    </button>
+                </div>
+
+                <div class="bg-slate-800/50 p-6 rounded-xl border border-white/5 card-hover transition-all group">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-lg">2. รูปแบบการวิจัย (Methodology)</h3>
+                        <button onclick="previewTemplate('research_methodology')" class="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded text-xs text-blue-400" title="Preview Content"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4 line-clamp-2">
+                        เชิงปริมาณ (Quantitative), เชิงคุณภาพ (Qualitative), แบบผสม (Mixed Method)
+                    </p>
+                    <button onclick="previewTemplate('research_methodology')" class="w-full py-2 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-600/50 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="upload-cloud"></i> Teach AI
+                    </button>
+                </div>
+            </div>
+
+            <!-- Column 2: Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2"><i data-lucide="bar-chart-2"></i> สถิติ (Statistics)</h2>
+                
+                <div class="bg-slate-800/50 p-6 rounded-xl border border-white/5 card-hover transition-all group">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-lg">1. สถิติพรรณนา (Descriptive)</h3>
+                        <button onclick="previewTemplate('stat_desc')" class="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded text-xs text-emerald-400" title="Preview Content"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4 line-clamp-2">
+                        Mean, Median, Mode, SD, Percentage
+                    </p>
+                    <button onclick="previewTemplate('stat_desc')" class="w-full py-2 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-600/50 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="upload-cloud"></i> Teach AI
+                    </button>
+                </div>
+
+                <div class="bg-slate-800/50 p-6 rounded-xl border border-white/5 card-hover transition-all group">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-lg">2. สถิติอนุมาน (Inferential)</h3>
+                        <button onclick="previewTemplate('stat_infer')" class="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded text-xs text-emerald-400" title="Preview Content"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4 line-clamp-2">
+                        T-test, ANOVA, Chi-Square, Correlation
+                    </p>
+                    <button onclick="previewTemplate('stat_infer')" class="w-full py-2 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-600/50 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="upload-cloud"></i> Teach AI
+                    </button>
+                </div>
+            </div>
+
+            <!-- Column 3: Health -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-pink-400 flex items-center gap-2"><i data-lucide="heart-pulse"></i> สุขภาพ (Health)</h2>
+                
+                <div class="bg-slate-800/50 p-6 rounded-xl border border-white/5 card-hover transition-all group">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-lg">1. พัฒนาการเด็กปฐมวัย</h3>
+                        <button onclick="previewTemplate('health_kids')" class="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded text-xs text-pink-400" title="Preview Content"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4 line-clamp-2">
+                        พัฒนาการ 4 ด้าน และโภชนาการวัยเด็ก
+                    </p>
+                    <button onclick="previewTemplate('health_kids')" class="w-full py-2 bg-pink-600/20 hover:bg-pink-600 text-pink-400 hover:text-white border border-pink-600/50 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="upload-cloud"></i> Teach AI
+                    </button>
+                </div>
+
+                <div class="bg-slate-800/50 p-6 rounded-xl border border-white/5 card-hover transition-all group">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-lg">2. การดูแลผู้สูงอายุ</h3>
+                        <button onclick="previewTemplate('health_elderly')" class="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded text-xs text-pink-400" title="Preview Content"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4 line-clamp-2">
+                        ป้องกันหกล้ม, สมองเสื่อม, โภชนาการ
+                    </p>
+                    <button onclick="previewTemplate('health_elderly')" class="w-full py-2 bg-pink-600/20 hover:bg-pink-600 text-pink-400 hover:text-white border border-pink-600/50 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="upload-cloud"></i> Teach AI
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PREVIEW / EDIT MODAL -->
+    <div id="preview-modal" class="fixed inset-0 z-50 hidden opacity-0 pointer-events-none modal flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-[#0f172a] w-full max-w-3xl rounded-2xl border border-white/10 shadow-2xl flex flex-col h-[85vh]">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
+                <div>
+                    <h3 class="text-xl font-bold flex items-center gap-2"><i data-lucide="edit-3" class="w-5 h-5 text-blue-400"></i> Review & Edit Content</h3>
+                    <p class="text-xs text-slate-400 mt-1">Review the content below. You can edit it before teaching the AI.</p>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white p-2 hover:bg-white/10 rounded-lg transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-0 flex-1 overflow-hidden flex flex-col bg-black/20">
+                <textarea id="modal-content" class="w-full h-full bg-transparent p-6 font-mono text-sm leading-relaxed focus:outline-none resize-none text-slate-300 selection:bg-blue-500/30"></textarea>
+            </div>
+            <div class="p-6 border-t border-white/10 flex justify-end gap-3 bg-slate-900/50 rounded-b-2xl">
+                <button onclick="closeModal()" class="px-5 py-2.5 rounded-xl text-sm hover:bg-white/5 transition-colors text-slate-300">Cancel</button>
+                <button onclick="confirmTrainFromModal()" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all transform hover:scale-105">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i> Confirm & Train AI
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Toast -->
+    <div id="toast" class="fixed bottom-10 right-10 bg-green-600 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-y-32 transition-all duration-300 flex items-center gap-3 z-50">
+        <div class="bg-white/20 p-1 rounded-full"><i data-lucide="check" class="w-4 h-4"></i></div>
+        <div>
+            <h4 class="font-bold text-sm">Success!</h4>
+            <p class="text-xs opacity-90" id="toast-msg">Data sent to Main AI Memory.</p>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        const GEMINI_API_KEY = ""; // Key injected by environment
+
+        // --- DATA CONTENT ---
+        const templates = {
+            research_structure: `[Topic: Research Structure 5 Chapters]
+บทที่ 1 บทนำ (Introduction):
+- ความเป็นมาและความสำคัญของปัญหา: ทำไมถึงทำเรื่องนี้ ปัญหาคืออะไร
+- วัตถุประสงค์การวิจัย: เพื่อศึกษาอะไร
+- สมมติฐาน (ถ้ามี): คาดเดาผลลัพธ์อย่างไร
+- ขอบเขตการวิจัย: ประชากร พื้นที่ ระยะเวลา
+- นิยามศัพท์เฉพาะ: คำสำคัญในงานวิจัย
+
+บทที่ 2 เอกสารและงานวิจัยที่เกี่ยวข้อง (Literature Review):
+- ทฤษฎีที่เกี่ยวข้อง
+- งานวิจัยในอดีต (ทั้งไทยและต่างประเทศ)
+- กรอบแนวคิดการวิจัย
+
+บทที่ 3 วิธีดำเนินการวิจัย (Methodology):
+- รูปแบบการวิจัย
+- ประชากรและกลุ่มตัวอย่าง
+- เครื่องมือที่ใช้ และการตรวจสอบคุณภาพ
+- การเก็บรวบรวมข้อมูล
+- สถิติที่ใช้
+
+บทที่ 4 ผลการวิเคราะห์ข้อมูล (Results):
+- นำเสนอด้วยตาราง กราฟ หรือคำบรรยาย
+- แปลผลตามข้อเท็จจริง
+
+บทที่ 5 สรุป อภิปรายผล และข้อเสนอแนะ (Conclusion & Discussion):
+- สรุปผลตามวัตถุประสงค์
+- อภิปรายผล: สอดคล้องหรือขัดแย้งกับทฤษฎี/งานวิจัยเก่าอย่างไร
+
+`,
+
+            research_methodology: `[Topic: Research Methodology]
+รูปแบบการวิจัย (Research Methodology):
+1. การวิจัยเชิงปริมาณ (Quantitative Research):
+   - เน้นตัวเลข สถิติ การวัดผลที่ชัดเจน
+   - เครื่องมือ: แบบสอบถาม (Questionnaire), แบบทดสอบ
+   - การวิเคราะห์: ใช้โปรแกรมสถิติ (SPSS, R) หาค่า Mean, SD, t-test
+   - เหมาะกับ: การหาความสัมพันธ์, เปรียบเทียบผล, สำรวจความพึงพอใจในวงกว้าง
+
+2. การวิจัยเชิงคุณภาพ (Qualitative Research):
+   - เน้นความลึกซึ้ง ความหมาย บริบท ประสบการณ์
+   - เครื่องมือ: การสัมภาษณ์เชิงลึก (In-depth Interview), การสนทนากลุ่ม (Focus Group), การสังเกต
+   - การวิเคราะห์: การวิเคราะห์เนื้อหา (Content Analysis), ตีความ
+   - เหมาะกับ: การศึกษาพฤติกรรม, วัฒนธรรม, สาเหตุเชิงลึก
+
+3. การวิจัยแบบผสมผสาน (Mixed Methods):
+   - ใช้ทั้งเชิงปริมาณและคุณภาพร่วมกันเพื่อความสมบูรณ์ของข้อมูล`,
+
+            stat_desc: `[Topic: Descriptive Statistics]
+สถิติพรรณนา (Descriptive Statistics):
+1. การวัดแนวโน้มเข้าสู่ส่วนกลาง:
+   - Mean (ค่าเฉลี่ย): ใช้กับข้อมูลปกติ (Normal Distribution)
+   - Median (มัธยฐาน): ใช้เมื่อข้อมูลเบ้ หรือมีค่าสุดโต่ง (Outlier)
+   - Mode (ฐานนิยม): ใช้กับข้อมูลกลุ่ม/นามบัญญัติ
+
+2. การวัดการกระจาย:
+   - SD (Standard Deviation): ค่ายิ่งน้อยยิ่งดี (ข้อมูลเกาะกลุ่มกัน)
+   - Range (พิสัย): ค่าสูงสุด - ต่ำสุด`,
+
+            stat_infer: `[Topic: Inferential Statistics]
+สถิติอ้างอิง (Inferential Statistics):
+1. Parametric Statistics (ข้อมูลต้องมีการแจกแจงปกติ):
+   - T-test: เปรียบเทียบค่าเฉลี่ย 2 กลุ่ม
+   - ANOVA: เปรียบเทียบค่าเฉลี่ย > 2 กลุ่ม
+   - Pearson Correlation: หาความสัมพันธ์ตัวแปร
+
+2. Non-parametric Statistics (ข้อมูลไม่ปกติ):
+   - Chi-Square: หาความสัมพันธ์ข้อมูลกลุ่ม
+   - Mann-Whitney U test: ใช้แทน t-test
+   - Kruskal-Wallis: ใช้แทน ANOVA`,
+
+            health_kids: `[Topic: Early Childhood Development]
+พัฒนาการเด็กปฐมวัย (0-5 ปี):
+1. ร่างกาย: กล้ามเนื้อมัดใหญ่ (วิ่ง, กระโดด) มัดเล็ก (ร้อยลูกปัด, วาดรูป)
+2. อารมณ์: บอกความรู้สึกตนเองได้ ร่าเริง
+3. สังคม: การเล่นร่วมกับเพื่อน การแบ่งปัน
+4. สติปัญญา: ภาษา การแก้ปัญหาพื้นฐาน
+
+*Red Flags: ไม่สบตา, ไม่พูดคำที่มีความหมายตอน 18 เดือน, เดินไม่ได้ตอน 18 เดือน ควรพบแพทย์`,
+
+            health_elderly: `[Topic: Elderly Care Guidelines]
+หลักการดูแลผู้สูงอายุ (Elderly Care):
+1. Fall Prevention (ป้องกันการล้ม):
+   - พื้นเรียบ ไม่ลื่น แสงสว่างเพียงพอ
+   - ราวจับในห้องน้ำ
+   - รองเท้าหุ้มส้นกันลื่น
+
+2. Nutrition (โภชนาการ):
+   - โปรตีนคุณภาพดี (ปลา, ไข่ขาว, เต้าหู้) เพื่อรักษามวลกล้ามเนื้อ
+   - ลด Sodium (<2,000 mg/day) ลดน้ำตาล
+   - แคลเซียมและวิตามิน D (ป้องกันกระดูกพรุน)
+
+3. Mental Health:
+   - สังเกตอาการซึมเศร้า (เบื่ออาหาร, นอนไม่หลับ, แยกตัว)
+   - ภาวะสมองเสื่อม (Dementia) จำเหตุการณ์ปัจจุบันไม่ได้`
+        };
+
+        // --- FETCH / GENERATE CONTENT LOGIC ---
+        
+        async function simulateWebFetch() {
+            const url = document.getElementById('web-url').value;
+            if(!url) return alert("Please enter a URL first.");
+            
+            // Toggle UI
+            const btn = document.getElementById('btn-fetch');
+            const processing = document.getElementById('fetch-processing');
+            const hint = document.getElementById('fetch-hint');
+            
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> Fetching...`;
+            processing.classList.remove('hidden');
+            hint.classList.add('hidden');
+            lucide.createIcons();
+
+            // Prompt asking for search/summary
+            const prompt = `User provided URL: "${url}". 
+            Please search for information related to this URL or topic and summarize the key educational/research/health content found.
+            Format as a structured note in Thai.`;
+
+            try {
+                const key = GEMINI_API_KEY || ""; 
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
+                    method: 'POST', 
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ 
+                        contents: [{ parts: [{ text: prompt }] }],
+                        tools: [{ google_search: {} }] // Add Google Search Grounding
+                    })
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
+                }
+
+                const data = await res.json();
+                
+                if (data.candidates && data.candidates[0].content) {
+                    const content = data.candidates[0].content.parts[0].text;
+                    openModalWithContent(content);
+                } else if (data.promptFeedback) {
+                     throw new Error(`Safety Block: ${data.promptFeedback.blockReason}`);
+                } else {
+                     throw new Error("No content generated.");
+                }
+
+            } catch(e) {
+                console.error(e);
+                let msg = e.message;
+                if(msg.includes("400")) msg += " (Check API Key or Request format)";
+                alert(`Error fetching content: ${msg}`);
+            }
+            
+            // Restore UI
+            btn.innerHTML = `<i data-lucide="download-cloud"></i> Fetch`;
+            btn.disabled = false;
+            processing.classList.add('hidden');
+            hint.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        async function generateContent() {
+            const topic = document.getElementById('search-topic').value;
+            if(!topic) return alert("Please enter a topic.");
+
+            // Toggle UI
+            const btn = document.getElementById('btn-generate');
+            const processing = document.getElementById('gen-processing');
+            const hint = document.getElementById('gen-hint');
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> Generating...`;
+            processing.classList.remove('hidden');
+            hint.classList.add('hidden');
+            lucide.createIcons();
+
+            const prompt = `Role: Research Assistant.
+            Task: Generate a comprehensive, structured knowledge base about: "${topic}" in Thai.
+            Focus on facts, definitions, key points, and statistics if applicable.
+            Keep it concise but informative for training an AI.`;
+
+            try {
+                const key = GEMINI_API_KEY || "";
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
+                    method: 'POST', 
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
+                }
+
+                const data = await res.json();
+                
+                if (data.candidates && data.candidates[0].content) {
+                    const content = data.candidates[0].content.parts[0].text;
+                    openModalWithContent(content);
+                } else {
+                    throw new Error("No content generated.");
+                }
+            } catch(e) {
+                console.error(e);
+                alert(`Error generating content: ${e.message}`);
+            }
+
+            // Restore UI
+            btn.innerHTML = `<i data-lucide="sparkles"></i> Generate`;
+            btn.disabled = false;
+            processing.classList.add('hidden');
+            hint.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // --- MODAL LOGIC ---
+        function openModalWithContent(content) {
+            document.getElementById('modal-content').value = content;
+            const modal = document.getElementById('preview-modal');
+            modal.classList.remove('hidden', 'pointer-events-none', 'opacity-0');
+            document.body.classList.add('modal-active');
+        }
+
+        function previewTemplate(key) {
+            if(templates[key]) {
+                openModalWithContent(templates[key]);
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('preview-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.classList.remove('modal-active');
+            }, 300);
+        }
+
+        function confirmTrainFromModal() {
+            const content = document.getElementById('modal-content').value;
+            if(content.trim()) {
+                saveToStorage(content);
+                closeModal();
+            }
+        }
+
+        // --- CORE TRAIN LOGIC (Internal) ---
+        function saveToStorage(content) {
+            // 1. Get existing memory
+            let currentMemory = [];
+            const saved = localStorage.getItem('ai_memory');
+            if(saved) {
+                try { currentMemory = JSON.parse(saved); } catch(e){}
+            }
+
+            // 2. Add new (Duplicate check)
+            if(!currentMemory.includes(content)) {
+                currentMemory.push(content);
+                localStorage.setItem('ai_memory', JSON.stringify(currentMemory));
+                showToast("Data sent to Main AI Memory.");
+            } else {
+                showToast("This content is already in memory!");
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            if(msg) document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-32');
+            setTimeout(() => {
+                toast.classList.add('translate-y-32');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
