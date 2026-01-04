@@ -43,7 +43,7 @@
         <div class="flex items-center gap-4">
             <!-- Link back to ai_training.html -->
             <a href="index.html" class="px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all flex items-center gap-2 text-sm font-bold">
-                <i data-lucide="arrow-left"></i> Back to Main App
+                <i data-lucide="arrow-left"></i> Back to Main AI
             </a>
         </div>
     </div>
@@ -396,6 +396,13 @@
 
                 if (!res.ok) {
                     const errData = await res.json().catch(() => ({}));
+                    // HANDLE QUOTA ERROR
+                    if (res.status === 429) {
+                        const errMsg = errData.error?.message || "";
+                        const waitTimeMatch = errMsg.match(/retry in ([0-9\.]+)s/);
+                        const waitTime = waitTimeMatch ? Math.ceil(parseFloat(waitTimeMatch[1])) : 60;
+                        throw new Error(`Quota exceeded. Please wait ${waitTime} seconds.`);
+                    }
                     throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
                 }
 
@@ -413,8 +420,12 @@
             } catch(e) {
                 console.error(e);
                 let msg = e.message;
-                if(msg.includes("400")) msg += " (Check API Key or Request format)";
-                alert(`Error fetching content: ${msg}`);
+                if(msg.includes("Quota exceeded")) {
+                    alert(`⚠️ ${msg}`);
+                } else {
+                    if(msg.includes("400")) msg += " (Check API Key or Request format)";
+                    alert(`Error fetching content: ${msg}`);
+                }
             }
             
             // Restore UI
@@ -455,6 +466,13 @@
 
                 if (!res.ok) {
                     const errData = await res.json().catch(() => ({}));
+                    // HANDLE QUOTA ERROR
+                    if (res.status === 429) {
+                        const errMsg = errData.error?.message || "";
+                        const waitTimeMatch = errMsg.match(/retry in ([0-9\.]+)s/);
+                        const waitTime = waitTimeMatch ? Math.ceil(parseFloat(waitTimeMatch[1])) : 60;
+                        throw new Error(`Quota exceeded. Please wait ${waitTime} seconds.`);
+                    }
                     throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
                 }
 
@@ -468,7 +486,12 @@
                 }
             } catch(e) {
                 console.error(e);
-                alert(`Error generating content: ${e.message}`);
+                let msg = e.message;
+                if(msg.includes("Quota exceeded")) {
+                    alert(`⚠️ ${msg}`);
+                } else {
+                    alert(`Error generating content: ${msg}`);
+                }
             }
 
             // Restore UI
@@ -539,5 +562,4 @@
         }
     </script>
 </body>
-
 </html>
