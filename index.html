@@ -96,12 +96,6 @@
             border-radius: 8px;
             border: 2px dashed var(--text-muted);
         }
-        
-        /* Template Card Hover */
-        .template-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
     </style>
 </head>
 <!-- Set default data-theme to light -->
@@ -145,10 +139,13 @@
                     <i data-lucide="database" class="w-4 h-4"></i> 
                     <span>Text Research</span>
                 </button>
-                <button onclick="switchMode('templates')" id="btn-templates" class="tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+                
+                <!-- Updated: External Link to training.html -->
+                <a href="training.html" class="tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 hover:bg-purple-500/10 hover:border-purple-500 hover:text-purple-500">
                     <i data-lucide="library" class="w-4 h-4"></i> 
-                    <span>Templates Train AI</span>
-                </button>
+                    <span>Training Center ↗</span>
+                </a>
+
                 <button onclick="switchMode('visual')" id="btn-visual" class="tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
                     <i data-lucide="scan-face" class="w-4 h-4"></i> 
                     <span>Deep Visual</span>
@@ -303,66 +300,6 @@
                             <input type="text" id="user-input" class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all" placeholder="ถามคำถามวิจัยทั่วไป (General Knowledge)...">
                             <button type="submit" class="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500"><i data-lucide="send" class="w-5 h-5"></i></button>
                         </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== MODE 2: KNOWLEDGE TEMPLATES (NEW) ==================== -->
-        <div id="mode-templates" class="grid grid-cols-12 gap-6 hidden animate-fade-in h-full">
-            <div class="col-span-12">
-                <div class="glass-panel p-8 rounded-2xl h-full flex flex-col">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold flex items-center gap-3">
-                            <i data-lucide="library" class="text-purple-400"></i> Knowledge Templates
-                        </h2>
-                        <p class="text-sm opacity-60">เลือกเทมเพลตความรู้พื้นฐานเพื่อสอน AI อย่างรวดเร็ว</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <!-- Template Card 1 -->
-                        <div onclick="loadTemplate('research')" class="template-card glass-panel p-6 rounded-xl cursor-pointer border-l-4 border-l-blue-500 bg-blue-500/5 transition-all">
-                            <div class="flex items-center gap-4 mb-3">
-                                <div class="p-3 bg-blue-500/20 rounded-lg text-blue-400"><i data-lucide="file-text"></i></div>
-                                <h3 class="font-bold text-lg">โครงสร้างงานวิจัย</h3>
-                            </div>
-                            <p class="text-sm opacity-70">บทนำ, วัตถุประสงค์, วิธีการดำเนินการวิจัย, ผลการศึกษา, สรุปผล</p>
-                        </div>
-                        
-                        <!-- Template Card 2 -->
-                        <div onclick="loadTemplate('statistics')" class="template-card glass-panel p-6 rounded-xl cursor-pointer border-l-4 border-l-emerald-500 bg-emerald-500/5 transition-all">
-                            <div class="flex items-center gap-4 mb-3">
-                                <div class="p-3 bg-emerald-500/20 rounded-lg text-emerald-400"><i data-lucide="bar-chart-2"></i></div>
-                                <h3 class="font-bold text-lg">สถิติในงานวิจัย</h3>
-                            </div>
-                            <p class="text-sm opacity-70">Mean, SD, T-test, ANOVA, การกำหนดระดับนัยสำคัญ (P-value)</p>
-                        </div>
-
-                        <!-- Template Card 3 -->
-                        <div onclick="loadTemplate('health')" class="template-card glass-panel p-6 rounded-xl cursor-pointer border-l-4 border-l-pink-500 bg-pink-500/5 transition-all">
-                            <div class="flex items-center gap-4 mb-3">
-                                <div class="p-3 bg-pink-500/20 rounded-lg text-pink-400"><i data-lucide="heart-pulse"></i></div>
-                                <h3 class="font-bold text-lg">สุขภาพแต่ละช่วงวัย</h3>
-                            </div>
-                            <p class="text-sm opacity-70">เด็กเล็ก, วัยรุ่น, วัยทำงาน, ผู้สูงอายุ และโภชนาการ</p>
-                        </div>
-                    </div>
-
-                    <!-- Template Preview & Action -->
-                    <div class="flex-1 flex flex-col md:flex-row gap-6">
-                        <div class="flex-1 relative">
-                            <label class="absolute top-2 left-4 text-xs font-bold px-2 py-1 bg-[var(--bg-main)] rounded border border-[var(--border-color)]">Preview Content</label>
-                            <textarea id="template-content" class="w-full h-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl p-6 pt-10 font-mono text-sm leading-relaxed focus:border-purple-500 outline-none resize-none" readonly></textarea>
-                        </div>
-                        <div class="w-full md:w-64 flex flex-col justify-center gap-4">
-                            <div class="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
-                                <h4 class="text-yellow-500 font-bold text-sm mb-2"><i data-lucide="info"></i> Instruction</h4>
-                                <p class="text-xs opacity-80">เมื่อนำเข้าเทมเพลต ข้อมูลจะถูกส่งไปยัง "Memory" ของ AI ทันที เพื่อใช้ในการตอบคำถามโหมด Strict</p>
-                            </div>
-                            <button onclick="importTemplate()" class="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-xl font-bold shadow-lg flex justify-center items-center gap-2 transition-all">
-                                <i data-lucide="download"></i> Import to Training
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -645,60 +582,38 @@
         // Initial Memory with Developer Credit
         let memory = ["คุณคือ AI ผู้ช่วยวิจัย ที่พัฒนาโดย นายจรัญญู ทองเอนก"];
         
+        // --- STORAGE LOGIC ---
+        function loadMemory() {
+            const saved = localStorage.getItem('ai_memory');
+            if(saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if(parsed.length > 0) memory = parsed;
+                } catch(e) { console.error("Load Memory Error", e); }
+            }
+        }
+
+        function saveMemoryToStorage() {
+            localStorage.setItem('ai_memory', JSON.stringify(memory));
+        }
+
+        // Listen for changes from other tabs (training.html)
+        window.addEventListener('storage', (e) => {
+            if(e.key === 'ai_memory') {
+                loadMemory();
+                showAlert("System Sync", "ได้รับข้อมูลใหม่จาก Training Center เรียบร้อยแล้ว!");
+            }
+        });
+
+        // Initialize
+        loadMemory();
+
         let visualDataset = [];
         let isDrawing = false;
         let trainInterval;
         let trainStream = null;
         let currentChatFile = null;
         let lastUserQuestion = ""; // For Learning/Teaching
-
-        // --- TEMPLATES DATA ---
-        const templates = {
-            research: `[Topic: Research Structure]
-1. ชื่อเรื่อง (Title): กระชับ ชัดเจน สื่อถึงเนื้อหา
-2. บทคัดย่อ (Abstract): สรุปย่อของงานวิจัยทั้งหมด (วัตถุประสงค์, วิธีการ, ผล, สรุป)
-3. บทนำ (Introduction): ที่มาและความสำคัญของปัญหา
-4. วัตถุประสงค์ (Objectives): ต้องการศึกษาอะไร
-5. การทบทวนวรรณกรรม (Literature Review): ทฤษฎีและงานวิจัยที่เกี่ยวข้อง
-6. วิธีการดำเนินการวิจัย (Methodology): ประชากร, กลุ่มตัวอย่าง, เครื่องมือ, การเก็บรวบรวมข้อมูล
-7. ผลการศึกษา (Results): การนำเสนอผลข้อมูล (ตาราง, กราฟ)
-8. อภิปรายและสรุปผล (Discussion & Conclusion): ตีความผล เปรียบเทียบกับทฤษฎี`,
-            
-            statistics: `[Topic: Research Statistics]
-1. Descriptive Statistics (สถิติพรรณนา):
-   - Mean (ค่าเฉลี่ย): ตัวแทนข้อมูล
-   - SD (ส่วนเบี่ยงเบนมาตรฐาน): การกระจายตัวของข้อมูล
-   - Percentage (ร้อยละ)
-
-2. Inferential Statistics (สถิติอ้างอิง):
-   - T-test: เปรียบเทียบค่าเฉลี่ย 2 กลุ่ม
-   - ANOVA: เปรียบเทียบค่าเฉลี่ยมากกว่า 2 กลุ่ม
-   - Chi-square: หาความสัมพันธ์ของข้อมูลกลุ่ม (Categorical)
-   - Correlation (r): ความสัมพันธ์ระหว่างตัวแปร
-   
-* P-value < 0.05 หมายถึง มีนัยสำคัญทางสถิติ (ยอมรับสมมติฐาน)`,
-
-            health: `[Topic: Healthcare by Age Group]
-1. วัยเด็ก (0-12 ปี):
-   - เน้นโภชนาการครบ 5 หมู่ (โปรตีน, แคลเซียม)
-   - วัคซีนพื้นฐาน
-   - พัฒนาการทางสมองและร่างกาย
-
-2. วัยรุ่น (13-19 ปี):
-   - การเปลี่ยนแปลงฮอร์โมน
-   - สุขภาพจิตและการปรับตัว
-   - การออกกำลังกายสม่ำเสมอ
-
-3. วัยทำงาน (20-59 ปี):
-   - ระวัง Office Syndrome
-   - ตรวจสุขภาพประจำปี (ความดัน, เบาหวาน, ไขมัน)
-   - การจัดการความเครียด
-
-4. ผู้สูงอายุ (60+ ปี):
-   - อาหารย่อยง่าย ลดเค็ม/หวาน
-   - ป้องกันการพลัดตกหกล้ม
-   - สุขภาพจิตและกิจกรรมทางสังคม`
-        };
 
         // --- THEME ---
         function setTheme(theme) {
@@ -708,11 +623,10 @@
         // --- NAVIGATION ---
         function switchMode(mode) {
             document.getElementById('mode-text').classList.toggle('hidden', mode !== 'text');
-            document.getElementById('mode-templates').classList.toggle('hidden', mode !== 'templates'); // NEW
             document.getElementById('mode-visual').classList.toggle('hidden', mode !== 'visual');
             
             // Update Tab States
-            const tabs = ['text', 'templates', 'visual'];
+            const tabs = ['text', 'visual'];
             tabs.forEach(t => {
                 const btn = document.getElementById(`btn-${t}`);
                 if (t === mode) {
@@ -721,23 +635,6 @@
                     btn.className = "tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2";
                 }
             });
-        }
-
-        // --- TEMPLATE LOGIC ---
-        function loadTemplate(type) {
-            const textarea = document.getElementById('template-content');
-            textarea.value = templates[type];
-        }
-
-        function importTemplate() {
-            const content = document.getElementById('template-content').value;
-            if(!content) return showAlert("Alert", "Please select a template first.");
-            
-            memory.push(content);
-            showAlert("Success", "Template imported to AI Memory successfully!");
-            
-            // Optional: Switch to Text Research to see it's "ready" (visual feedback)
-            // switchMode('text');
         }
 
         // --- TEXT TRAINING (ENHANCED) ---
@@ -824,6 +721,7 @@
             const input = document.getElementById('knowledge-input').value;
             // Add to global memory array
             memory.push(input);
+            saveMemoryToStorage(); // SYNC
             
             showAlert("Training Complete", "Data has been vectorized and saved to Trained Memory.");
             
@@ -1448,6 +1346,7 @@ ANSWER:`;
             // Format: Q: [Question] \n A: [Corrected Answer]
             const teachingEntry = `[Human Correction]\nQ: ${lastUserQuestion}\nA: ${newText}`;
             memory.push(teachingEntry);
+            saveMemoryToStorage(); // SYNC
 
             showAlert("AI Learned!", "บันทึกคำตอบที่ถูกต้องลงใน Memory แล้ว AI จะจำคำตอบนี้ในครั้งถัดไป");
         }
