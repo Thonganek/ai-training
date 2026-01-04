@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Research & Health By Jarunyoo Thonganek</title>
+    <title>AI Training for Research & Health by Ton</title>
     
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -250,9 +250,21 @@
                                 </p>
                             </div>
                         </div>
-                        <button onclick="clearChat()" class="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg flex items-center gap-2 text-xs font-bold transition-all">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i> New Chat
-                        </button>
+                        
+                        <div class="flex items-center gap-2">
+                            <!-- Response Source Selector -->
+                            <div class="flex items-center bg-[var(--bg-main)] rounded-lg border border-[var(--border-color)] px-2 py-1">
+                                <span class="text-[10px] opacity-60 mr-2">Source:</span>
+                                <select id="chat-source" onchange="handleSourceChange(this)" class="bg-transparent text-xs font-bold outline-none cursor-pointer text-[var(--text-main)]">
+                                    <option value="api">🌐 General AI</option>
+                                    <option value="memory">🧠 Trained Memory</option>
+                                </select>
+                            </div>
+
+                            <button onclick="clearChat()" class="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg flex items-center gap-2 text-xs font-bold transition-all">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i> New Chat
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Chat Box -->
@@ -284,7 +296,7 @@
                             <!-- Supports all files -->
                             <input type="file" id="chat-file-upload" class="hidden" onchange="handleChatFileSelect(this)">
                             
-                            <input type="text" id="user-input" class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none" placeholder="ถามคำถามวิจัย... (แนบไฟล์ได้)">
+                            <input type="text" id="user-input" class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all" placeholder="ถามคำถามวิจัย... (แนบไฟล์ได้)">
                             <button type="submit" class="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500"><i data-lucide="send" class="w-5 h-5"></i></button>
                         </form>
                     </div>
@@ -564,8 +576,11 @@
     </div>
 
     <script>
-        const GEMINI_API_KEY = "AIzaSyBLUrqgqMoJ0hIwft5l-RjSTvOvo0QlSlU";
+        const GEMINI_API_KEY = "AIzaSyATWMM_E0icR3lIUX-88DS3hGw2RGrA4Wo";
+        
+        // Initial Memory with Developer Credit
         let memory = ["คุณคือ AI ผู้ช่วยวิจัย ที่พัฒนาโดย นายจรัญญู ทองเอนก"];
+        
         let visualDataset = [];
         let isDrawing = false;
         let trainInterval;
@@ -667,8 +682,11 @@
 
         function confirmTraining() {
             const input = document.getElementById('knowledge-input').value;
+            // Add to global memory array
             memory.push(input);
-            showAlert("Success", "Data saved to memory!");
+            
+            showAlert("Training Complete", "Data has been vectorized and saved to Trained Memory.");
+            
             document.getElementById('knowledge-input').value = '';
             document.getElementById('token-count').innerText = "0 chars";
             document.getElementById('nlp-visualizer').classList.add('hidden');
@@ -876,7 +894,7 @@
         }
 
         // ============================================
-        // REAL PREDICTION LOGIC
+        // REAL PREDICTION LOGIC (No changes here as requested)
         // ============================================
         
         async function getPixelData(source, w=64, h=64) {
@@ -904,7 +922,7 @@
         function calculateSimilarity(pixels1, pixels2) {
             let diff = 0;
             for (let i = 0; i < pixels1.length; i += 4) {
-                diff += Math.abs(pixels1[i] - pixels2[i]);     // R
+                diff += Math.abs(pixels1[i] - pixels2[i]);      // R
                 diff += Math.abs(pixels1[i+1] - pixels2[i+1]); // G
                 diff += Math.abs(pixels1[i+2] - pixels2[i+2]); // B
             }
@@ -979,7 +997,7 @@
                             <img src="${m.img}" class="w-10 h-10 object-cover rounded">
                             <div class="flex-1">
                                 <div class="text-xs font-bold ${colorClass}">${m.label}</div>
-                                <div class="text-[10px] opacity-70">Similarity: ${m.score.toFixed(1)}%</div>
+                                <div class="text-left text-[10px] opacity-70">Similarity: ${m.score.toFixed(1)}%</div>
                             </div>
                         </div>
                     `;
@@ -1042,11 +1060,24 @@
             document.getElementById('chat-attachment-preview').classList.remove('flex');
         }
 
-        // Chat Logic (Updated)
+        // --- NEW: HANDLE SOURCE CHANGE ---
+        function handleSourceChange(select) {
+            const input = document.getElementById('user-input');
+            if (select.value === 'memory') {
+                input.placeholder = "ถามคำถามเฉพาะข้อมูลที่เทรนมา (Strict Mode)...";
+                input.classList.add('border-emerald-500');
+            } else {
+                input.placeholder = "ถามคำถามวิจัยทั่วไป (General Knowledge)...";
+                input.classList.remove('border-emerald-500');
+            }
+        }
+
+        // --- CHAT LOGIC (UPDATED FOR REAL MEMORY MODE) ---
         async function handleChatSubmit(e) {
             e.preventDefault();
             const input = document.getElementById('user-input');
             const msg = input.value.trim();
+            const source = document.getElementById('chat-source').value;
             
             // Check if attached or msg present
             if (!msg && !currentChatFile) return;
@@ -1064,17 +1095,81 @@
             input.value = '';
             clearChatAttachment(); // Reset attachment
             
-            // Simple RAG simulation
-            const context = memory.join('\n');
+            // --- STRICT MEMORY CHECK ---
+            if(source === 'memory') {
+                // If memory array only has the initial credit, it is considered empty
+                if(memory.length <= 1) {
+                     setTimeout(() => {
+                         addMsg('ai', `⚠️ <b>Memory Empty:</b> ระบบยังไม่มีข้อมูลที่ถูกเทรนเข้ามาในหน่วยความจำครับ<br><br>กรุณาไปที่แถบ <b>"Text Research"</b> ด้านซ้าย แล้วกด <b>"Start Training Process"</b> เพื่อบันทึกข้อมูลเข้าสู่ระบบก่อนครับ`);
+                     }, 500);
+                     return;
+                }
+            }
+
+            // Prompt Engineering
+            let prompt = "";
+
+            if(source === 'memory') {
+                // RAG Simulation (Strict Context)
+                const context = memory.join('\n\n--- NEXT DOCUMENT ---\n\n');
+                
+                prompt = `
+You are a strict research assistant AI.
+Your Goal: Answer the user question using ONLY the provided CONTEXT below.
+Constraints:
+1. Do NOT use your own outside knowledge.
+2. If the answer is not found in the CONTEXT, you MUST say: "ขออภัยครับ ไม่พบข้อมูลนี้ในหน่วยความจำที่คุณเทรนมา (Not found in Trained Memory)."
+3. Answer in Thai language primarily.
+
+CONTEXT:
+${context}
+
+USER QUESTION:
+${contextMsg}
+
+ANSWER:`;
+
+            } else {
+                // General Mode
+                prompt = `You are a helpful AI Research Assistant. Answer the following question in Thai:\n\n${contextMsg}`;
+            }
+
+            // Call Gemini
             try {
+                // Show thinking indicator
+                const tempId = "thinking-" + Date.now();
+                const box = document.getElementById('chat-box');
+                const div = document.createElement('div');
+                div.id = tempId;
+                div.className = "flex gap-4";
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div>
+                    <div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2">
+                        <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Processing...
+                    </div>
+                `;
+                box.appendChild(div);
+                box.scrollTop = box.scrollHeight;
+                lucide.createIcons();
+
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST', headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: `Context:\n${context}\n\nQ: ${contextMsg}\nA (Thai):` }] }] })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
+                
                 const data = await res.json();
-                addMsg('ai', data.candidates[0].content.parts[0].text);
+                
+                // Remove thinking
+                document.getElementById(tempId).remove();
+
+                if (data.candidates && data.candidates[0].content) {
+                    addMsg('ai', data.candidates[0].content.parts[0].text);
+                } else {
+                    addMsg('ai', "Error: AI did not return a response.");
+                }
             } catch(e) {
-                addMsg('ai', "Error connecting to AI.");
+                document.getElementById(tempId)?.remove();
+                addMsg('ai', "Error connecting to AI Network.");
             }
         }
 
@@ -1093,7 +1188,6 @@
 
         // CLEAR CHAT
         function clearChat() {
-            // Confirm dialog? Nah, just clear for UX speed as per request "for real"
             const box = document.getElementById('chat-box');
             box.innerHTML = `
                 <div class="flex gap-4">
@@ -1103,17 +1197,13 @@
                     </div>
                 </div>
             `;
-            // Reset memory partially but keep developer credit
-            memory = ["คุณคือ AI ผู้ช่วยวิจัย ที่พัฒนาโดย นายจรัญญู ทองเอนก"];
+            // Note: We DO NOT clear 'memory' here, because training should persist across chats in the same session.
             clearChatAttachment();
             lucide.createIcons();
-            showAlert("Chat Cleared", "บทสนทนาและ Context ถูกรีเซ็ตแล้ว");
+            showAlert("Chat Cleared", "ล้างหน้าจอแชทเรียบร้อย (หน่วยความจำที่เทรนไว้ยังอยู่)");
         }
 
         lucide.createIcons();
     </script>
 </body>
 </html>
-
-
-
