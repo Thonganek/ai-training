@@ -147,7 +147,7 @@
                 </button>
                 <button onclick="switchMode('templates')" id="btn-templates" class="tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
                     <i data-lucide="library" class="w-4 h-4"></i> 
-                    <span>Templates</span>
+                    <span>Templates Train AI</span>
                 </button>
                 <button onclick="switchMode('visual')" id="btn-visual" class="tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
                     <i data-lucide="scan-face" class="w-4 h-4"></i> 
@@ -256,10 +256,12 @@
                         <div class="flex items-center gap-2">
                             <!-- Response Source Selector -->
                             <div class="flex items-center bg-[var(--bg-main)] rounded-lg border border-[var(--border-color)] px-2 py-1">
-                                <span class="text-[10px] opacity-60 mr-2">Source:</span>
-                                <select id="chat-source" onchange="handleSourceChange(this)" class="bg-transparent text-xs font-bold outline-none cursor-pointer text-[var(--text-main)]">
-                                    <option value="api">🌐 General AI</option>
-                                    <option value="memory">🧠 Trained Memory</option>
+                                <span class="text-[10px] opacity-60 mr-2">กรุณาเลือก Source:</span>
+                                <select id="chat-source" onchange="handleSourceChange(this)" class="bg-transparent text-xs font-bold outline-none cursor-pointer text-[var(--text-main)] max-w-[150px]">
+                                    <option value="api">1. 🌐 General AI</option>
+                                    <option value="hybrid">2. 🧠 Trained Memory (Hybrid)</option>
+                                    <option value="strict">3. 🔒 Only Data Training</option>
+                                    <option value="offline">4. 🚫 Offline Logic (No API)</option>
                                 </select>
                             </div>
 
@@ -298,7 +300,7 @@
                             <!-- Supports all files -->
                             <input type="file" id="chat-file-upload" class="hidden" onchange="handleChatFileSelect(this)">
                             
-                            <input type="text" id="user-input" class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all" placeholder="ถามคำถามวิจัย... (แนบไฟล์ได้)">
+                            <input type="text" id="user-input" class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all" placeholder="ถามคำถามวิจัยทั่วไป (General Knowledge)...">
                             <button type="submit" class="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500"><i data-lucide="send" class="w-5 h-5"></i></button>
                         </form>
                     </div>
@@ -1201,16 +1203,24 @@
         // --- NEW: HANDLE SOURCE CHANGE ---
         function handleSourceChange(select) {
             const input = document.getElementById('user-input');
-            if (select.value === 'memory') {
-                input.placeholder = "ถามคำถามเฉพาะข้อมูลที่เทรนมา (Strict Mode)...";
+            input.className = "flex-1 bg-[var(--bg-main)] border rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all"; // reset class
+            
+            if (select.value === 'hybrid') {
+                input.placeholder = "ถามแบบผสมผสาน (AI + Memory)...";
+                input.classList.add('border-blue-500');
+            } else if (select.value === 'strict') {
+                input.placeholder = "ถามเจาะจงเฉพาะข้อมูลที่เทรน (Strict Mode)...";
                 input.classList.add('border-emerald-500');
+            } else if (select.value === 'offline') {
+                input.placeholder = "ค้นหาคำเป๊ะๆ จาก Memory (ไม่ใช้ AI)...";
+                input.classList.add('border-slate-500');
             } else {
                 input.placeholder = "ถามคำถามวิจัยทั่วไป (General Knowledge)...";
-                input.classList.remove('border-emerald-500');
+                input.classList.add('border-[var(--border-color)]');
             }
         }
 
-        // --- CHAT LOGIC (UPDATED FOR REAL MEMORY MODE + CORRECTION) ---
+        // --- CHAT LOGIC (UPDATED FOR 3 MODES) ---
         async function handleChatSubmit(e) {
             e.preventDefault();
             const input = document.getElementById('user-input');
@@ -1237,7 +1247,7 @@
             clearChatAttachment(); // Reset attachment
             
             // --- STRICT MEMORY CHECK ---
-            if(source === 'memory') {
+            if(source !== 'api') { // Check for both hybrid and strict
                 if(memory.length <= 1) {
                      setTimeout(() => {
                          addMsg('ai', `⚠️ <b>Memory Empty:</b> ระบบยังไม่มีข้อมูลที่ถูกเทรนเข้ามาในหน่วยความจำครับ<br><br>กรุณาไปที่แถบ <b>"Text Research"</b> ด้านซ้าย หรือ <b>"Templates"</b> แล้วนำเข้าข้อมูลก่อนครับ`);
@@ -1246,13 +1256,51 @@
                 }
             }
 
+            // --- 4. OFFLINE LOGIC (NO API) ---
+            if (source === 'offline') {
+                // Show simplified processing UI
+                const tempId = "thinking-" + Date.now();
+                const box = document.getElementById('chat-box');
+                const div = document.createElement('div');
+                div.id = tempId;
+                div.className = "flex gap-4";
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0"><i data-lucide="cpu" class="w-4 h-4 text-white"></i></div>
+                    <div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2">
+                        <i data-lucide="search" class="w-3 h-3 animate-bounce"></i> Searching Local Memory...
+                    </div>
+                `;
+                box.appendChild(div);
+                box.scrollTop = box.scrollHeight;
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    document.getElementById(tempId).remove();
+                    
+                    // Simple logic: Keyword Search
+                    const keywords = contextMsg.toLowerCase().split(/[\s,]+/); // Split by space
+                    const results = memory.filter(doc => {
+                        // Check if ANY keyword (longer than 2 chars) exists in the doc
+                        return keywords.some(k => k.length > 2 && doc.toLowerCase().includes(k));
+                    });
+
+                    if (results.length > 0) {
+                        const content = results.map(r => `> ${r.substring(0, 150)}...`).join('\n\n');
+                        addMsg('ai', `<b>[OFFLINE MODE]</b> พบข้อมูลที่ตรงกับคำค้นหา ${results.length} รายการครับ:\n\n${content}\n\n*ระบบนี้แสดงผลการค้นหาตามคำเป๊ะๆ (Keyword Matching) ไม่ได้ใช้สมอง AI เรียบเรียงครับ*`);
+                    } else {
+                        addMsg('ai', `<b>[OFFLINE MODE]</b> ไม่พบข้อมูลที่ตรงกันใน Memory ครับ\n\nโหมดนี้ทำงานโดยการหา "คำที่เหมือนกันเป๊ะๆ" เท่านั้น ลองใช้คำค้นหาที่มีใน Template ดูครับ เช่น "งานวิจัย", "สถิติ", "Mean"`);
+                    }
+                }, 800); // Fake delay
+                
+                return; // Stop here! Don't call API.
+            }
+
             // Prompt Engineering
             let prompt = "";
+            const context = memory.join('\n\n--- NEXT DOCUMENT ---\n\n');
 
-            if(source === 'memory') {
-                // RAG Simulation (Strict Context)
-                const context = memory.join('\n\n--- NEXT DOCUMENT ---\n\n');
-                
+            if(source === 'strict') {
+                // STRICT RAG
                 prompt = `
 You are a strict research assistant AI.
 Your Goal: Answer the user question using ONLY the provided CONTEXT below.
@@ -1260,6 +1308,25 @@ Constraints:
 1. Do NOT use your own outside knowledge.
 2. If the answer is not found in the CONTEXT, you MUST say: "ขออภัยครับ ไม่พบข้อมูลนี้ในหน่วยความจำที่คุณเทรนมา (Not found in Trained Memory)."
 3. Answer in Thai language primarily.
+
+CONTEXT:
+${context}
+
+USER QUESTION:
+${contextMsg}
+
+ANSWER:`;
+
+            } else if (source === 'hybrid') {
+                // HYBRID RAG
+                prompt = `
+You are a smart research assistant AI.
+Your Goal: Answer the user question.
+Instructions:
+1. Use the provided CONTEXT below as your primary source of truth.
+2. You CAN use your own general knowledge to explain terms, fill in gaps, or make the answer smoother.
+3. If the context conflicts with general knowledge, prefer the context.
+4. Answer in Thai language primarily.
 
 CONTEXT:
 ${context}
