@@ -608,13 +608,18 @@
     </div>
 
     <script>
+        // ใส่ API Key ของคุณที่นี่ (จะวนใช้ทีละตัวถ้าตัวก่อนหน้าใช้ไม่ได้)
         const API_KEYS = [
-            "AIzaSyATWMM_E0icR3lIUX-88DS3hGw2RGrA4Wo",
+            "AIzaSyDwEO11lXEehpjPA3K-xRLj2LkxnsTI2mw",
             "AIzaSyAXn2RnKle5RdJsD74PHVQbQAcOkPffkb4",
+            "AIzaSyBLUrqgqMoJ0hIwft5l-RjSTvOvo0QlSlU",
+            "AIzaSyCcr-1DrCu2unZMdXVULUqbDgIVXDbAWw8",
+            "AIzaSyATWMM_E0icR3lIUX-88DS3hGw2RGrA4Wo",
             "AIzaSyAuGmhGGfVIgdcBS-bDPu06I_fQpIy2Sng",
             "AIzaSyBW_DCpCRdME_d1oT8PmsppdDDxNcPRq84",
             "AIzaSyB--mv-d2ps80wX8ANivxVPD9VEc3AE4dE"
         ];
+        
         let currentKeyIndex = 0;
         
         // Initial Memory with Developer Credit
@@ -1062,7 +1067,7 @@
         function calculateSimilarity(pixels1, pixels2) {
             let diff = 0;
             for (let i = 0; i < pixels1.length; i += 4) {
-                diff += Math.abs(pixels1[i] - pixels2[i]);      // R
+                diff += Math.abs(pixels1[i] - pixels2[i]);       // R
                 diff += Math.abs(pixels1[i+1] - pixels2[i+1]); // G
                 diff += Math.abs(pixels1[i+2] - pixels2[i+2]); // B
             }
@@ -1220,41 +1225,67 @@
             }
         }
 
-        // --- API CALL FUNCTION WITH ROTATION ---
-        async function callGeminiAPI(payload) {
+        // --- NEW: SMART API KEY ROTATION WITH FEEDBACK ---
+        async function callGeminiAPI(payload, loadingId) {
             let lastError = null;
+            const startKeyIndex = currentKeyIndex; // Remember where we started
+
+            // Loop through ALL keys, starting from current one
             for (let i = 0; i < API_KEYS.length; i++) {
-                const apiKey = API_KEYS[currentKeyIndex];
+                // Calculate actual index (wrapping around array)
+                const actualIndex = (startKeyIndex + i) % API_KEYS.length;
+                const apiKey = API_KEYS[actualIndex];
+
                 try {
+                    // Update UI to show current attempt
+                    if (loadingId) {
+                        const loadingElem = document.querySelector(`#${loadingId} .glass-panel`);
+                        if (loadingElem) {
+                             loadingElem.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Processing... (Using Key #${actualIndex + 1})`;
+                             lucide.createIcons();
+                        }
+                    }
+
+                    // Attempt Fetch
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                         method: 'POST', 
                         headers: {'Content-Type':'application/json'},
                         body: JSON.stringify(payload)
                     });
 
-                    // Check for Quota Exceeded (429)
+                    // Check for Quota Exceeded (429) or other errors
                     if (res.status === 429) {
-                        console.warn(`⚠️ Key index ${currentKeyIndex} exceeded quota. Rotating to next key...`);
-                        currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
-                        lastError = new Error("Quota exceeded");
-                        continue; // Retry loop with new key
+                        throw new Error("Quota Exceeded (429)");
                     }
-
                     if (!res.ok) {
                         const errData = await res.json().catch(() => ({}));
                         throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
                     }
 
-                    return await res.json(); // Success!
+                    // If SUCCESS: Update global index to stick with this good key for next time
+                    currentKeyIndex = actualIndex; 
+                    return await res.json(); // Return data immediately
 
                 } catch (e) {
                     lastError = e;
-                    if (!e.message.includes("Quota") && !e.message.includes("429")) {
-                        throw e; // Non-quota error, fail immediately
+                    console.warn(`Key #${actualIndex + 1} failed: ${e.message}`);
+                    
+                    // SHOW ERROR MESSAGE ON UI BEFORE SWITCHING
+                    if (loadingId) {
+                        const loadingElem = document.querySelector(`#${loadingId} .glass-panel`);
+                        if (loadingElem) {
+                            loadingElem.innerHTML = `<span class="text-orange-400 font-bold"><i data-lucide="alert-triangle" class="w-3 h-3 inline"></i> Key #${actualIndex + 1} Failed! Switching...</span>`;
+                            lucide.createIcons();
+                        }
                     }
+                    
+                    // Small delay to let user see the error message
+                    await new Promise(resolve => setTimeout(resolve, 1500));
                 }
             }
-            throw new Error(`System Busy: All 5 API keys are exhausted. (${lastError?.message})`);
+
+            // If loop finishes without success
+            throw new Error(`System Busy: All ${API_KEYS.length} keys failed. Last error: ${lastError?.message}`);
         }
 
         // --- CHAT LOGIC (UPDATED WITH TOKEN CONTROL) ---
@@ -1282,14 +1313,14 @@
             
             if(source !== 'api') {
                 if(memory.length <= 1) {
-                     setTimeout(() => {
-                         addMsg('ai', `⚠️ <b>Memory Empty:</b> ระบบยังไม่มีข้อมูลที่ถูกเทรนเข้ามาในหน่วยความจำครับ<br><br>กรุณาไปที่แถบ <b>"Text Research"</b> ด้านซ้าย หรือ <b>"Templates"</b> แล้วนำเข้าข้อมูลก่อนครับ`);
-                     }, 500);
-                     return;
+                      setTimeout(() => {
+                          addMsg('ai', `⚠️ <b>Memory Empty:</b> ระบบยังไม่มีข้อมูลที่ถูกเทรนเข้ามาในหน่วยความจำครับ<br><br>กรุณาไปที่แถบ <b>"Text Research"</b> ด้านซ้าย หรือ <b>"Templates"</b> แล้วนำเข้าข้อมูลก่อนครับ`);
+                      }, 500);
+                      return;
                 }
             }
 
-            // ... Offline Logic Block (Same as before) ...
+            // ... Offline Logic Block ...
             if (source === 'offline') {
                 const tempId = "thinking-" + Date.now();
                 const box = document.getElementById('chat-box');
@@ -1347,7 +1378,7 @@
                 const div = document.createElement('div');
                 div.id = tempId;
                 div.className = "flex gap-4";
-                div.innerHTML = `<div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div><div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2"><i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Processing...</div>`;
+                div.innerHTML = `<div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div><div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2"><i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Initializing...</div>`;
                 box.appendChild(div);
                 box.scrollTop = box.scrollHeight;
                 lucide.createIcons();
@@ -1361,7 +1392,8 @@
                     }
                 };
 
-                const data = await callGeminiAPI(payload);
+                // Pass tempId to update UI
+                const data = await callGeminiAPI(payload, tempId);
                 
                 document.getElementById(tempId).remove();
 
@@ -1374,8 +1406,9 @@
                     addMsg('ai', `Error: AI did not return a response. <br><span class="text-xs text-red-300 opacity-80">${detail}</span>`);
                 }
             } catch(e) {
-                document.getElementById("thinking-" + Date.now())?.remove(); // Cleanup attempt
-                addMsg('ai', `Error connecting to AI Network: ${e.message}`);
+                // Find all thinking bubbles and remove them
+                document.querySelectorAll('[id^="thinking-"]').forEach(el => el.remove());
+                addMsg('ai', `<span class="text-red-400 font-bold">Connection Failed:</span> ${e.message}`);
             }
         }
 
