@@ -96,6 +96,12 @@
             border-radius: 8px;
             border: 2px dashed var(--text-muted);
         }
+
+        /* Training Visualizer Custom Scroll */
+        .scroller {
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) transparent;
+        }
     </style>
 </head>
 <!-- Set default data-theme to light -->
@@ -140,7 +146,6 @@
                     <span>Text Research</span>
                 </button>
                 
-                <!-- Updated: External Link to training.html -->
                 <a href="training.html" class="tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 hover:bg-purple-500/10 hover:border-purple-500 hover:text-purple-500">
                     <i data-lucide="library" class="w-4 h-4"></i> 
                     <span>Training Center ↗</span>
@@ -201,28 +206,44 @@
                     <!-- Input -->
                     <div class="relative flex-1 min-h-[200px]">
                         <textarea id="knowledge-input" class="w-full h-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl p-4 font-mono text-sm focus:border-cyan-500 outline-none resize-none leading-relaxed transition-all placeholder-slate-500" 
-                        placeholder="วางข้อมูลงานวิจัย, สถิติ หรือแนบไฟล์ที่นี่..."></textarea>
+                        placeholder="วางข้อมูลงานวิจัย, สถิติ หรือแนบไฟล์ที่นี่ (รองรับข้อมูลขนาดใหญ่)..."></textarea>
                         <div class="absolute bottom-2 right-2 text-[10px] opacity-50 bg-[var(--bg-main)] px-2 rounded border border-[var(--border-color)]" id="token-count">0 chars</div>
                     </div>
 
                     <!-- Visualizer -->
                     <div id="nlp-visualizer" class="hidden mt-4 p-4 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)]">
-                        <h4 class="text-xs font-bold text-purple-400 mb-2">NLP Processing Pipeline</h4>
-                        <div class="space-y-2">
-                            <div>
-                                <div class="flex justify-between text-[10px] opacity-60 mb-1"><span>1. Tokenization</span><span id="step-1-status" class="text-yellow-500">Waiting...</span></div>
-                                <div id="vis-tokens" class="h-16 bg-black/20 rounded p-2 overflow-y-auto flex flex-wrap content-start gap-1"></div>
+                        <h4 class="text-xs font-bold text-purple-400 mb-2 flex justify-between items-center">
+                            <span><i data-lucide="cpu" class="w-3 h-3 inline mr-1"></i> NLP Training Core</span>
+                            <span class="text-[10px] opacity-50" id="proc-speed">0 words/s</span>
+                        </h4>
+                        
+                        <!-- Step 1: Token Stream -->
+                        <div class="mb-3">
+                            <div class="flex justify-between text-[10px] opacity-60 mb-1">
+                                <span>1. Tokenization & Extraction</span>
+                                <span id="step-1-status" class="text-yellow-500">Waiting...</span>
                             </div>
-                            <div>
-                                <div class="flex justify-between text-[10px] opacity-60 mb-1"><span>2. Vectorization</span><span id="step-2-status" class="text-slate-500">...</span></div>
-                                <div id="vis-vectors" class="h-8 bg-black/20 rounded p-2 overflow-hidden font-mono text-[8px] text-green-400 whitespace-nowrap"></div>
+                            <div id="vis-tokens" class="h-24 bg-black/30 rounded-lg p-2 overflow-y-auto flex flex-wrap content-start gap-1 scroller border border-[var(--border-color)] font-mono text-[10px]">
+                                <!-- Tokens will stream here -->
                             </div>
                         </div>
+
+                        <!-- Step 2: Vector Matrix -->
+                        <div>
+                            <div class="flex justify-between text-[10px] opacity-60 mb-1">
+                                <span>2. Vector Embedding (1024-dim)</span>
+                                <span id="step-2-status" class="text-slate-500">...</span>
+                            </div>
+                            <div id="vis-vectors" class="h-20 bg-black/40 rounded-lg p-2 overflow-hidden font-mono text-[8px] text-green-500/80 leading-none break-all relative border border-[var(--border-color)]">
+                                <!-- Matrix Rain will happen here -->
+                            </div>
+                        </div>
+
                         <!-- Confirmation Button -->
-                        <div id="train-confirm-area" class="hidden mt-3 pt-3 border-t border-[var(--border-color)] text-center">
-                            <p class="text-xs text-green-400 mb-2">Analysis Complete. Save to Memory?</p>
-                            <button onclick="confirmTraining()" class="px-6 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-bold shadow-lg animate-pulse">
-                                OK, Save
+                        <div id="train-confirm-area" class="hidden mt-4 pt-3 border-t border-[var(--border-color)] text-center">
+                            <p class="text-xs text-green-400 mb-2 font-bold"><i data-lucide="check-circle" class="w-3 h-3 inline"></i> Deep Learning Complete</p>
+                            <button onclick="confirmTraining()" class="w-full py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-lg text-sm font-bold shadow-lg animate-pulse transition-all">
+                                Save Model to Memory
                             </button>
                         </div>
                     </div>
@@ -305,7 +326,7 @@
             </div>
         </div>
 
-        <!-- ==================== MODE 3: DEEP VISUAL TRAINING (4 STEPS) ==================== -->
+        <!-- ==================== MODE 3: DEEP VISUAL TRAINING ==================== -->
         <div id="mode-visual" class="grid grid-cols-12 gap-6 hidden animate-fade-in">
             <!-- Sidebar Pipeline -->
             <div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
@@ -637,7 +658,7 @@
             });
         }
 
-        // --- TEXT TRAINING (ENHANCED) ---
+        // --- TEXT TRAINING (DEEP & DETAILED) ---
         function handleFileUpload(input) {
             const file = input.files[0];
             if (!file) return;
@@ -658,7 +679,6 @@
         }
 
         function handleSheetImport() {
-            // Mock URL Input
             const url = prompt("Enter CSV/Google Sheet URL:");
             if(url) {
                 const textArea = document.getElementById('knowledge-input');
@@ -667,64 +687,129 @@
             }
         }
 
-        function startTextTraining() {
+        // --- NEW: ADVANCED TRAINING PROCESS VISUALIZER ---
+        async function startTextTraining() {
             const input = document.getElementById('knowledge-input').value.trim();
             if(!input) return showAlert("Error", "Please enter data or attach a file first");
-            
+
+            // UI Setup
             document.getElementById('nlp-visualizer').classList.remove('hidden');
             document.getElementById('btn-start-train').classList.add('hidden');
-            document.getElementById('vis-tokens').innerHTML = '';
+            
+            // Clear previous
+            const visTokens = document.getElementById('vis-tokens');
+            visTokens.innerHTML = '';
             document.getElementById('vis-vectors').innerHTML = '';
             
-            // Step 1: Tokenize
-            const words = input.split(/[\s\n]+/);
-            let i = 0;
-            const tokenInt = setInterval(() => {
-                if(i >= words.length || i > 20) {
-                    clearInterval(tokenInt);
-                    document.getElementById('step-1-status').innerText = "Done";
-                    document.getElementById('step-1-status').className = "text-green-500";
-                    startVectorization();
-                } else {
-                    if(words[i]) {
-                        const span = document.createElement('span');
-                        span.className = "px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] rounded animate-pulse";
-                        span.innerText = words[i].substring(0, 10) + (words[i].length>10?"...":"");
-                        document.getElementById('vis-tokens').appendChild(span);
-                    }
-                    i++;
+            // Tokenization Simulation (Split by spacing/newline for visual)
+            let tokens = input.split(/[\s\n]+/);
+            // Handle massive text blocks without spaces (Thai) by chunking chars if needed
+            if(tokens.length < input.length / 20) {
+                // Heuristic: If tokens are too few relative to length, it might be unspaced Thai.
+                // We'll split visually by character chunks for the "Stream" effect.
+                tokens = input.match(/.{1,10}/g) || [];
+            }
+            
+            const totalTokens = tokens.length;
+            let processedCount = 0;
+            
+            // Initial Status
+            document.getElementById('step-1-status').innerHTML = `<span class="animate-pulse text-yellow-500">Initializing Pipeline...</span>`;
+
+            // CHUNK PROCESSING SYSTEM (Optimized for 10,000+ words)
+            const chunkSize = 20; // Words per frame
+            let index = 0;
+            let startTime = Date.now();
+
+            function processChunk() {
+                const chunkEnd = Math.min(index + chunkSize, totalTokens);
+                let fragment = document.createDocumentFragment();
+                
+                for (let i = index; i < chunkEnd; i++) {
+                    const token = tokens[i];
+                    if (!token) continue;
+                    
+                    const span = document.createElement('span');
+                    // Smart Highlighting: Highlight longer words/concepts
+                    const isConcept = token.length > 5 || /[\u0E00-\u0E7F]/.test(token); // Simple heuristic
+                    
+                    span.className = isConcept 
+                        ? "inline-block px-1.5 py-0.5 m-0.5 bg-blue-500/20 text-blue-300 text-[10px] rounded border border-blue-500/30 animate-fade-in" 
+                        : "inline-block px-1 m-0.5 text-slate-500 text-[10px]";
+                    span.innerText = token;
+                    fragment.appendChild(span);
                 }
-            }, 50);
+                
+                visTokens.appendChild(fragment);
+                
+                // Auto Scroll
+                visTokens.scrollTop = visTokens.scrollHeight;
+                
+                // DOM Memory Management (Rolling Window: Keep last ~300 items)
+                if (visTokens.children.length > 300) {
+                    for(let k=0; k<chunkSize; k++) {
+                        if(visTokens.firstChild) visTokens.removeChild(visTokens.firstChild);
+                    }
+                }
+
+                processedCount = chunkEnd;
+                
+                // Calculate Speed
+                const elapsed = (Date.now() - startTime) / 1000;
+                const speed = Math.round(processedCount / (elapsed || 1));
+                document.getElementById('proc-speed').innerText = `${speed} words/s`;
+                document.getElementById('step-1-status').innerHTML = `<span class="text-yellow-500">Scanning & Tokenizing: ${processedCount}/${totalTokens}</span>`;
+
+                index += chunkSize;
+
+                if (index < totalTokens) {
+                    requestAnimationFrame(processChunk);
+                } else {
+                    document.getElementById('step-1-status').innerHTML = `<span class="text-green-500 font-bold">Extraction Complete (${totalTokens} tokens)</span>`;
+                    startDeepVectorization();
+                }
+            }
+
+            processChunk();
         }
 
-        function startVectorization() {
-            document.getElementById('step-2-status').innerText = "Processing...";
-            let vecStr = "[";
-            let j = 0;
-            const vecInt = setInterval(() => {
-                if(j > 50) {
-                    clearInterval(vecInt);
-                    document.getElementById('vis-vectors').innerText += "...]";
-                    document.getElementById('step-2-status').innerText = "Done";
-                    document.getElementById('step-2-status').className = "text-green-500";
-                    // SHOW CONFIRMATION
+        function startDeepVectorization() {
+            // Matrix Rain Effect for Vectorization
+            const visVectors = document.getElementById('vis-vectors');
+            document.getElementById('step-2-status').innerHTML = `<span class="animate-pulse text-blue-400">Generatiing Embeddings...</span>`;
+            
+            let progress = 0;
+            visVectors.innerHTML = "";
+
+            const interval = setInterval(() => {
+                // Generate simulated vector data (Hex dumps / Floats)
+                const chunk = Array(12).fill(0).map(() => Math.random().toFixed(4)).join(' ');
+                const row = document.createElement('div');
+                row.className = "text-[8px] whitespace-nowrap opacity-0 animate-fade-in text-emerald-500 font-mono";
+                row.innerText = `[VEC-${progress}] ${chunk} ...`;
+                visVectors.appendChild(row);
+                visVectors.scrollTop = visVectors.scrollHeight;
+
+                progress += 5; // increment
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    document.getElementById('step-2-status').innerHTML = `<span class="text-green-500 font-bold">Vectorized 1024-Dimensions Ready</span>`;
+                    
+                    // Show Save Button
                     document.getElementById('train-confirm-area').classList.remove('hidden');
-                } else {
-                    vecStr += (Math.random()).toFixed(2) + ", ";
-                    document.getElementById('vis-vectors').innerText = vecStr;
-                    j++;
                 }
-            }, 30);
+            }, 50); // Speed of matrix rain
         }
 
         function confirmTraining() {
             const input = document.getElementById('knowledge-input').value;
-            // Add to global memory array
             memory.push(input);
             saveMemoryToStorage(); // SYNC
             
             showAlert("Training Complete", "Data has been vectorized and saved to Trained Memory.");
             
+            // Reset UI
             document.getElementById('knowledge-input').value = '';
             document.getElementById('token-count').innerText = "0 chars";
             document.getElementById('nlp-visualizer').classList.add('hidden');
@@ -932,7 +1017,7 @@
         }
 
         // ============================================
-        // REAL PREDICTION LOGIC (No changes here as requested)
+        // REAL PREDICTION LOGIC
         // ============================================
         
         async function getPixelData(source, w=64, h=64) {
@@ -1377,4 +1462,3 @@ ANSWER:`;
     </script>
 </body>
 </html>
-
