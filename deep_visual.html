@@ -14,7 +14,7 @@
         .glass-panel { background: var(--bg-panel); backdrop-filter: blur(12px); border: 1px solid var(--border-color); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
         .animate-float { animation: float 8s ease-in-out infinite; }
         @keyframes float { 0% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } 100% { transform: translate(0, 0px); } }
-        canvas#draw-canvas { background: white; cursor: crosshair; border-radius: 8px; border: 2px dashed var(--text-muted); }
+        canvas#draw-canvas { background: white; cursor: crosshair; border-radius: 8px; border: 2px dashed var(--text-muted); touch-action: none; }
         .step-card-active { border-color: var(--accent-color); background: rgba(14, 165, 233, 0.1); }
         .step-card-inactive { border-color: var(--border-color); background: transparent; }
         
@@ -22,6 +22,9 @@
         .matrix-font { font-family: 'JetBrains Mono', monospace; line-height: 1; letter-spacing: 2px; }
         .digit-0 { opacity: 0.3; }
         .digit-1 { opacity: 1; font-weight: bold; color: #4ade80; text-shadow: 0 0 5px rgba(74, 222, 128, 0.5); }
+
+        /* Tools */
+        input[type="range"] { accent-color: var(--accent-color); }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden" data-theme="light">
@@ -280,32 +283,68 @@
                         </div>
                     </div>
 
-                    <!-- Step 4: Inference -->
+                    <!-- Step 4: Inference (ENHANCED) -->
                     <div id="visual-content-4" class="w-full h-full hidden flex-col items-center">
                         <h3 class="text-xl font-bold mb-4 text-green-400">Test Model</h3>
-                        <div class="flex gap-2 mb-4 bg-[var(--bg-main)] p-1 rounded-lg border border-[var(--border-color)]">
+                        
+                        <!-- Mode Selectors -->
+                        <div class="flex gap-2 mb-6 bg-[var(--bg-main)] p-1 rounded-lg border border-[var(--border-color)]">
                             <button onclick="setInferMode('draw')" id="btn-infer-draw" class="px-4 py-1.5 rounded text-xs bg-white/10 font-bold">Draw</button>
                             <button onclick="setInferMode('upload')" id="btn-infer-upload" class="px-4 py-1.5 rounded text-xs hover:bg-white/5 opacity-60">Upload</button>
                             <button onclick="setInferMode('camera')" id="btn-infer-camera" class="px-4 py-1.5 rounded text-xs hover:bg-white/5 opacity-60">Camera</button>
                         </div>
-                        <div class="flex flex-col items-center w-full max-w-md">
-                            <div id="infer-draw" class="infer-panel">
-                                <canvas id="draw-canvas" width="250" height="250"></canvas>
-                                <button onclick="clearCanvas()" class="mt-2 text-xs text-red-400 hover:underline">Clear Canvas</button>
+
+                        <!-- LARGE INFERENCE CONTAINER -->
+                        <div class="flex flex-col items-center w-full max-w-3xl">
+                            
+                            <!-- DRAWING MODE with TOOLS -->
+                            <div id="infer-draw" class="infer-panel flex flex-col items-center gap-2">
+                                <!-- Drawing Tools -->
+                                <div class="flex items-center gap-4 bg-[var(--bg-panel)] p-2 rounded-xl border border-[var(--border-color)] mb-2 shadow-sm">
+                                    <div class="flex flex-col items-center">
+                                        <input type="color" id="draw-color" value="#000000" class="w-8 h-8 rounded cursor-pointer border-0 p-0 overflow-hidden" onchange="setTool('brush')">
+                                        <span class="text-[10px] opacity-60">Color</span>
+                                    </div>
+                                    <div class="h-8 w-px bg-[var(--border-color)]"></div>
+                                    <div class="flex flex-col items-center w-24">
+                                        <input type="range" id="draw-size" min="1" max="50" value="10" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                        <span class="text-[10px] opacity-60">Size: <span id="size-val">10</span>px</span>
+                                    </div>
+                                    <div class="h-8 w-px bg-[var(--border-color)]"></div>
+                                    <button onclick="setTool('eraser')" id="tool-eraser" class="p-2 rounded hover:bg-black/5 opacity-50 transition-all text-[var(--text-main)]" title="Eraser">
+                                        <i data-lucide="eraser" class="w-5 h-5"></i>
+                                    </button>
+                                    <button onclick="setTool('brush')" id="tool-brush" class="p-2 rounded hover:bg-black/5 bg-blue-500/20 text-blue-500 transition-all" title="Brush">
+                                        <i data-lucide="pencil" class="w-5 h-5"></i>
+                                    </button>
+                                    <div class="h-8 w-px bg-[var(--border-color)]"></div>
+                                    <button onclick="clearCanvas()" class="p-2 rounded hover:bg-red-500/10 text-red-500 transition-all" title="Clear All">
+                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Large Canvas -->
+                                <canvas id="draw-canvas" width="500" height="500" class="max-w-full bg-white shadow-inner border border-slate-200"></canvas>
                             </div>
-                            <div id="infer-upload" class="infer-panel hidden flex-col items-center justify-center w-[250px] h-[250px] border-2 border-dashed border-[var(--border-color)] rounded-lg">
+
+                            <!-- UPLOAD MODE (Upsized) -->
+                            <div id="infer-upload" class="infer-panel hidden flex-col items-center justify-center w-[500px] h-[500px] max-w-full border-2 border-dashed border-[var(--border-color)] rounded-2xl bg-[var(--bg-main)]/30">
                                 <input type="file" id="test-image-upload" class="hidden" onchange="handleTestImage(this)">
-                                <button onclick="document.getElementById('test-image-upload').click()" class="flex flex-col items-center opacity-60 hover:opacity-100">
-                                    <i data-lucide="image-plus" class="w-8 h-8 mb-2"></i>
-                                    <span class="text-xs">Select Image</span>
+                                <button onclick="document.getElementById('test-image-upload').click()" class="flex flex-col items-center opacity-60 hover:opacity-100 transition-opacity">
+                                    <i data-lucide="image-plus" class="w-16 h-16 mb-4 text-[var(--text-muted)]"></i>
+                                    <span class="text-sm font-bold text-[var(--text-muted)]">Click to Select Image</span>
                                 </button>
-                                <img id="test-preview" class="hidden w-full h-full object-cover rounded-lg">
+                                <img id="test-preview" class="hidden w-full h-full object-contain rounded-2xl">
                             </div>
+
+                            <!-- CAMERA MODE (Upsized) -->
                             <div id="infer-camera" class="infer-panel hidden flex-col items-center">
-                                <div class="w-[250px] h-[250px] bg-black rounded-lg overflow-hidden relative">
+                                <div class="w-[500px] h-[375px] max-w-full bg-black rounded-2xl overflow-hidden relative shadow-lg">
                                     <video id="webcam" autoplay playsinline class="w-full h-full object-cover"></video>
                                     <div class="absolute inset-0 flex items-center justify-center" id="cam-placeholder">
-                                        <button onclick="startCamera()" class="px-4 py-2 bg-blue-600 rounded text-xs text-white">Start Camera</button>
+                                        <button onclick="startCamera()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-bold flex items-center gap-2">
+                                            <i data-lucide="camera"></i> Start Camera
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -497,7 +536,7 @@
         }, 200); // Slower interval to see the images change
     }
 
-    // --- Inference & Popup Logic ---
+    // --- Inference & Popup Logic (Enhanced) ---
 
     function setInferMode(mode) {
         document.querySelectorAll('.infer-panel').forEach(p => p.classList.add('hidden'));
@@ -517,36 +556,109 @@
         });
     }
 
+    // Drawing State
+    let isEraser = false;
+    let currentCtx = null;
+
     function initCanvas() {
         const canvas = document.getElementById('draw-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "white";
-        ctx.fillRect(0,0,250,250);
+        currentCtx = canvas.getContext('2d');
+        
+        // White background
+        currentCtx.fillStyle = "white";
+        currentCtx.fillRect(0,0, canvas.width, canvas.height);
         
         let painting = false;
-        function startPosition(e) { painting = true; draw(e); }
-        function finishedPosition() { painting = false; ctx.beginPath(); }
+        
+        // Tools Listener
+        const sizeSlider = document.getElementById('draw-size');
+        sizeSlider.addEventListener('input', (e) => {
+            document.getElementById('size-val').innerText = e.target.value;
+        });
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            // Handle touch events too
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            // Adjust for canvas scaling in CSS
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function startPosition(e) { 
+            e.preventDefault(); 
+            painting = true; 
+            draw(e); 
+        }
+        function finishedPosition() { 
+            painting = false; 
+            currentCtx.beginPath(); 
+        }
         function draw(e) {
             if(!painting) return;
-            const rect = canvas.getBoundingClientRect();
-            ctx.lineWidth = 10;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = 'black';
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+            e.preventDefault();
+            
+            const pos = getPos(e);
+            
+            const color = document.getElementById('draw-color').value;
+            const size = document.getElementById('draw-size').value;
+
+            currentCtx.lineWidth = size;
+            currentCtx.lineCap = 'round';
+            currentCtx.lineJoin = 'round';
+            currentCtx.strokeStyle = isEraser ? 'white' : color;
+            
+            currentCtx.lineTo(pos.x, pos.y);
+            currentCtx.stroke();
+            currentCtx.beginPath();
+            currentCtx.moveTo(pos.x, pos.y);
         }
+
+        // Mouse Events
         canvas.addEventListener('mousedown', startPosition);
         canvas.addEventListener('mouseup', finishedPosition);
         canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseleave', finishedPosition);
+
+        // Touch Events
+        canvas.addEventListener('touchstart', startPosition);
+        canvas.addEventListener('touchend', finishedPosition);
+        canvas.addEventListener('touchmove', draw);
+    }
+
+    function setTool(tool) {
+        const btnBrush = document.getElementById('tool-brush');
+        const btnEraser = document.getElementById('tool-eraser');
+        
+        if (tool === 'eraser') {
+            isEraser = true;
+            btnEraser.classList.remove('opacity-50');
+            btnEraser.classList.add('bg-blue-500/20', 'text-blue-500');
+            
+            btnBrush.classList.add('opacity-50');
+            btnBrush.classList.remove('bg-blue-500/20', 'text-blue-500');
+        } else {
+            isEraser = false;
+            btnBrush.classList.remove('opacity-50');
+            btnBrush.classList.add('bg-blue-500/20', 'text-blue-500');
+            
+            btnEraser.classList.add('opacity-50');
+            btnEraser.classList.remove('bg-blue-500/20', 'text-blue-500');
+        }
     }
 
     function clearCanvas() {
         const canvas = document.getElementById('draw-canvas');
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = "white";
-        ctx.fillRect(0,0,250,250);
+        ctx.fillRect(0,0, canvas.width, canvas.height);
     }
 
     async function startCamera() {
@@ -567,6 +679,8 @@
                 const img = document.getElementById('test-preview');
                 img.src = e.target.result;
                 img.classList.remove('hidden');
+                // Hide the upload prompt
+                input.nextElementSibling.classList.add('hidden');
             };
             reader.readAsDataURL(file);
         }
