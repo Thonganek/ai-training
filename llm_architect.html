@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Architect By TON Pro: Hybrid AI Suite</title>
+    <title>LLM Architect Pro: Hybrid AI Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -139,12 +139,17 @@
                     <i data-lucide="network" class="w-6 h-6 text-white"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight">LLM Architect By TON <span class="text-xs align-top px-1.5 py-0.5 bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] rounded border border-[var(--accent-primary)]/30">PRO</span></h1>
+                    <h1 class="text-xl font-bold tracking-tight">LLM Architect <span class="text-xs align-top px-1.5 py-0.5 bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] rounded border border-[var(--accent-primary)]/30">PRO</span></h1>
                     <p class="text-xs text-[var(--text-muted)] font-mono">Hybrid AI Suite: Local N-Gram + Cloud LLM</p>
                 </div>
             </div>
             
             <div class="flex items-center gap-6">
+                <!-- Back to Home Button -->
+                <a href="index.html" class="flex items-center gap-2 px-4 py-2 bg-[var(--code-bg)] hover:bg-[var(--slider-bg)] border border-[var(--border-color)] rounded-lg text-xs font-bold transition-all text-[var(--text-muted)] hover:text-[var(--text-main)]">
+                    <i data-lucide="home" class="w-4 h-4"></i> Back to Home
+                </a>
+
                 <!-- Theme Selector -->
                 <div class="flex items-center gap-2 bg-[var(--code-bg)] rounded-lg px-2 py-1.5 border border-[var(--border-color)]">
                     <i data-lucide="palette" class="w-4 h-4 text-[var(--text-muted)]"></i>
@@ -229,21 +234,44 @@
                     </h2>
                     
                     <div class="space-y-6">
+                        <!-- N-Gram -->
                         <div class="space-y-2 pb-4 border-b border-[var(--border-color)]">
                             <div class="flex justify-between text-sm">
                                 <span class="text-[var(--text-muted)]">N-Gram Context (N)</span>
                                 <span id="val-ngram" class="font-mono" style="color: var(--accent-primary)">3</span>
                             </div>
                             <input type="range" id="param-ngram" min="2" max="5" value="3" class="control-slider" oninput="updateDisplay('val-ngram', this.value)">
-                            <p class="text-[10px] text-[var(--text-muted)] mt-1">จำนวนคำที่จำย้อนหลัง (Context Window)</p>
+                            <p class="text-[10px] text-[var(--text-muted)] mt-1">ขอบเขตการจำข้อมูลย้อนหลัง (History Window) ยิ่งมากประโยคยิ่งเชื่อมโยง</p>
                         </div>
 
+                        <!-- Temperature -->
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm">
                                 <span class="text-[var(--text-muted)]">Temperature (T)</span>
                                 <span id="val-temp" class="font-mono" style="color: var(--accent-secondary)">1.0</span>
                             </div>
                             <input type="range" id="param-temp" min="0.1" max="2.0" step="0.1" value="1.0" class="control-slider" oninput="updateDisplay('val-temp', this.value)">
+                            <p class="text-[10px] text-[var(--text-muted)] mt-1">ระดับความสร้างสรรค์ (ต่ำ = แม่นยำตามสูตร, สูง = สุ่มหลากหลาย)</p>
+                        </div>
+
+                        <!-- Top-K -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--text-muted)]">Top-K Sampling</span>
+                                <span id="val-topk" class="font-mono text-green-500">5</span>
+                            </div>
+                            <input type="range" id="param-topk" min="1" max="20" value="5" class="control-slider" oninput="updateDisplay('val-topk', this.value)">
+                            <p class="text-[10px] text-[var(--text-muted)] mt-1">ตัดตัวเลือกเหลือเฉพาะ K คำที่มีโอกาสสูงสุด (ลดคำมั่ว)</p>
+                        </div>
+
+                        <!-- Max Tokens -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--text-muted)]">Max Tokens</span>
+                                <span id="val-maxtokens" class="font-mono text-orange-400">50</span>
+                            </div>
+                            <input type="range" id="param-maxtokens" min="10" max="200" step="10" value="50" class="control-slider" oninput="updateDisplay('val-maxtokens', this.value)">
+                            <p class="text-[10px] text-[var(--text-muted)] mt-1">จำนวนคำสูงสุดที่จะสร้างต่อครั้ง</p>
                         </div>
                     </div>
                 </div>
@@ -271,6 +299,7 @@
                 <div class="glass-panel rounded-xl p-0 flex flex-col flex-1 min-h-[450px] overflow-hidden border-t-4 border-t-[var(--accent-primary)] relative">
                     <div class="p-4 border-b border-[var(--border-color)] flex flex-wrap justify-between items-center bg-[var(--bg-panel)] gap-3">
                         <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                            <i data-lucide="terminal-square" class="text-[var(--accent-primary)]"></i>
                             <input type="text" id="seed-input" class="flex-1 rounded px-3 py-2 text-sm font-mono transition-all focus:border-[var(--accent-primary)] outline-none" placeholder="Enter prompt...">
                         </div>
                         
@@ -308,6 +337,46 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+        <!-- TECHNICAL EXPLANATION SECTION -->
+        <div class="mt-8 glass-panel rounded-xl p-8 border border-[var(--border-color)]">
+            <h3 class="text-xl font-bold mb-6 pb-2 border-b border-[var(--border-color)] flex items-center gap-3">
+                <i data-lucide="book-open"></i> สถาปัตยกรรมทางเทคนิค (Technical Architecture)
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm leading-relaxed text-[var(--text-muted)]">
+                <div class="space-y-4">
+                    <h4 class="font-bold text-[var(--accent-primary)] text-base">1. ขั้นตอนการฝึกฝน (Training Phase - N-Gram)</h4>
+                    <p>ระบบใช้หลักการเรียนรู้เชิงสถิติ (Statistical Learning) แทนการใช้ Backpropagation แบบเครือข่ายประสาทเทียมขนาดใหญ่:</p>
+                    <ul class="list-disc pl-4 space-y-2 opacity-80">
+                        <li><strong>Tokenization:</strong> กระบวนการตัดคำและแปลงข้อความดิบให้เป็นหน่วยย่อย (Tokens) เพื่อให้คอมพิวเตอร์เข้าใจ</li>
+                        <li><strong>Markov Assumption:</strong> หลักการที่ว่า "คำถัดไป" ขึ้นอยู่กับ "ประวัติคำก่อนหน้า" จำนวน N คำเท่านั้น (Context Window)</li>
+                        <li><strong>MLE:</strong> การคำนวณหาความน่าจะเป็นสูงสุดจากการนับความถี่ที่คำต่างๆ ปรากฏคู่กันในชุดข้อมูล (Corpus)</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="font-bold text-[var(--accent-secondary)] text-base">2. ตรรกะการสุ่มเลือกคำ (Sampling Logic)</h4>
+                    <p>ใช้วิธีการสุ่มเลือกคำถัดไปโดยใช้น้ำหนักความน่าจะเป็น (Weighted Random Sampling):</p>
+                    <div class="bg-[var(--code-bg)] p-3 rounded border border-[var(--border-color)] font-mono text-xs opacity-90">
+                        P(w_i) = exp(logit_i / T) / Σ
+                    </div>
+                    <ul class="list-disc pl-4 space-y-2 opacity-80">
+                        <li><strong>Temperature ($T$):</strong> ตัวแปรควบคุมความ "กระจาย" ของความน่าจะเป็น ค่า $T$ ต่ำจะทำให้ผลลัพธ์แม่นยำและซ้ำเดิม, ค่า $T$ สูงจะเพิ่มความหลากหลาย (Creative)</li>
+                        <li><strong>Top-K:</strong> เทคนิคการตัดหางแถว โดยเลือกเฉพาะ K คำที่มีโอกาสสูงสุด เพื่อกำจัดคำที่ดูไร้เหตุผลออกไป</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="font-bold text-orange-400 text-base">3. การแสดงผลเชิงภาพ (Visualization)</h4>
+                    <p>การจำลองการทำงานของการส่งสัญญาณประสาท (Neural Signal Propagation):</p>
+                    <ul class="list-disc pl-4 space-y-2 opacity-80">
+                        <li><strong>Nodes (โหนด):</strong> ตัวแทนจำลองของกลุ่มเซลล์ประสาท (Neuron Clusters) ในแต่ละชั้น (Layer)</li>
+                        <li><strong>Signals (สัญญาณ):</strong> ภาพเคลื่อนไหวที่แสดงถึงข้อมูลที่กำลังไหลผ่านเครือข่าย (Forward Pass) ในขณะที่ระบบกำลังประมวลผลคำตอบ</li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -517,10 +586,6 @@
         } else {
             txt.innerText = `Medium Corpus (${size} words). Recommending N=3, Temp=1.0 (Balanced).`;
         }
-        
-        // Auto-set sliders (visual cue)
-        // $('param-ngram').value = recN;
-        // $('param-temp').value = recTemp;
     }
 
     // --- 4. CORE FUNCTIONS ---
@@ -569,9 +634,18 @@
         const textColor = style.getPropertyValue('--text-main').trim();
 
         // Determine Max Tokens
+        // Prefer slider for Local Mode, Dropdown for Cloud Mode or fallback
         let maxTokens = 50;
-        if (lengthSetting === 'short') maxTokens = 20;
-        if (lengthSetting === 'long') maxTokens = 150;
+        
+        if ($('param-maxtokens')) {
+            // If slider exists (Local mode visible), use it
+             maxTokens = parseInt($('param-maxtokens').value);
+        } else {
+             // Fallback to dropdown
+             if (lengthSetting === 'short') maxTokens = 20;
+             if (lengthSetting === 'medium') maxTokens = 50;
+             if (lengthSetting === 'long') maxTokens = 150;
+        }
 
         $('teach-overlay').classList.add('hidden'); // Reset teach button
 
@@ -617,7 +691,11 @@
         }
 
         const temp = parseFloat($('param-temp').value);
-        const topK = 5; // Fixed reasonable topK for local
+        
+        // Get topK from slider
+        const topKInput = $('param-topk');
+        const topK = topKInput ? parseInt(topKInput.value) : 5;
+        
         const n = parseInt($('param-ngram').value);
 
         outputConsole.innerHTML = `<span style="color: ${accentColor}; font-weight: bold;">${seed}</span>`;
@@ -661,7 +739,6 @@
     }
 
     // --- 5. VISUALIZATION & INIT ---
-    // (Reusing the robust visualizer from previous version)
     function initNetwork() {
         if (!canvas) return;
         nodes = []; connections = [];
@@ -735,9 +812,7 @@
         const start = inputs[Math.floor(Math.random() * inputs.length)];
         start.active = 1;
         const nextLinks = connections.filter(c => c.from === start);
-        if (nextLinks.length > 0) signals.push({ from: link.from, to: link.to, progress: 0 }); // Note: minor fix in logic needed here but functionality visually mostly ok
-        // Fix for trigger signal logic
-         if (nextLinks.length > 0) {
+        if (nextLinks.length > 0) {
             const link = nextLinks[Math.floor(Math.random() * nextLinks.length)];
             signals.push({ from: link.from, to: link.to, progress: 0 });
         }
