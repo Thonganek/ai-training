@@ -3,302 +3,666 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Architect - AI Training Suite</title>
+    <title>LLM Architect By TON Pro: Advanced AI Training Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Fonts for Professional/Coding Look -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-main: #f8fafc; --bg-panel: rgba(255, 255, 255, 0.9); --text-main: #0f172a; --text-muted: #64748b; --border-color: rgba(0, 0, 0, 0.1); --accent-color: #0284c7; }
-        [data-theme="dark"] { --bg-main: #020617; --bg-panel: rgba(15, 23, 42, 0.6); --text-main: #e2e8f0; --text-muted: #94a3b8; --border-color: rgba(255, 255, 255, 0.08); --accent-color: #0ea5e9; }
-        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: background-color 0.5s, color 0.5s; }
-        .glass-panel { background: var(--bg-panel); backdrop-filter: blur(12px); border: 1px solid var(--border-color); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
-        .animate-float { animation: float 8s ease-in-out infinite; }
-        @keyframes float { 0% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } 100% { transform: translate(0, 0px); } }
+        /* Define Themes */
+        body[data-theme="midnight"] {
+            --bg-main: #0f172a;
+            --bg-panel: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-heading: #f8fafc;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --code-bg: #020617;
+            --console-bg: #050505;
+            --nav-bg: rgba(15, 23, 42, 0.9);
+            --slider-bg: #334155;
+            --bg-gradient: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 20%),
+                           radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 20%);
+        }
+
+        body[data-theme="matrix"] {
+            --bg-main: #000000;
+            --bg-panel: rgba(0, 20, 0, 0.8);
+            --text-main: #22c55e;
+            --text-muted: #15803d;
+            --text-heading: #4ade80;
+            --accent-primary: #22c55e;
+            --accent-secondary: #16a34a;
+            --border-color: rgba(34, 197, 94, 0.3);
+            --code-bg: #020602;
+            --console-bg: #000000;
+            --nav-bg: rgba(0, 10, 0, 0.95);
+            --slider-bg: #14532d;
+            --bg-gradient: radial-gradient(circle at 50% 50%, rgba(34, 197, 94, 0.05) 0%, transparent 50%);
+        }
+
+        body[data-theme="lab"] {
+            --bg-main: #f1f5f9;
+            --bg-panel: rgba(255, 255, 255, 0.8);
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --text-heading: #0f172a;
+            --accent-primary: #2563eb;
+            --accent-secondary: #4f46e5;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --code-bg: #ffffff;
+            --console-bg: #e2e8f0;
+            --nav-bg: rgba(255, 255, 255, 0.9);
+            --slider-bg: #cbd5e1;
+            --bg-gradient: radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.05) 0%, transparent 20%);
+        }
+
+        body {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            background-image: var(--bg-gradient);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        .glass-panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Dynamic Slider */
+        .control-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--slider-bg);
+            border-radius: 5px;
+            outline: none;
+        }
+        .control-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            cursor: pointer;
+            transition: .2s;
+            box-shadow: 0 0 10px var(--accent-primary);
+        }
+        .control-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; opacity: 0.5; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+
+        .token-highlight { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Dynamic Text Colors */
+        h1, h2, h3, h4 { color: var(--text-heading); }
+        .text-slate-300 { color: var(--text-main) !important; }
+        .text-slate-400 { color: var(--text-muted) !important; }
+        
+        /* Input overrides */
+        input, textarea, select {
+            color: var(--text-main) !important;
+            background-color: var(--code-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+        
+        /* Navbar specific override */
+        nav { background: var(--nav-bg) !important; }
     </style>
 </head>
-<body class="min-h-screen overflow-x-hidden" data-theme="light">
-    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-pink-600/10 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
-    </div>
+<body class="min-h-screen overflow-x-hidden selection:bg-blue-500 selection:text-white" data-theme="midnight">
 
-    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <a href="index.html" class="p-2.5 bg-gradient-to-br from-purple-500 to-pink-400 rounded-xl shadow-lg"><i data-lucide="brain-circuit" class="w-6 h-6 text-white"></i></a>
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 border-b border-[var(--border-color)] glass-panel transition-colors duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="p-2 bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded-lg shadow-lg">
+                    <i data-lucide="network" class="w-6 h-6 text-white"></i>
+                </div>
                 <div>
-                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">LLM Architect</h1>
-                    <p class="text-[10px] opacity-60">สร้าง Neural Network สำหรับ Text Generation</p>
+                    <h1 class="text-xl font-bold tracking-tight">LLM Architect <span class="text-xs align-top px-1.5 py-0.5 bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] rounded border border-[var(--accent-primary)]/30">PRO</span></h1>
+                    <p class="text-xs text-[var(--text-muted)] font-mono">Neural Network & Stochastic Modeling Suite</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <div class="flex bg-[var(--bg-main)] rounded-lg p-1 border border-[var(--border-color)]">
-                    <button onclick="setTheme('dark')" class="p-1.5 rounded hover:bg-slate-800 hover:text-white text-[var(--text-muted)]"><i data-lucide="moon" class="w-4 h-4"></i></button>
-                    <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]"><i data-lucide="sun" class="w-4 h-4"></i></button>
+            
+            <div class="flex items-center gap-6">
+                <!-- Theme Selector -->
+                <div class="flex items-center gap-2 bg-[var(--code-bg)] rounded-lg px-2 py-1.5 border border-[var(--border-color)]">
+                    <i data-lucide="palette" class="w-4 h-4 text-[var(--text-muted)]"></i>
+                    <select onchange="setTheme(this.value)" id="theme-select" class="bg-transparent text-xs font-mono outline-none border-none cursor-pointer w-[120px] !p-0 !h-auto">
+                        <option value="midnight">Midnight Pro</option>
+                        <option value="matrix">Matrix Core</option>
+                        <option value="lab">Clean Lab</option>
+                    </select>
                 </div>
-                <a href="index.html" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i> กลับหน้าหลัก</a>
+
+                <div class="hidden md:flex gap-4 text-xs font-mono text-[var(--text-muted)] border-l border-[var(--border-color)] pl-6">
+                    <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> GPU: Sim</span>
+                    <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Mem: Heap</span>
+                </div>
             </div>
         </div>
     </nav>
 
-    <main class="relative z-10 p-4 md:p-8 container mx-auto max-w-[1600px]">
-        <div class="grid grid-cols-12 gap-6 h-full">
-            <div class="col-span-12 lg:col-span-4 flex flex-col gap-5 h-full">
-                <div class="glass-panel p-6 rounded-2xl h-full flex flex-col">
-                    <h2 class="text-lg font-bold mb-4 text-purple-400 flex items-center gap-2"><i data-lucide="brain-circuit"></i> LLM Neural Architect</h2>
-                    
-                    <div class="mb-4 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)]">
-                        <h3 class="text-xs font-bold mb-2 opacity-70">Architecture Hyperparameters</h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-[10px] opacity-60">Hidden Layers</label>
-                                <input type="number" id="llm-layers" value="3" min="1" max="5" class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
-                            </div>
-                            <div>
-                                <label class="text-[10px] opacity-60">Neurons/Layer</label>
-                                <input type="number" id="llm-neurons" value="8" min="4" max="16" class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
-                            </div>
-                            <div>
-                                <label class="text-[10px] opacity-60">Context Window</label>
-                                <select class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
-                                    <option>2 Tokens (Bigram)</option>
-                                    <option>3 Tokens (Trigram)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[10px] opacity-60">Learning Rate</label>
-                                <select class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
-                                    <option>0.01 (Adam)</option>
-                                </select>
-                            </div>
-                        </div>
+    <main class="container mx-auto p-6 max-w-[1800px]">
+        <div class="grid grid-cols-12 gap-6">
+            
+            <!-- LEFT COLUMN: Configuration & Training -->
+            <div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+                <!-- Data Ingestion (Expanded Height) -->
+                <div class="glass-panel rounded-xl p-6 flex flex-col min-h-[450px]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-base font-bold flex items-center gap-2" style="color: var(--accent-primary)">
+                            <i data-lucide="database"></i> Corpus Ingestion
+                        </h2>
+                        <span class="text-[10px] px-2 py-1 rounded bg-[var(--code-bg)] border border-[var(--border-color)] text-[var(--text-muted)] font-mono">UTF-8</span>
                     </div>
-
-                    <div class="flex-1 flex flex-col">
-                        <h3 class="text-xs font-bold mb-2 opacity-70">Training Corpus (Text Data)</h3>
-                        <textarea id="llm-train-data" class="flex-1 w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl p-3 font-mono text-xs focus:border-purple-500 outline-none resize-none mb-2" placeholder="Paste text here to train the Neural Network... (e.g., Medical reports, Research abstracts)"></textarea>
-                        <button onclick="trainLLM()" id="btn-train-llm" class="w-full py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg text-sm font-bold shadow-lg transition-all flex justify-center items-center gap-2">
-                            <i data-lucide="play-circle"></i> Train Neural Network
+                    <textarea id="corpus-input" class="flex-1 w-full rounded-lg p-4 font-mono text-sm focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] outline-none resize-none transition-all leading-relaxed" 
+                    placeholder="/* Paste large text dataset here... */&#10;The transformer model uses self-attention mechanisms..."></textarea>
+                    
+                    <div class="mt-4 flex gap-3">
+                        <button onclick="trainModel()" id="btn-train" class="flex-1 py-3 bg-[var(--accent-primary)] hover:opacity-90 text-white rounded-lg text-sm font-bold shadow-lg transition-all flex justify-center items-center gap-2 group">
+                            <i data-lucide="cpu" class="group-hover:rotate-180 transition-transform duration-500"></i> Initialize & Train
                         </button>
+                        <button onclick="loadPresetData()" class="px-4 py-3 bg-[var(--slider-bg)] hover:opacity-80 text-[var(--text-heading)] rounded-lg text-xs font-mono transition-all">
+                            Load Demo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hyperparameters -->
+                <div class="glass-panel rounded-xl p-6 flex-1">
+                    <h2 class="text-base font-bold mb-6 flex items-center gap-2" style="color: var(--accent-secondary)">
+                        <i data-lucide="sliders"></i> Hyperparameters
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Model Architecture Params -->
+                        <div class="space-y-2 pb-4 border-b border-[var(--border-color)]">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--text-muted)]">N-Gram Context (N)</span>
+                                <span id="val-ngram" class="font-mono" style="color: var(--accent-primary)">3</span>
+                            </div>
+                            <input type="range" id="param-ngram" min="2" max="5" value="3" class="control-slider" oninput="updateDisplay('val-ngram', this.value)">
+                            <p class="text-[10px] text-[var(--text-muted)] mt-1">ขอบเขตการจำข้อมูลย้อนหลัง (History Window) ยิ่งมากประโยคยิ่งเชื่อมโยง</p>
+                        </div>
+
+                        <!-- Sampling Params -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--text-muted)]">Temperature (T)</span>
+                                <span id="val-temp" class="font-mono" style="color: var(--accent-secondary)">1.0</span>
+                            </div>
+                            <input type="range" id="param-temp" min="0.1" max="2.0" step="0.1" value="1.0" class="control-slider" oninput="updateDisplay('val-temp', this.value)">
+                            <p class="text-[10px] text-[var(--text-muted)] mt-1">ระดับความสร้างสรรค์ (ต่ำ = แม่นยำตามสูตร, สูง = สุ่มหลากหลาย)</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--text-muted)]">Top-K Sampling</span>
+                                <span id="val-topk" class="font-mono text-green-500">5</span>
+                            </div>
+                            <input type="range" id="param-topk" min="1" max="20" value="5" class="control-slider" oninput="updateDisplay('val-topk', this.value)">
+                            <p class="text-[10px] text-[var(--text-muted)] mt-1">ตัดตัวเลือกเหลือเฉพาะ K คำที่มีโอกาสสูงสุด (ลดคำมั่ว)</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--text-muted)]">Max Tokens</span>
+                                <span id="val-maxtokens" class="font-mono text-orange-400">50</span>
+                            </div>
+                            <input type="range" id="param-maxtokens" min="10" max="200" step="10" value="50" class="control-slider" oninput="updateDisplay('val-maxtokens', this.value)">
+                            <p class="text-[10px] text-[var(--text-muted)] mt-1">จำนวนคำสูงสุดที่จะสร้างต่อครั้ง</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-span-12 lg:col-span-8 flex flex-col gap-5 h-full">
-                <div class="glass-panel p-4 rounded-2xl flex-1 flex flex-col relative overflow-hidden bg-black/80">
-                    <div class="absolute top-4 left-4 z-10 bg-black/50 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
-                        <span class="text-xs font-mono text-green-400" id="llm-status">Status: Idle</span>
+            <!-- RIGHT COLUMN: Visualization & Inference -->
+            <div class="col-span-12 lg:col-span-8 flex flex-col gap-6 h-full">
+                
+                <!-- Visualization Canvas -->
+                <div class="glass-panel rounded-xl p-1 relative h-[400px] overflow-hidden group border border-[var(--border-color)]">
+                    <div class="absolute top-4 left-4 z-10 space-y-2 pointer-events-none">
+                        <div class="bg-[var(--bg-main)]/80 backdrop-blur border border-[var(--border-color)] px-3 py-1.5 rounded-full flex items-center gap-2 w-fit">
+                            <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-500"></div>
+                            <span id="status-text" class="text-xs font-mono text-[var(--text-muted)]">System Idle</span>
+                        </div>
+                        <div class="bg-[var(--bg-main)]/80 backdrop-blur border border-[var(--border-color)] px-3 py-1.5 rounded-lg w-fit hidden" id="vocab-stat">
+                            <span class="text-[10px] font-mono text-[var(--text-muted)] block">VOCAB SIZE</span>
+                            <span class="text-lg font-mono text-[var(--text-heading)]" id="vocab-count">0</span>
+                        </div>
                     </div>
-                    <canvas id="nn-canvas" class="w-full h-full object-contain"></canvas>
+                    
+                    <canvas id="nn-canvas" class="w-full h-full object-cover bg-[var(--console-bg)] rounded-lg"></canvas>
                 </div>
 
-                <div class="glass-panel p-6 rounded-2xl h-[200px] flex flex-col">
-                    <h3 class="text-sm font-bold mb-2 flex items-center gap-2"><i data-lucide="message-square"></i> Test Generation (Inference)</h3>
-                    <div class="flex gap-2 mb-2">
-                        <input type="text" id="llm-seed" class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm outline-none" placeholder="Start typing (e.g. 'The patient')...">
-                        <button onclick="generateText()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold flex items-center gap-2"><i data-lucide="wand-2"></i> Generate</button>
+                <!-- Inference Output (Enhanced) -->
+                <div class="glass-panel rounded-xl p-0 flex flex-col flex-1 min-h-[400px] overflow-hidden border-t-4 border-t-[var(--accent-primary)]">
+                    <div class="p-4 border-b border-[var(--border-color)] flex justify-between items-center bg-[var(--bg-panel)]">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="terminal-square" class="text-[var(--accent-primary)]"></i>
+                            <span class="font-bold text-sm text-[var(--text-heading)]">Inference Stream</span>
+                        </div>
+                        <div class="flex gap-2">
+                             <input type="text" id="seed-input" class="rounded px-3 py-1.5 text-sm font-mono w-[200px] md:w-[350px] transition-all focus:border-[var(--accent-primary)] outline-none" placeholder="Enter seed text (prompt)...">
+                             <button onclick="generate()" class="bg-[var(--accent-primary)] hover:opacity-90 text-white px-4 py-1.5 rounded text-sm font-bold flex items-center gap-2">
+                                <i data-lucide="play"></i> Gen
+                             </button>
+                             <button onclick="clearOutput()" class="bg-[var(--slider-bg)] hover:opacity-80 text-[var(--text-heading)] px-3 py-1.5 rounded text-sm">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                             </button>
+                        </div>
                     </div>
-                    <div id="llm-output" class="flex-1 bg-white/20 rounded-lg p-3 text-sm font-mono text-blue-1000 overflow-y-auto border border-[var(--border-color)]">
-                        <span class="opacity-50">// Generated text will appear here...</span>
+                    
+                    <div id="output-console" class="flex-1 bg-[var(--console-bg)] p-6 font-mono text-base leading-7 text-[var(--text-main)] overflow-y-auto font-light border-t border-[var(--border-color)] break-words whitespace-pre-wrap">
+                        <div class="opacity-50 select-none">// Output tokens will stream here...</div>
+                        <div class="opacity-50 select-none">// Configure hyperparameters and click Generate.</div>
                     </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TECHNICAL EXPLANATION SECTION (TRANSLATED TO THAI) -->
+        <div class="mt-8 glass-panel rounded-xl p-8 border border-[var(--border-color)]">
+            <h3 class="text-xl font-bold mb-6 pb-2 border-b border-[var(--border-color)] flex items-center gap-3">
+                <i data-lucide="book-open"></i> สถาปัตยกรรมทางเทคนิค (Technical Architecture)
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm leading-relaxed text-[var(--text-muted)]">
+                <div class="space-y-4">
+                    <h4 class="font-bold text-[var(--accent-primary)] text-base">1. ขั้นตอนการฝึกฝน (Training Phase - N-Gram)</h4>
+                    <p>ระบบใช้หลักการเรียนรู้เชิงสถิติ (Statistical Learning) แทนการใช้ Backpropagation แบบเครือข่ายประสาทเทียมขนาดใหญ่:</p>
+                    <ul class="list-disc pl-4 space-y-2 opacity-80">
+                        <li><strong>Tokenization:</strong> กระบวนการตัดคำและแปลงข้อความดิบให้เป็นหน่วยย่อย (Tokens) เพื่อให้คอมพิวเตอร์เข้าใจ</li>
+                        <li><strong>Markov Assumption:</strong> หลักการที่ว่า "คำถัดไป" ขึ้นอยู่กับ "ประวัติคำก่อนหน้า" จำนวน N คำเท่านั้น (Context Window)</li>
+                        <li><strong>MLE (Maximum Likelihood Estimation):</strong> การคำนวณหาความน่าจะเป็นสูงสุดจากการนับความถี่ที่คำต่างๆ ปรากฏคู่กันในชุดข้อมูล (Corpus)</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="font-bold text-[var(--accent-secondary)] text-base">2. ตรรกะการสุ่มเลือกคำ (Sampling Logic)</h4>
+                    <p>ใช้วิธีการสุ่มเลือกคำถัดไปโดยใช้น้ำหนักความน่าจะเป็น (Weighted Random Sampling):</p>
+                    <div class="bg-[var(--code-bg)] p-3 rounded border border-[var(--border-color)] font-mono text-xs opacity-90">
+                        P(w_i) = exp(logit_i / T) / Σ
+                    </div>
+                    <ul class="list-disc pl-4 space-y-2 opacity-80">
+                        <li><strong>Temperature ($T$):</strong> ตัวแปรควบคุมความ "กระจาย" ของความน่าจะเป็น ค่า $T$ ต่ำจะทำให้ผลลัพธ์แม่นยำและซ้ำเดิม, ค่า $T$ สูงจะเพิ่มความหลากหลาย (Creative)</li>
+                        <li><strong>Top-K:</strong> เทคนิคการตัดหางแถว โดยเลือกเฉพาะ K คำที่มีโอกาสสูงสุด เพื่อกำจัดคำที่ดูไร้เหตุผลออกไป</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="font-bold text-orange-400 text-base">3. การแสดงผลเชิงภาพ (Visualization)</h4>
+                    <p>การจำลองการทำงานของการส่งสัญญาณประสาท (Neural Signal Propagation):</p>
+                    <ul class="list-disc pl-4 space-y-2 opacity-80">
+                        <li><strong>Nodes (โหนด):</strong> ตัวแทนจำลองของกลุ่มเซลล์ประสาท (Neuron Clusters) ในแต่ละชั้น (Layer)</li>
+                        <li><strong>Signals (สัญญาณ):</strong> ภาพเคลื่อนไหวที่แสดงถึงข้อมูลที่กำลังไหลผ่านเครือข่าย (Forward Pass) ในขณะที่ระบบกำลังประมวลผลคำตอบ</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </main>
 
 <script>
-    function setTheme(theme) {
-        document.body.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-    }
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.body.setAttribute('data-theme', savedTheme);
+    // --- 1. GLOBALS & UTILITIES ---
+    const $ = id => document.getElementById(id);
+    const updateDisplay = (id, val) => $(id).innerText = val;
+    
+    // Global State
+    let isTraining = false;
+    let nodes = [], connections = [], signals = [];
+    let animationId;
+    let engine; // Initialized later
+    
+    // Canvas Globals - Initialized in window.onload or explicit init
+    let canvas, ctx;
 
-    class TinyLLM {
+    // --- 2. ENGINE CLASS ---
+    class AdvancedNGramEngine {
         constructor() {
-            this.ngrams = {};
-            this.vocab = [];
+            this.ngrams = new Map();
+            this.vocab = new Set();
             this.isTrained = false;
-            this.contextSize = 2;
         }
 
-        tokenize(text) {
-            return text.toLowerCase().replace(/[^\w\s\u0E00-\u0E7F]/g, '').split(/\s+/).filter(t => t.length > 0);
+        preprocess(text) {
+            return text.replace(/([.,!?;:()])/g, ' $1 ')
+                       .replace(/\s+/g, ' ')
+                       .trim()
+                       .split(' ')
+                       .filter(t => t.length > 0);
         }
 
-        train(text) {
-            const tokens = this.tokenize(text);
-            this.vocab = [...new Set(tokens)];
-            this.ngrams = {};
+        train(text, n) {
+            this.ngrams.clear();
+            this.vocab.clear();
+            const tokens = this.preprocess(text);
+            tokens.forEach(t => this.vocab.add(t));
 
-            for (let i = 0; i < tokens.length - this.contextSize; i++) {
-                let context = tokens.slice(i, i + this.contextSize).join(' ');
-                let nextWord = tokens[i + this.contextSize];
+            for (let i = 0; i < tokens.length - 1; i++) {
+                const contextStart = Math.max(0, i - n + 1);
+                const context = tokens.slice(contextStart, i + 1).join(' ');
+                const nextWord = tokens[i + 1];
 
-                if (!this.ngrams[context]) this.ngrams[context] = {};
-                if (!this.ngrams[context][nextWord]) this.ngrams[context][nextWord] = 0;
-                this.ngrams[context][nextWord]++;
+                if (!this.ngrams.has(context)) {
+                    this.ngrams.set(context, {});
+                }
+                const dist = this.ngrams.get(context);
+                dist[nextWord] = (dist[nextWord] || 0) + 1;
             }
+
             this.isTrained = true;
+            return { vocabSize: this.vocab.size, tokenCount: tokens.length };
         }
 
-        predictNext(currentContext) {
-            if (!this.ngrams[currentContext]) return null;
-            const possibleNext = this.ngrams[currentContext];
-            const words = Object.keys(possibleNext);
-            let total = 0;
-            words.forEach(w => total += possibleNext[w]);
-            let r = Math.random() * total;
-            for (let w of words) {
-                r -= possibleNext[w];
-                if (r <= 0) return w;
-            }
-            return words[0];
-        }
-    }
+        predict(contextTokens, n, temp, topK) {
+            let candidates = null;
+            let usedContext = "";
 
-    const myLLM = new TinyLLM();
-    let isLLMTraining = false;
-    let nnCanvas, nnCtx;
-    let nnNodes = [];
-    let nnSignals = [];
-
-    function initNeuralNetworkVisualizer() {
-        nnCanvas = document.getElementById('nn-canvas');
-        if (!nnCanvas) return;
-        const parent = nnCanvas.parentElement;
-        nnCanvas.width = parent.clientWidth;
-        nnCanvas.height = parent.clientHeight;
-        nnCtx = nnCanvas.getContext('2d');
-        generateNNStructure();
-        animateNN();
-    }
-
-    function generateNNStructure() {
-        nnNodes = [];
-        const layers = parseInt(document.getElementById('llm-layers').value) + 2;
-        const neuronsPerLayer = parseInt(document.getElementById('llm-neurons').value);
-        const colSpacing = nnCanvas.width / (layers + 1);
-        for(let l = 0; l < layers; l++) {
-            const rowSpacing = nnCanvas.height / (neuronsPerLayer + 1);
-            for(let n = 0; n < neuronsPerLayer; n++) {
-                nnNodes.push({ x: colSpacing * (l + 1), y: rowSpacing * (n + 1), layer: l, active: 0 });
-            }
-        }
-    }
-
-    function trainLLM() {
-        const text = document.getElementById('llm-train-data').value;
-        if(!text) return alert("Please paste some text to train the LLM.");
-        document.getElementById('btn-train-llm').innerText = "Training...";
-        document.getElementById('llm-status').innerText = "Status: Backpropagation...";
-        isLLMTraining = true;
-
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 10;
-            fireNeurons();
-            if(progress >= 100) {
-                clearInterval(interval);
-                myLLM.train(text);
-                isLLMTraining = false;
-                document.getElementById('btn-train-llm').innerHTML = `<i data-lucide="check"></i> Trained`;
-                document.getElementById('llm-status').innerText = `Status: Trained (Vocab: ${myLLM.vocab.length})`;
-                alert(`LLM Trained\n\nNeural Network adjusted weights for ${myLLM.vocab.length} unique tokens.`);
-                lucide.createIcons();
-            }
-        }, 200);
-    }
-
-    function generateText() {
-        if(!myLLM.isTrained) return alert("Please train the model first.");
-        const seed = document.getElementById('llm-seed').value.trim();
-        if(!seed) return alert("Enter a starting word.");
-        const outputDiv = document.getElementById('llm-output');
-        outputDiv.innerText = seed;
-        let currentWords = myLLM.tokenize(seed);
-        if(currentWords.length < 2) currentWords = [currentWords[0], currentWords[0]];
-        let genCount = 0;
-        const maxGen = 20;
-        const genInterval = setInterval(() => {
-            const context = currentWords.slice(-2).join(' ');
-            const next = myLLM.predictNext(context);
-            fireNeurons();
-            if(next) {
-                outputDiv.innerText += " " + next;
-                currentWords.push(next);
-            } else {
-                outputDiv.innerText += " [END]";
-                clearInterval(genInterval);
-            }
-            genCount++;
-            if(genCount >= maxGen) clearInterval(genInterval);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
-        }, 300);
-    }
-
-    function fireNeurons() {
-        const inputNodes = nnNodes.filter(n => n.layer === 0);
-        const startNode = inputNodes[Math.floor(Math.random() * inputNodes.length)];
-        nnSignals.push({ x: startNode.x, y: startNode.y, targetLayer: 1, progress: 0 });
-    }
-
-    function animateNN() {
-        if (!nnCtx) return;
-        nnCtx.clearRect(0, 0, nnCanvas.width, nnCanvas.height);
-        nnCtx.lineWidth = 0.5;
-        nnCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-        for(let i=0; i<nnNodes.length; i++) {
-            const n1 = nnNodes[i];
-            for(let j=0; j<nnNodes.length; j++) {
-                const n2 = nnNodes[j];
-                if (n2.layer === n1.layer + 1) {
-                    nnCtx.beginPath();
-                    nnCtx.moveTo(n1.x, n1.y);
-                    nnCtx.lineTo(n2.x, n2.y);
-                    nnCtx.stroke();
+            for (let i = 0; i < n; i++) {
+                usedContext = contextTokens.slice(contextTokens.length - (n - i)).join(' ');
+                if (this.ngrams.has(usedContext)) {
+                    candidates = this.ngrams.get(usedContext);
+                    break;
                 }
             }
-        }
 
-        for(let n of nnNodes) {
-            nnCtx.beginPath();
-            nnCtx.arc(n.x, n.y, 4, 0, Math.PI * 2);
-            nnCtx.fillStyle = n.active > 0 ? `rgba(0, 255, 255, ${n.active})` : '#333';
-            nnCtx.fill();
-            nnCtx.strokeStyle = '#555';
-            nnCtx.stroke();
-            if(n.active > 0) n.active -= 0.05;
-        }
+            if (!candidates) return null;
 
-        for(let i = nnSignals.length - 1; i >= 0; i--) {
-            const sig = nnSignals[i];
-            sig.progress += 0.05;
-            const layerNodes = nnNodes.filter(n => n.layer === sig.targetLayer);
-            const targetX = layerNodes[0].x;
-            const currentX = sig.x + (targetX - sig.x) * sig.progress;
-            nnCtx.beginPath();
-            nnCtx.arc(currentX, sig.y, 3, 0, Math.PI * 2);
-            nnCtx.fillStyle = '#f0f';
-            nnCtx.fill();
-            if (sig.progress >= 1) {
-                const hitNodes = nnNodes.filter(n => n.layer === sig.targetLayer);
-                if(hitNodes.length > 0) {
-                    const hitNode = hitNodes[Math.floor(Math.random() * hitNodes.length)];
-                    hitNode.active = 1.0;
-                    if (sig.targetLayer < 4) {
-                        nnSignals.push({ x: hitNode.x, y: hitNode.y, targetLayer: sig.targetLayer + 1, progress: 0 });
+            let items = Object.entries(candidates).map(([word, count]) => ({ word, score: count }));
+            items = items.map(item => ({
+                ...item,
+                prob: Math.pow(item.score, 1 / temp)
+            }));
+            items.sort((a, b) => b.prob - a.prob);
+
+            if (topK > 0 && items.length > topK) {
+                items = items.slice(0, topK);
+            }
+
+            const sumProb = items.reduce((sum, item) => sum + item.prob, 0);
+            items.forEach(item => item.prob /= sumProb);
+
+            let r = Math.random();
+            for (let item of items) {
+                r -= item.prob;
+                if (r <= 0) return item.word;
+            }
+            return items[0].word;
+        }
+    }
+
+    // --- 3. VISUALIZATION FUNCTIONS ---
+    function initNetwork() {
+        if (!canvas) return; // Guard clause
+        
+        nodes = []; 
+        connections = [];
+        const layers = [6, 10, 10, 6]; 
+        const layerX = canvas.width / (layers.length + 1);
+        
+        // Get theme colors for canvas
+        const style = getComputedStyle(document.body);
+        const accent = style.getPropertyValue('--accent-primary').trim();
+
+        layers.forEach((nodeCount, lIndex) => {
+            const layerY = canvas.height / (nodeCount + 1);
+            for (let i = 0; i < nodeCount; i++) {
+                nodes.push({
+                    x: layerX * (lIndex + 1),
+                    y: layerY * (i + 1),
+                    layer: lIndex,
+                    active: 0
+                });
+            }
+        });
+
+        nodes.forEach(n1 => {
+            nodes.forEach(n2 => {
+                if (n2.layer === n1.layer + 1 && Math.random() > 0.4) {
+                    connections.push({ from: n1, to: n2 });
+                }
+            });
+        });
+    }
+
+    function animate() {
+        if (!ctx || !canvas) return;
+
+        // Clear with slight trail based on theme bg
+        const style = getComputedStyle(document.body);
+        const bg = style.getPropertyValue('--console-bg').trim();
+        const accent = style.getPropertyValue('--accent-primary').trim();
+        
+        ctx.fillStyle = bg + '40'; // Add transparency for trail
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Connections
+        ctx.lineWidth = 0.5;
+        connections.forEach(c => {
+            // Calculate dynamic color
+            ctx.strokeStyle = c.from.active > 0.1 ? accent : style.getPropertyValue('--border-color');
+            ctx.globalAlpha = 0.2 + c.from.active * 0.5;
+            
+            ctx.beginPath();
+            ctx.moveTo(c.from.x, c.from.y);
+            ctx.lineTo(c.to.x, c.to.y);
+            ctx.stroke();
+            ctx.globalAlpha = 1.0;
+        });
+
+        // Draw Nodes
+        nodes.forEach(n => {
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, 3 + n.active * 2, 0, Math.PI * 2);
+            ctx.fillStyle = accent;
+            ctx.globalAlpha = 0.3 + n.active;
+            ctx.fill();
+            if (n.active > 0) n.active *= 0.92;
+            ctx.globalAlpha = 1.0;
+        });
+
+        // Draw Signals
+        for (let i = signals.length - 1; i >= 0; i--) {
+            let s = signals[i];
+            s.progress += 0.08;
+            
+            const dx = s.to.x - s.from.x;
+            const dy = s.to.y - s.from.y;
+            const cx = s.from.x + dx * s.progress;
+            const cy = s.from.y + dy * s.progress;
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+            ctx.fillStyle = style.getPropertyValue('--text-main'); // Signal is text color (usually white/bright)
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = accent;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            if (s.progress >= 1) {
+                s.to.active = 1.0;
+                if (s.to.layer < 3) {
+                    const nextLinks = connections.filter(c => c.from === s.to);
+                    if (nextLinks.length > 0) {
+                        const nextLink = nextLinks[Math.floor(Math.random() * nextLinks.length)];
+                        signals.push({ from: nextLink.from, to: nextLink.to, progress: 0 });
                     }
                 }
-                nnSignals.splice(i, 1);
+                signals.splice(i, 1);
             }
         }
-        requestAnimationFrame(animateNN);
+
+        animationId = requestAnimationFrame(animate);
     }
 
-    window.addEventListener('load', initNeuralNetworkVisualizer);
-    lucide.createIcons();
+    function resizeCanvas() {
+        if (!canvas) return;
+        const parent = canvas.parentElement;
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
+        initNetwork();
+    }
+
+    function triggerSignal() {
+        if (nodes.length === 0) return;
+        const inputs = nodes.filter(n => n.layer === 0);
+        const start = inputs[Math.floor(Math.random() * inputs.length)];
+        start.active = 1;
+        const nextLinks = connections.filter(c => c.from === start);
+        if (nextLinks.length > 0) {
+            const link = nextLinks[Math.floor(Math.random() * nextLinks.length)];
+            signals.push({ from: link.from, to: link.to, progress: 0 });
+        }
+    }
+
+    // --- 4. APP LOGIC & THEME ---
+    function setTheme(themeName) {
+        document.body.setAttribute('data-theme', themeName);
+        localStorage.setItem('llm_theme', themeName);
+        
+        // Ensure select element reflects current theme
+        const select = document.getElementById('theme-select');
+        if (select) select.value = themeName;
+
+        // Redraw canvas with new colors
+        if (canvas) initNetwork(); 
+    }
+
+    function loadPresetData() {
+        const demoText = `Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to the natural intelligence displayed by humans or animals. Leading AI textbooks define the field as the study of "intelligent agents": any system that perceives its environment and takes actions that maximize its chance of achieving its goals. Some popular accounts use the term "artificial intelligence" to describe machines that mimic "cognitive" functions that humans associate with the human mind, such as "learning" and "problem solving". As machines become increasingly capable, tasks considered to require "intelligence" are often removed from the definition of AI, a phenomenon known as the AI effect. A quip in Tesler's Theorem says "AI is whatever hasn't been done yet". For instance, optical character recognition is frequently excluded from things considered to be AI, having become a routine technology. Modern machine learning capabilities generally include successfully understanding human speech, competing at the highest level in strategic game systems (such as chess and Go), autonomously operating cars, intelligent routing in content delivery networks, and military simulations.`;
+        $('corpus-input').value = demoText;
+    }
+
+    function trainModel() {
+        const text = $('corpus-input').value;
+        if (!text.trim()) {
+            alert("Error: Corpus is empty. Please enter text or load demo data.");
+            return;
+        }
+
+        const btn = $('btn-train');
+        const style = getComputedStyle(document.body);
+        const accent = style.getPropertyValue('--accent-primary');
+        
+        btn.innerHTML = `<i class="animate-spin" data-lucide="loader-2"></i> Vectorizing...`;
+        $('status-dot').style.backgroundColor = '#eab308'; // Yellow
+        $('status-text').innerText = "Training...";
+
+        setTimeout(() => {
+            const ngramN = parseInt($('param-ngram').value);
+            const stats = engine.train(text, ngramN);
+            
+            isTraining = false;
+            btn.innerHTML = `<i data-lucide="check-circle-2"></i> Model Ready`;
+            
+            $('status-dot').style.backgroundColor = '#22c55e'; // Green
+            $('status-text').innerText = "Model Ready";
+            
+            $('vocab-stat').classList.remove('hidden');
+            $('vocab-count').innerText = stats.vocabSize;
+            
+            lucide.createIcons();
+            for(let i=0; i<10; i++) setTimeout(triggerSignal, i * 100);
+
+        }, 800);
+    }
+
+    async function generate() {
+        if (!engine.isTrained) {
+            alert("Exception: Model weights not initialized. Please train the model first.");
+            return;
+        }
+
+        const seed = $('seed-input').value.trim();
+        const outputConsole = $('output-console');
+        const temp = parseFloat($('param-temp').value);
+        const topK = parseInt($('param-topk').value);
+        const maxTokens = parseInt($('param-maxtokens').value);
+        const n = parseInt($('param-ngram').value);
+
+        const style = getComputedStyle(document.body);
+        const accentColor = style.getPropertyValue('--accent-primary').trim();
+        const textColor = style.getPropertyValue('--text-main').trim();
+
+        $('output-console').innerHTML = `<span style="color: ${accentColor}; font-weight: bold;">${seed}</span>`;
+        
+        let currentTokens = engine.preprocess(seed);
+        if (currentTokens.length === 0) {
+            currentTokens = [Array.from(engine.vocab)[Math.floor(Math.random() * engine.vocab.size)]];
+            $('output-console').innerHTML = `<span style="color: ${accentColor}; font-weight: bold;">${currentTokens[0]}</span>`;
+        }
+
+        $('status-dot').style.backgroundColor = accentColor;
+        $('status-text').innerText = "Inference...";
+
+        for (let i = 0; i < maxTokens; i++) {
+            await new Promise(r => setTimeout(r, 50));
+
+            const context = currentTokens.slice();
+            const nextWord = engine.predict(context, n, temp, topK);
+
+            if (!nextWord) {
+                outputConsole.innerHTML += `<span style="opacity:0.5; margin-left:4px;">[EOS]</span>`;
+                break;
+            }
+
+            triggerSignal();
+
+            const span = document.createElement('span');
+            span.className = "token-highlight ml-1";
+            span.style.color = textColor;
+            span.innerText = nextWord;
+            outputConsole.appendChild(span);
+            outputConsole.scrollTop = outputConsole.scrollHeight;
+
+            currentTokens.push(nextWord);
+        }
+        
+        $('status-dot').style.backgroundColor = '#22c55e';
+        $('status-text').innerText = "Complete";
+    }
+
+    function clearOutput() {
+        $('output-console').innerHTML = `<div style="opacity:0.5">// Ready...</div>`;
+    }
+
+    // --- 5. INITIALIZATION ---
+    window.addEventListener('load', () => {
+        // Initialize Global Objects
+        engine = new AdvancedNGramEngine();
+        canvas = $('nn-canvas');
+        ctx = canvas.getContext('2d');
+
+        // Setup Resize Listener
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas(); // Set initial size
+
+        // Load Theme
+        const savedTheme = localStorage.getItem('llm_theme') || 'midnight';
+        setTheme(savedTheme);
+
+        // Start Loop and Icons
+        animate();
+        lucide.createIcons();
+    });
+
 </script>
 </body>
 </html>
