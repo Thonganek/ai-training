@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Visual - AI Training Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-main: #f8fafc; --bg-panel: rgba(255, 255, 255, 0.9); --text-main: #0f172a; --text-muted: #64748b; --border-color: rgba(0, 0, 0, 0.1); --accent-color: #0284c7; }
+        [data-theme="dark"] { --bg-main: #020617; --bg-panel: rgba(15, 23, 42, 0.6); --text-main: #e2e8f0; --text-muted: #94a3b8; --border-color: rgba(255, 255, 255, 0.08); --accent-color: #0ea5e9; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: background-color 0.5s, color 0.5s; }
+        .glass-panel { background: var(--bg-panel); backdrop-filter: blur(12px); border: 1px solid var(--border-color); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
+        .animate-float { animation: float 8s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } 100% { transform: translate(0, 0px); } }
+        canvas#draw-canvas { background: white; cursor: crosshair; border-radius: 8px; border: 2px dashed var(--text-muted); }
+        .step-card-active { border-color: var(--accent-color); background: rgba(14, 165, 233, 0.1); }
+        .step-card-inactive { border-color: var(--border-color); background: transparent; }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden" data-theme="light">
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
+    </div>
+
+    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="p-2.5 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl shadow-lg"><i data-lucide="brain-circuit" class="w-6 h-6 text-white"></i></a>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">Deep Visual Training</h1>
+                    <p class="text-[10px] opacity-60">ฝึกอบรม AI ด้วยรูปภาพ</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="flex bg-[var(--bg-main)] rounded-lg p-1 border border-[var(--border-color)]">
+                    <button onclick="setTheme('dark')" class="p-1.5 rounded hover:bg-slate-800 hover:text-white text-[var(--text-muted)]"><i data-lucide="moon" class="w-4 h-4"></i></button>
+                    <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]"><i data-lucide="sun" class="w-4 h-4"></i></button>
+                </div>
+                <a href="index.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i> กลับหน้าหลัก</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 p-4 md:p-8 container mx-auto max-w-[1600px]">
+        <div class="grid grid-cols-12 gap-6">
+            <div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h2 class="text-lg font-bold mb-4 text-blue-400 flex items-center gap-2"><i data-lucide="layers"></i> Deep Visual Pipeline</h2>
+                    <div class="space-y-3">
+                        <div onclick="visualStep(1)" id="v-step-1" class="step-card-active p-4 rounded-xl border cursor-pointer transition-all">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-blue-500/20 p-2 rounded-lg text-blue-400"><i data-lucide="upload"></i></div>
+                                <div><h3 class="font-bold text-sm">1. Dataset</h3><p class="text-[10px] opacity-60">Upload & Label</p></div>
+                            </div>
+                        </div>
+                        <div onclick="visualStep(2)" id="v-step-2" class="step-card-inactive p-4 rounded-xl border cursor-pointer transition-all">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-purple-500/20 p-2 rounded-lg text-purple-400"><i data-lucide="network"></i></div>
+                                <div><h3 class="font-bold text-sm">2. Neural Network</h3><p class="text-[10px] opacity-60">CNN Architecture</p></div>
+                            </div>
+                        </div>
+                        <div onclick="visualStep(3)" id="v-step-3" class="step-card-inactive p-4 rounded-xl border cursor-pointer transition-all">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-orange-500/20 p-2 rounded-lg text-orange-400"><i data-lucide="zap"></i></div>
+                                <div><h3 class="font-bold text-sm">3. Training</h3><p class="text-[10px] opacity-60">Backpropagation</p></div>
+                            </div>
+                        </div>
+                        <div onclick="visualStep(4)" id="v-step-4" class="step-card-inactive p-4 rounded-xl border cursor-pointer transition-all">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-green-500/20 p-2 rounded-lg text-green-400"><i data-lucide="scan-eye"></i></div>
+                                <div><h3 class="font-bold text-sm">4. Inference</h3><p class="text-[10px] opacity-60">Test & Predict</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-9">
+                <div class="glass-panel rounded-2xl p-6 min-h-[600px] flex flex-col items-center" id="visual-workspace">
+                    <div id="visual-content-1" class="w-full h-full flex flex-col items-center justify-center">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold mb-2">Prepare Dataset</h3>
+                            <p class="opacity-60 text-sm">อัปโหลดภาพเพื่อสอน AI (จะจำภาพเหล่านี้ไว้เปรียบเทียบ)</p>
+                        </div>
+                        <div id="train-camera-container" class="hidden w-full max-w-md flex-col items-center gap-2 mb-4 p-4 bg-black/20 rounded-xl">
+                            <div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+                                <video id="train-webcam" autoplay playsinline class="w-full h-full object-cover"></video>
+                                <div class="absolute top-2 right-2 flex items-center gap-1 bg-red-600/80 text-white px-2 py-0.5 rounded text-[10px] animate-pulse">
+                                    <div class="w-2 h-2 bg-white rounded-full"></div> REC
+                                </div>
+                            </div>
+                            <div class="flex gap-2 w-full">
+                                <button onclick="captureTrainingImage()" class="flex-1 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-bold flex justify-center items-center gap-2"><i data-lucide="camera"></i> Capture & Add</button>
+                                <button onclick="closeTrainCamera()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm">Close</button>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap justify-center gap-4 mb-4">
+                            <select id="label-selector" class="bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-4 py-2 text-sm">
+                                <option value="Normal">Label: Normal (ปกติ)</option>
+                                <option value="Abnormal">Label: Abnormal (ผิดปกติ)</option>
+                                <option value="Risk">Label: Risk (มีความเสี่ยง)</option>
+                            </select>
+                            <button onclick="document.getElementById('visual-upload').click()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2"><i data-lucide="plus"></i> Add Images</button>
+                            <button onclick="toggleTrainCamera()" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2"><i data-lucide="video"></i> Use Camera</button>
+                            <input type="file" id="visual-upload" multiple accept="image/*" class="hidden" onchange="handleVisualUpload(this)">
+                        </div>
+                        <div id="dataset-grid" class="w-full max-w-3xl h-64 border-2 border-dashed border-[var(--border-color)] rounded-xl p-4 overflow-y-auto grid grid-cols-4 gap-2 bg-[var(--bg-main)]/30">
+                            <div class="col-span-4 flex flex-col items-center justify-center h-full text-[var(--text-muted)]">
+                                <i data-lucide="image-plus" class="w-8 h-8 mb-2 opacity-50"></i>
+                                <span class="text-xs">No images yet. Upload or Capture to start.</span>
+                            </div>
+                        </div>
+                        <button onclick="visualStep(2)" id="btn-next-step1" class="mt-6 px-8 py-2 bg-[var(--bg-main)] border border-[var(--border-color)] hover:border-blue-500 rounded-lg text-sm opacity-50 cursor-not-allowed" disabled>Next: Build Network ></button>
+                    </div>
+
+                    <div id="visual-content-2" class="w-full h-full hidden flex-col items-center">
+                        <h3 class="text-xl font-bold mb-6 text-purple-400">CNN Architecture Visualization</h3>
+                        <div class="flex items-center gap-2 overflow-x-auto p-4 w-full justify-center">
+                            <div class="flex flex-col items-center">
+                                <div class="w-16 h-16 bg-white border border-slate-300 grid grid-cols-3 gap-0.5 p-0.5">
+                                    <div class="bg-black/80"></div><div class="bg-black/20"></div><div class="bg-black/60"></div>
+                                    <div class="bg-black/10"></div><div class="bg-black/90"></div><div class="bg-black/30"></div>
+                                    <div class="bg-black/50"></div><div class="bg-black/40"></div><div class="bg-black/10"></div>
+                                </div>
+                                <span class="text-[10px] mt-2">Input Image</span>
+                            </div>
+                            <i data-lucide="arrow-right" class="opacity-50"></i>
+                            <div class="flex flex-col items-center p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                                <div class="space-y-1">
+                                    <div class="w-12 h-1 bg-blue-500 rounded"></div>
+                                    <div class="w-12 h-1 bg-blue-500 rounded"></div>
+                                    <div class="w-12 h-1 bg-blue-500 rounded"></div>
+                                </div>
+                                <span class="text-[10px] mt-2 text-blue-400">Conv2D</span>
+                            </div>
+                            <i data-lucide="arrow-right" class="opacity-50"></i>
+                            <div class="flex flex-col items-center p-2 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                                <div class="w-8 h-8 border border-orange-500 grid grid-cols-2">
+                                    <div class="bg-orange-500/50"></div><div></div>
+                                    <div></div><div class="bg-orange-500/50"></div>
+                                </div>
+                                <span class="text-[10px] mt-2 text-orange-400">MaxPooling</span>
+                            </div>
+                            <i data-lucide="arrow-right" class="opacity-50"></i>
+                            <div class="flex flex-col items-center">
+                                <div class="h-16 w-2 bg-slate-500 rounded"></div>
+                                <span class="text-[10px] mt-2">Flatten</span>
+                            </div>
+                            <i data-lucide="arrow-right" class="opacity-50"></i>
+                            <div class="flex flex-col items-center p-2 bg-green-500/10 border border-green-500/30 rounded-lg">
+                                <div class="flex gap-1">
+                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                </div>
+                                <span class="text-[10px] mt-2 text-green-400">Softmax</span>
+                            </div>
+                        </div>
+                        <button onclick="visualStep(3)" class="mt-6 px-8 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold">Initialize & Train ></button>
+                    </div>
+
+                    <div id="visual-content-3" class="w-full h-full hidden flex-col items-center justify-center">
+                        <h3 class="text-xl font-bold mb-2 text-orange-400">Training Model...</h3>
+                        <p class="text-xs opacity-60 mb-6">Learning features from uploaded dataset...</p>
+                        <div class="relative w-64 h-64 bg-black border-2 border-[var(--border-color)] rounded-lg overflow-hidden mb-6">
+                            <div class="absolute inset-0 grid grid-cols-12 grid-rows-12 gap-px opacity-30" id="matrix-bg"></div>
+                            <div class="absolute inset-0 bg-green-500/20 h-2 w-full animate-[scan_1.5s_linear_infinite]"></div>
+                            <div class="absolute bottom-2 left-2 font-mono text-green-400 text-xs" id="loss-display">Loss: 0.99</div>
+                            <div class="absolute bottom-2 right-2 font-mono text-blue-400 text-xs" id="acc-display">Acc: 0%</div>
+                        </div>
+                        <div class="w-full max-w-md bg-[var(--border-color)] h-2 rounded-full overflow-hidden">
+                            <div id="train-progress" class="bg-gradient-to-r from-blue-500 to-green-500 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                        <p class="text-xs mt-2 opacity-60" id="epoch-status">Epoch 0/50</p>
+                    </div>
+
+                    <div id="visual-content-4" class="w-full h-full hidden flex-col items-center">
+                        <h3 class="text-xl font-bold mb-4 text-green-400">Test Model (Comparison Mode)</h3>
+                        <div class="flex gap-2 mb-4 bg-[var(--bg-main)] p-1 rounded-lg border border-[var(--border-color)]">
+                            <button onclick="setInferMode('draw')" id="btn-infer-draw" class="px-4 py-1.5 rounded text-xs bg-white/10 font-bold">Draw</button>
+                            <button onclick="setInferMode('upload')" id="btn-infer-upload" class="px-4 py-1.5 rounded text-xs hover:bg-white/5 opacity-60">Upload</button>
+                            <button onclick="setInferMode('camera')" id="btn-infer-camera" class="px-4 py-1.5 rounded text-xs hover:bg-white/5 opacity-60">Camera</button>
+                        </div>
+                        <div class="flex flex-col md:flex-row gap-8 w-full max-w-4xl">
+                            <div class="flex-1 flex flex-col items-center">
+                                <div id="infer-draw" class="infer-panel">
+                                    <canvas id="draw-canvas" width="250" height="250"></canvas>
+                                    <button onclick="clearCanvas()" class="mt-2 text-xs text-red-400 hover:underline">Clear Canvas</button>
+                                </div>
+                                <div id="infer-upload" class="infer-panel hidden flex-col items-center justify-center w-[250px] h-[250px] border-2 border-dashed border-[var(--border-color)] rounded-lg">
+                                    <input type="file" id="test-image-upload" class="hidden" onchange="handleTestImage(this)">
+                                    <button onclick="document.getElementById('test-image-upload').click()" class="flex flex-col items-center opacity-60 hover:opacity-100">
+                                        <i data-lucide="image-plus" class="w-8 h-8 mb-2"></i>
+                                        <span class="text-xs">Select Image</span>
+                                    </button>
+                                    <img id="test-preview" class="hidden w-full h-full object-cover rounded-lg">
+                                </div>
+                                <div id="infer-camera" class="infer-panel hidden flex-col items-center">
+                                    <div class="w-[250px] h-[250px] bg-black rounded-lg overflow-hidden relative">
+                                        <video id="webcam" autoplay playsinline class="w-full h-full object-cover"></video>
+                                        <div class="absolute inset-0 flex items-center justify-center" id="cam-placeholder">
+                                            <button onclick="startCamera()" class="px-4 py-2 bg-blue-600 rounded text-xs text-white">Start Camera</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-1 bg-[var(--bg-main)]/50 rounded-xl border border-[var(--border-color)] p-6 flex flex-col justify-center">
+                                <h4 class="text-sm font-bold mb-4 border-b border-[var(--border-color)] pb-2">Similarity Match</h4>
+                                <div class="space-y-4 mb-4" id="bars-container">
+                                    <div>
+                                        <div class="flex justify-between text-xs mb-1"><span>Normal</span><span id="pred-normal">0%</span></div>
+                                        <div class="w-full h-2 bg-black/20 rounded-full"><div id="bar-normal" class="h-full bg-green-500 rounded-full w-0 transition-all duration-500"></div></div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-xs mb-1"><span>Abnormal</span><span id="pred-abnormal">0%</span></div>
+                                        <div class="w-full h-2 bg-black/20 rounded-full"><div id="bar-abnormal" class="h-full bg-red-500 rounded-full w-0 transition-all duration-500"></div></div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-xs mb-1"><span>Risk</span><span id="pred-risk">0%</span></div>
+                                        <div class="w-full h-2 bg-black/20 rounded-full"><div id="bar-risk" class="h-full bg-orange-500 rounded-full w-0 transition-all duration-500"></div></div>
+                                    </div>
+                                </div>
+                                <div id="match-results-list" class="space-y-2 mb-4 min-h-[50px]"></div>
+                                <button onclick="predict()" id="btn-predict" class="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl font-bold shadow-lg flex justify-center items-center gap-2"><i data-lucide="scan"></i> Compare & Predict</button>
+                                <p class="text-[10px] text-center mt-2 opacity-50">Comparing input pixels with training dataset...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script>
+    let visualDataset = [];
+    let trainStream = null;
+    let trainInterval;
+
+    function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    }
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+
+    function visualStep(step) {
+        for(let i=1; i<=4; i++) {
+            const card = document.getElementById(`v-step-${i}`);
+            const content = document.getElementById(`visual-content-${i}`);
+            if(i === step) {
+                card.className = "step-card-active p-4 rounded-xl border cursor-pointer transition-all";
+                content.classList.remove('hidden');
+                content.classList.add('flex');
+                if(step === 3) startTrainingSim();
+                if(step === 4) initCanvas();
+            } else {
+                card.className = "step-card-inactive p-4 rounded-xl border cursor-pointer transition-all";
+                content.classList.add('hidden');
+                content.classList.remove('flex');
+            }
+        }
+        lucide.createIcons();
+    }
+
+    async function toggleTrainCamera() {
+        const container = document.getElementById('train-camera-container');
+        if (container.classList.contains('hidden')) {
+            container.classList.remove('hidden');
+            container.classList.add('flex');
+            try {
+                trainStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('train-webcam').srcObject = trainStream;
+            } catch(e) {
+                alert("Camera access denied");
+                closeTrainCamera();
+            }
+        } else {
+            closeTrainCamera();
+        }
+    }
+
+    function closeTrainCamera() {
+        const container = document.getElementById('train-camera-container');
+        container.classList.add('hidden');
+        container.classList.remove('flex');
+        if (trainStream) {
+            trainStream.getTracks().forEach(track => track.stop());
+            trainStream = null;
+        }
+    }
+
+    function captureTrainingImage() {
+        const video = document.getElementById('train-webcam');
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const dataUrl = canvas.toDataURL('image/jpeg');
+        const label = document.getElementById('label-selector').value;
+        addToDataset(dataUrl, label);
+    }
+
+    function handleVisualUpload(input) {
+        const label = document.getElementById('label-selector').value;
+        const files = Array.from(input.files);
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = e => addToDataset(e.target.result, label);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function addToDataset(imgSrc, label) {
+        const grid = document.getElementById('dataset-grid');
+        if(visualDataset.length === 0) grid.innerHTML = ''; 
+
+        const div = document.createElement('div');
+        div.className = "relative group h-20 bg-black/20 rounded-lg overflow-hidden border border-[var(--border-color)]";
+        div.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 right-0 bg-black/60 text-[8px] text-white p-1 truncate">${label}</div>`;
+        grid.appendChild(div);
+        visualDataset.push({ img: imgSrc, label });
+
+        document.getElementById('btn-next-step1').disabled = false;
+        document.getElementById('btn-next-step1').classList.remove('opacity-50', 'cursor-not-allowed');
+        document.getElementById('btn-next-step1').classList.add('bg-blue-600', 'text-white');
+    }
+
+    function startTrainingSim() {
+        let epoch = 0;
+        let loss = 0.99;
+        let acc = 0;
+        const bg = document.getElementById('matrix-bg');
+        let html = '';
+        for(let i=0; i<144; i++) html += `<div class="bg-green-500 rounded-full transition-opacity duration-300" style="opacity:${Math.random()}"></div>`;
+        bg.innerHTML = html;
+
+        trainInterval = setInterval(() => {
+            epoch++;
+            loss -= 0.02;
+            acc += 2;
+            if(loss < 0.01) loss = 0.01;
+            if(acc > 98) acc = 99;
+
+            document.getElementById('train-progress').style.width = (epoch * 2) + "%";
+            document.getElementById('epoch-status').innerText = `Epoch ${epoch}/50`;
+            document.getElementById('loss-display').innerText = `Loss: ${loss.toFixed(2)}`;
+            document.getElementById('acc-display').innerText = `Acc: ${acc}%`;
+
+            Array.from(bg.children).forEach(d => d.style.opacity = Math.random());
+
+            if(epoch >= 50) {
+                clearInterval(trainInterval);
+                setTimeout(() => visualStep(4), 1000);
+            }
+        }, 100);
+    }
+
+    function setInferMode(mode) {
+        document.querySelectorAll('.infer-panel').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.infer-panel').forEach(p => p.classList.remove('flex'));
+        document.getElementById(`infer-${mode}`).classList.remove('hidden');
+        document.getElementById(`infer-${mode}`).classList.add('flex');
+        
+        ['draw','upload','camera'].forEach(m => {
+            const btn = document.getElementById(`btn-infer-${m}`);
+            if(m === mode) {
+                btn.classList.remove('opacity-60', 'hover:bg-white/5');
+                btn.classList.add('bg-white/10', 'font-bold');
+            } else {
+                btn.classList.add('opacity-60', 'hover:bg-white/5');
+                btn.classList.remove('bg-white/10', 'font-bold');
+            }
+        });
+    }
+
+    function initCanvas() {
+        const canvas = document.getElementById('draw-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = "white";
+        ctx.fillRect(0,0,250,250);
+        
+        let painting = false;
+        function startPosition(e) { painting = true; draw(e); }
+        function finishedPosition() { painting = false; ctx.beginPath(); }
+        function draw(e) {
+            if(!painting) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'black';
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', finishedPosition);
+        canvas.addEventListener('mousemove', draw);
+    }
+
+    function clearCanvas() {
+        const canvas = document.getElementById('draw-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = "white";
+        ctx.fillRect(0,0,250,250);
+    }
+
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            document.getElementById('webcam').srcObject = stream;
+            document.getElementById('cam-placeholder').classList.add('hidden');
+        } catch(e) {
+            alert("Camera not accessible");
+        }
+    }
+
+    function handleTestImage(input) {
+        const file = input.files[0];
+        if(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.getElementById('test-preview');
+                img.src = e.target.result;
+                img.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function getPixelData(source, w=64, h=64) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+
+            if (typeof source === 'string') {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, w, h);
+                    resolve(ctx.getImageData(0, 0, w, h).data);
+                };
+                img.src = source;
+            } else {
+                ctx.drawImage(source, 0, 0, w, h);
+                resolve(ctx.getImageData(0, 0, w, h).data);
+            }
+        });
+    }
+
+    function calculateSimilarity(pixels1, pixels2) {
+        let diff = 0;
+        for (let i = 0; i < pixels1.length; i += 4) {
+            diff += Math.abs(pixels1[i] - pixels2[i]);
+            diff += Math.abs(pixels1[i+1] - pixels2[i+1]);
+            diff += Math.abs(pixels1[i+2] - pixels2[i+2]);
+        }
+        const maxDiff = (pixels1.length / 4) * 255 * 3;
+        return Math.max(0, 100 * (1 - (diff / maxDiff)));
+    }
+
+    async function predict() {
+        if(visualDataset.length === 0) return alert("Please go to Step 1 and upload/label training data first.");
+
+        const btn = document.getElementById('btn-predict');
+        btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> Analyzing...`;
+        lucide.createIcons();
+        
+        let inputSource;
+        if (!document.getElementById('infer-draw').classList.contains('hidden')) {
+            inputSource = document.getElementById('draw-canvas');
+        } else if (!document.getElementById('infer-upload').classList.contains('hidden')) {
+            const img = document.getElementById('test-preview');
+            if(!img.src) { btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`; lucide.createIcons(); return alert("Please upload an image first."); }
+            inputSource = img.src;
+        } else {
+            const vid = document.getElementById('webcam');
+            if(vid.paused) { btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`; lucide.createIcons(); return alert("Camera not active"); }
+            inputSource = vid;
+        }
+
+        const inputPixels = await getPixelData(inputSource);
+        let matches = [];
+        for (let data of visualDataset) {
+            const trainPixels = await getPixelData(data.img);
+            const similarity = calculateSimilarity(inputPixels, trainPixels);
+            matches.push({ label: data.label, score: similarity, img: data.img });
+        }
+
+        matches.sort((a, b) => b.score - a.score);
+        const perfectMatch = matches.find(m => m.score > 99.5);
+        const resultsList = document.getElementById('match-results-list');
+        resultsList.innerHTML = '';
+
+        if (perfectMatch) {
+            document.getElementById('bars-container').classList.add('hidden');
+            resultsList.innerHTML = `
+                <div class="bg-green-500/10 border border-green-500 rounded-xl p-4 flex flex-col items-center animate-pulse">
+                    <div class="text-green-400 font-bold text-lg mb-2 flex items-center gap-2"><i data-lucide="check-circle-2"></i> PERFECT MATCH FOUND!</div>
+                    <img src="${perfectMatch.img}" class="w-32 h-32 object-cover rounded-lg border-2 border-green-500 mb-2">
+                    <div class="text-white font-bold text-xl">${perfectMatch.label}</div>
+                    <div class="text-green-400 text-sm">Confidence: 100%</div>
+                </div>
+            `;
+            lucide.createIcons();
+        } else {
+            document.getElementById('bars-container').classList.remove('hidden');
+            resultsList.innerHTML = `<div class="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-2">Closest Training Images:</div>`;
+            matches.slice(0, 3).forEach((m, idx) => {
+                const colorClass = m.label === 'Normal' ? 'text-green-400' : (m.label === 'Abnormal' ? 'text-red-400' : 'text-orange-400');
+                resultsList.innerHTML += `
+                    <div class="flex items-center gap-3 bg-black/20 p-2 rounded-lg border border-[var(--border-color)]">
+                        <span class="text-xs font-mono opacity-50">#${idx+1}</span>
+                        <img src="${m.img}" class="w-10 h-10 object-cover rounded">
+                        <div class="flex-1">
+                            <div class="text-xs font-bold ${colorClass}">${m.label}</div>
+                            <div class="text-left text-[10px] opacity-70">Similarity: ${m.score.toFixed(1)}%</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            let maxScores = { "Normal": 0, "Abnormal": 0, "Risk": 0 };
+            matches.forEach(m => {
+                if(m.score > maxScores[m.label]) maxScores[m.label] = m.score;
+            });
+
+            const n = maxScores['Normal'] || 0;
+            const a = maxScores['Abnormal'] || 0;
+            const r = maxScores['Risk'] || 0;
+            const expN = Math.exp(n/10);
+            const expA = Math.exp(a/10);
+            const expR = Math.exp(r/10);
+            const expTotal = expN + expA + expR;
+
+            document.getElementById('bar-normal').style.width = ((expN / expTotal) * 100) + "%";
+            document.getElementById('pred-normal').innerText = n.toFixed(1) + "%";
+            document.getElementById('bar-abnormal').style.width = ((expA / expTotal) * 100) + "%";
+            document.getElementById('pred-abnormal').innerText = a.toFixed(1) + "%";
+            document.getElementById('bar-risk').style.width = ((expR / expTotal) * 100) + "%";
+            document.getElementById('pred-risk').innerText = r.toFixed(1) + "%";
+        }
+
+        btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`;
+        lucide.createIcons();
+    }
+
+    lucide.createIcons();
+</script>
+</body>
+</html>

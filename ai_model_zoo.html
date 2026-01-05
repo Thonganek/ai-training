@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Zoo - คลังโมเดล AI สำเร็จรูป</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-main: #f8fafc; --bg-panel: rgba(255, 255, 255, 0.9); --text-main: #0f172a; --text-muted: #64748b; --border-color: rgba(0, 0, 0, 0.1); --accent-color: #14b8a6; }
+        [data-theme="dark"] { --bg-main: #020617; --bg-panel: rgba(15, 23, 42, 0.6); --text-main: #e2e8f0; --text-muted: #94a3b8; --border-color: rgba(255, 255, 255, 0.08); --accent-color: #2dd4bf; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: all 0.5s; }
+        .glass-panel { background: var(--bg-panel); backdrop-filter: blur(12px); border: 1px solid var(--border-color); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); transition: all 0.3s; }
+        .glass-panel:hover { transform: translateY(-5px); box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1); }
+        .animate-float { animation: float 8s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+        .badge-blue { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .badge-green { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .badge-purple { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
+        .badge-orange { background: rgba(249, 115, 22, 0.2); color: #f97316; }
+        .badge-pink { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
+        .filter-btn { transition: all 0.3s; }
+        .filter-btn.active { background: var(--accent-color); color: white; }
+        .model-card { cursor: pointer; }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden" data-theme="light">
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-teal-600/10 rounded-full blur-[120px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
+    </div>
+
+    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel sticky top-0">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="p-2.5 bg-gradient-to-br from-teal-500 to-cyan-400 rounded-xl shadow-lg"><i data-lucide="package" class="w-6 h-6 text-white"></i></a>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-400">AI Model Zoo</h1>
+                    <p class="text-[10px] opacity-60">คลังโมเดล AI สำเร็จรูป</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="flex bg-[var(--bg-main)] rounded-lg p-1 border border-[var(--border-color)]">
+                    <button onclick="setTheme('dark')" class="p-1.5 rounded hover:bg-slate-800 hover:text-white text-[var(--text-muted)]"><i data-lucide="moon" class="w-4 h-4"></i></button>
+                    <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]"><i data-lucide="sun" class="w-4 h-4"></i></button>
+                </div>
+                <a href="index.html" class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i> กลับหน้าหลัก</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
+        <div class="text-center mb-8">
+            <div class="inline-block p-4 bg-teal-500/20 rounded-full mb-4">
+                <i data-lucide="box" class="w-12 h-12 text-teal-500"></i>
+            </div>
+            <h1 class="text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-400">AI Model Zoo</h1>
+            <p class="text-lg opacity-70">รวมโมเดล AI สำเร็จรูปคุณภาพสูง พร้อมใช้งาน</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="glass-panel p-4 rounded-xl text-center">
+                <div class="text-3xl font-bold text-teal-500">50+</div>
+                <p class="text-sm opacity-70 mt-1">โมเดล</p>
+            </div>
+            <div class="glass-panel p-4 rounded-xl text-center">
+                <div class="text-3xl font-bold text-blue-500">10+</div>
+                <p class="text-sm opacity-70 mt-1">หมวดหมู่</p>
+            </div>
+            <div class="glass-panel p-4 rounded-xl text-center">
+                <div class="text-3xl font-bold text-purple-500">1M+</div>
+                <p class="text-sm opacity-70 mt-1">ดาวน์โหลด</p>
+            </div>
+            <div class="glass-panel p-4 rounded-xl text-center">
+                <div class="text-3xl font-bold text-pink-500">100%</div>
+                <p class="text-sm opacity-70 mt-1">ฟรี</p>
+            </div>
+        </div>
+
+        <!-- Search & Filter -->
+        <div class="glass-panel p-6 rounded-2xl mb-8">
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <div class="flex-1 relative">
+                    <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 opacity-50"></i>
+                    <input type="text" id="searchInput" placeholder="ค้นหาโมเดล..." class="w-full pl-10 pr-4 py-3 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl outline-none" onkeyup="filterModels()">
+                </div>
+                <select id="sortSelect" class="px-4 py-3 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl outline-none" onchange="sortModels()">
+                    <option value="popular">เรียงตาม: ยอดนิยม</option>
+                    <option value="newest">เรียงตาม: ใหม่ล่าสุด</option>
+                    <option value="accuracy">เรียงตาม: ความแม่นยำ</option>
+                    <option value="speed">เรียงตาม: ความเร็ว</option>
+                </select>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <button onclick="filterByCategory('all')" class="filter-btn active px-4 py-2 rounded-lg text-sm bg-white/5" data-category="all">ทั้งหมด</button>
+                <button onclick="filterByCategory('nlp')" class="filter-btn px-4 py-2 rounded-lg text-sm bg-white/5" data-category="nlp">NLP</button>
+                <button onclick="filterByCategory('vision')" class="filter-btn px-4 py-2 rounded-lg text-sm bg-white/5" data-category="vision">Computer Vision</button>
+                <button onclick="filterByCategory('speech')" class="filter-btn px-4 py-2 rounded-lg text-sm bg-white/5" data-category="speech">Speech</button>
+                <button onclick="filterByCategory('multimodal')" class="filter-btn px-4 py-2 rounded-lg text-sm bg-white/5" data-category="multimodal">Multimodal</button>
+                <button onclick="filterByCategory('generative')" class="filter-btn px-4 py-2 rounded-lg text-sm bg-white/5" data-category="generative">Generative</button>
+            </div>
+        </div>
+
+        <!-- Models Grid -->
+        <div id="modelsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- GPT-4 -->
+            <div class="glass-panel p-6 rounded-2xl model-card" data-category="nlp" data-name="gpt-4" onclick="showModelDetail('gpt4')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="zap" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">GPT-4</h3>
+                            <p class="text-xs opacity-60">OpenAI</p>
+                        </div>
+                    </div>
+                    <span class="badge badge-green">Hot</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">โมเดลภาษาขนาดใหญ่ที่ทรงพลังที่สุด เข้าใจบริบทได้ลึก</p>
+                <div class="flex gap-2 mb-4">
+                    <span class="badge badge-blue">NLP</span>
+                    <span class="badge badge-purple">Chat</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div>
+                        <div class="font-bold text-teal-500">98%</div>
+                        <div class="opacity-60">Accuracy</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-blue-500">Fast</div>
+                        <div class="opacity-60">Speed</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-purple-500">8B</div>
+                        <div class="opacity-60">Params</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BERT -->
+            <div class="glass-panel p-6 rounded-2xl model-card" data-category="nlp" data-name="bert" onclick="showModelDetail('bert')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="message-square" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">BERT</h3>
+                            <p class="text-xs opacity-60">Google</p>
+                        </div>
+                    </div>
+                    <span class="badge badge-blue">Stable</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">Transformer สำหรับความเข้าใจภาษา เหมาะสำหรับ Classification</p>
+                <div class="flex gap-2 mb-4">
+                    <span class="badge badge-blue">NLP</span>
+                    <span class="badge badge-green">Classification</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div>
+                        <div class="font-bold text-teal-500">95%</div>
+                        <div class="opacity-60">Accuracy</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-blue-500">Medium</div>
+                        <div class="opacity-60">Speed</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-purple-500">340M</div>
+                        <div class="opacity-60">Params</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- YOLO -->
+            <div class="glass-panel p-6 rounded-2xl model-card" data-category="vision" data-name="yolo" onclick="showModelDetail('yolo')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="scan" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">YOLOv8</h3>
+                            <p class="text-xs opacity-60">Ultralytics</p>
+                        </div>
+                    </div>
+                    <span class="badge badge-orange">Fast</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">Object Detection แบบ Real-time ที่เร็วและแม่นยำ</p>
+                <div class="flex gap-2 mb-4">
+                    <span class="badge badge-orange">Vision</span>
+                    <span class="badge badge-blue">Detection</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div>
+                        <div class="font-bold text-teal-500">92%</div>
+                        <div class="opacity-60">mAP</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-blue-500">Very Fast</div>
+                        <div class="opacity-60">Speed</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-purple-500">68M</div>
+                        <div class="opacity-60">Params</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ResNet -->
+            <div class="glass-panel p-6 rounded-2xl model-card" data-category="vision" data-name="resnet" onclick="showModelDetail('resnet')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="image" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">ResNet-50</h3>
+                            <p class="text-xs opacity-60">Microsoft</p>
+                        </div>
+                    </div>
+                    <span class="badge badge-purple">Classic</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">CNN สำหรับ Image Classification ที่ได้รับความนิยมสูง</p>
+                <div class="flex gap-2 mb-4">
+                    <span class="badge badge-orange">Vision</span>
+                    <span class="badge badge-green">Classification</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div>
+                        <div class="font-bold text-teal-500">94%</div>
+                        <div class="opacity-60">Top-5</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-blue-500">Fast</div>
+                        <div class="opacity-60">Speed</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-purple-500">25M</div>
+                        <div class="opacity-60">Params</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Whisper -->
+            <div class="glass-panel p-6 rounded-2xl model-card" data-category="speech" data-name="whisper" onclick="showModelDetail('whisper')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="mic" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">Whisper</h3>
+                            <p class="text-xs opacity-60">OpenAI</p>
+                        </div>
+                    </div>
+                    <span class="badge badge-blue">New</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">Speech Recognition ที่แม่นยำ รองรับหลายภาษา</p>
+                <div class="flex gap-2 mb-4">
+                    <span class="badge badge-blue">Speech</span>
+                    <span class="badge badge-purple">ASR</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div>
+                        <div class="font-bold text-teal-500">96%</div>
+                        <div class="opacity-60">WER</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-blue-500">Medium</div>
+                        <div class="opacity-60">Speed</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-purple-500">1.5B</div>
+                        <div class="opacity-60">Params</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLIP -->
+            <div class="glass-panel p-6 rounded-2xl model-card" data-category="multimodal" data-name="clip" onclick="showModelDetail('clip')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="layers" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">CLIP</h3>
+                            <p class="text-xs opacity-60">OpenAI</p>
+                        </div>
+                    </div>
+                    <span class="badge badge-pink">Multimodal</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">เชื่อมโยงภาพและข้อความ สำหรับ Zero-shot Classification</p>
+                <div class="flex gap-2 mb-4">
+                    <span class="badge badge-pink">Multimodal</span>
+                    <span class="badge badge-blue">Vision+Text</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div>
+                        <div class="font-bold text-teal-500">89%</div>
+                        <div class="opacity-60">Accuracy</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-blue-500">Fast</div>
+                        <div class="opacity-60">Speed</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-purple-500">400M</div>
+                        <div class="opacity-60">Params</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stable Diffusion -->
+            <div class="glass-panel p-6 rounded-2xl model-card" data-category="generative" data-name="stable-diffusion" onclick="showModelDetail('sd')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="sparkles" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">Stable Diffusion</h3>
+                            <p class="text-xs opacity-60">Stability AI</p>
+                        </div>
+                    </div>
+                    <span class="badge badge-purple">Hot</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">สร้างภาพจากข้อความ ได้ภาพสวยงามและหลากหลาย</p>
+                <div class="flex gap-2 mb-4">
+                    <span class="badge badge-purple">Generative</span>
+                    <span class="badge badge-pink">Text-to-Image</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div>
+                        <div class="font-bold text-teal-500">High</div>
+                        <div class="opacity-60">Quality</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-blue-500">Slow</div>
+                        <div class="opacity-60">Speed</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-purple-500">890M</div>
+                        <div class="opacity-60">Params</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LLaMA -->
+            <div class="glass-panel p-6 rounded-2xl model-card" data-category="nlp" data-name="llama" onclick="showModelDetail('llama')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">LLaMA 2</h3>
+                            <p class="text-xs opacity-60">Meta</p>
+                        </div>
+                    </div>
+                    <span class="badge badge-green">Open Source</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">โมเดลภาษาขนาดใหญ่ Open Source ประสิทธิภาพสูง</p>
+                <div class="flex gap-2 mb-4">
+                    <span class="badge badge-blue">NLP</span>
+                    <span class="badge badge-green">LLM</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div>
+                        <div class="font-bold text-teal-500">96%</div>
+                        <div class="opacity-60">Accuracy</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-blue-500">Fast</div>
+                        <div class="opacity-60">Speed</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-purple-500">7B</div>
+                        <div class="opacity-60">Params</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SAM -->
+            <div class="glass-panel p-6 rounded-2xl model-card" data-category="vision" data-name="sam" onclick="showModelDetail('sam')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="scissors" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">SAM</h3>
+                            <p class="text-xs opacity-60">Meta</p>
+                        </div>
+                    </div>
+                    <span class="badge badge-green">Advanced</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">Segment Anything - แยกวัตถุจากภาพได้อย่างแม่นยำ</p>
+                <div class="flex gap-2 mb-4">
+                    <span class="badge badge-orange">Vision</span>
+                    <span class="badge badge-blue">Segmentation</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div>
+                        <div class="font-bold text-teal-500">97%</div>
+                        <div class="opacity-60">IoU</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-blue-500">Fast</div>
+                        <div class="opacity-60">Speed</div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-purple-500">636M</div>
+                        <div class="opacity-60">Params</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Results -->
+        <div id="noResults" class="hidden text-center py-12">
+            <i data-lucide="inbox" class="w-16 h-16 mx-auto opacity-30 mb-4"></i>
+            <p class="text-lg opacity-70">ไม่พบโมเดลที่ค้นหา</p>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="modelModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/70 backdrop-blur-sm px-4" onclick="closeModal()">
+        <div class="glass-panel p-8 rounded-2xl max-w-4xl w-full shadow-2xl relative" onclick="event.stopPropagation()">
+            <button onclick="closeModal()" class="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-lg">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        function setTheme(theme) { document.body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
+        setTheme(localStorage.getItem('theme') || 'light');
+
+        let currentCategory = 'all';
+
+        function filterByCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.dataset.category === category) btn.classList.add('active');
+            });
+            filterModels();
+        }
+
+        function filterModels() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.model-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const category = card.dataset.category;
+                const name = card.dataset.name;
+                const text = card.textContent.toLowerCase();
+                
+                const matchCategory = currentCategory === 'all' || category === currentCategory;
+                const matchSearch = text.includes(search);
+                
+                if(matchCategory && matchSearch) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            document.getElementById('noResults').classList.toggle('hidden', visibleCount > 0);
+        }
+
+        function sortModels() {
+            const sort = document.getElementById('sortSelect').value;
+            alert(`จัดเรียงตาม: ${sort} - ฟีเจอร์นี้จะทำงานในเวอร์ชันเต็ม`);
+        }
+
+        function showModelDetail(modelId) {
+            const models = {
+                gpt4: {
+                    name: 'GPT-4',
+                    company: 'OpenAI',
+                    description: 'โมเดลภาษาขนาดใหญ่ที่ทรงพลังที่สุดในปัจจุบัน สามารถเข้าใจบริบทได้ลึกซึ้ง ตอบคำถามได้แม่นยำ และสร้างเนื้อหาคุณภาพสูง',
+                    useCases: ['Chatbot', 'Content Generation', 'Code Generation', 'Translation', 'Q&A'],
+                    params: '8 Billion',
+                    accuracy: '98%',
+                    speed: 'Fast',
+                    license: 'Commercial API',
+                    downloadUrl: 'https://openai.com/gpt-4'
+                },
+                bert: {
+                    name: 'BERT',
+                    company: 'Google',
+                    description: 'Bidirectional Encoder Representations from Transformers - โมเดลที่ปฏิวัติ NLP ด้วยการเข้าใจบริบทแบบสองทิศทาง',
+                    useCases: ['Text Classification', 'Named Entity Recognition', 'Question Answering', 'Sentiment Analysis'],
+                    params: '340 Million',
+                    accuracy: '95%',
+                    speed: 'Medium',
+                    license: 'Apache 2.0',
+                    downloadUrl: 'https://huggingface.co/bert-base-uncased'
+                },
+                yolo: {
+                    name: 'YOLOv8',
+                    company: 'Ultralytics',
+                    description: 'You Only Look Once version 8 - Object Detection แบบ Real-time ที่เร็วและแม่นยำที่สุดในปัจจุบัน',
+                    useCases: ['Object Detection', 'Instance Segmentation', 'Pose Estimation', 'Tracking'],
+                    params: '68 Million',
+                    accuracy: '92% mAP',
+                    speed: 'Very Fast (30+ FPS)',
+                    license: 'AGPL-3.0',
+                    downloadUrl: 'https://github.com/ultralytics/ultralytics'
+                }
+            };
+
+            const model = models[modelId] || models.gpt4;
+            
+            document.getElementById('modalContent').innerHTML = `
+                <h2 class="text-3xl font-bold mb-2">${model.name}</h2>
+                <p class="text-sm opacity-60 mb-6">${model.company}</p>
+                
+                <div class="mb-6">
+                    <h3 class="font-bold mb-2">📝 รายละเอียด</h3>
+                    <p class="text-sm opacity-80 leading-relaxed">${model.description}</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="glass-panel p-4 rounded-lg text-center">
+                        <div class="font-bold text-teal-500">${model.params}</div>
+                        <div class="text-xs opacity-60 mt-1">Parameters</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-lg text-center">
+                        <div class="font-bold text-blue-500">${model.accuracy}</div>
+                        <div class="text-xs opacity-60 mt-1">Accuracy</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-lg text-center">
+                        <div class="font-bold text-purple-500">${model.speed}</div>
+                        <div class="text-xs opacity-60 mt-1">Speed</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-lg text-center">
+                        <div class="font-bold text-pink-500">${model.license}</div>
+                        <div class="text-xs opacity-60 mt-1">License</div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-bold mb-3">🎯 Use Cases</h3>
+                    <div class="flex flex-wrap gap-2">
+                        ${model.useCases.map(uc => `<span class="badge badge-blue">${uc}</span>`).join('')}
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <a href="${model.downloadUrl}" target="_blank" class="flex-1 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl font-bold text-center hover:from-teal-500 hover:to-cyan-500">
+                        <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                        Download / View
+                    </a>
+                    <button onclick="copyModelCode('${modelId}')" class="px-6 py-3 bg-white/5 border border-[var(--border-color)] rounded-xl hover:bg-white/10">
+                        <i data-lucide="code" class="w-4 h-4 inline mr-2"></i>
+                        Copy Code
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('modelModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('modelModal').classList.add('hidden');
+        }
+
+        function copyModelCode(modelId) {
+            const code = `# Example: Using ${modelId}\nimport transformers\nmodel = transformers.AutoModel.from_pretrained('${modelId}')`;
+            navigator.clipboard.writeText(code);
+            alert('คัดลอกโค้ดแล้ว!');
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

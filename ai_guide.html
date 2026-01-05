@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Complete Guide - คู่มือสมบูรณ์การสร้าง AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-main: #f8fafc; --bg-panel: rgba(255, 255, 255, 0.9); --text-main: #0f172a; --text-muted: #64748b; --border-color: rgba(0, 0, 0, 0.1); --accent-color: #ec4899; }
+        [data-theme="dark"] { --bg-main: #020617; --bg-panel: rgba(15, 23, 42, 0.6); --text-main: #e2e8f0; --text-muted: #94a3b8; --border-color: rgba(255, 255, 255, 0.08); --accent-color: #f472b6; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: background-color 0.5s, color 0.5s; }
+        .glass-panel { background: var(--bg-panel); backdrop-filter: blur(12px); border: 1px solid var(--border-color); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
+        .animate-float { animation: float 8s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } 100% { transform: translate(0, 0px); } }
+        .section-card { transition: all 0.3s; }
+        .section-card:hover { transform: translateX(10px); }
+        .step-number { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #ec4899, #f472b6); color: white; border-radius: 50%; font-weight: bold; flex-shrink: 0; }
+        .code-block { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 12px; overflow-x: auto; }
+        .timeline-item { position: relative; padding-left: 40px; padding-bottom: 30px; }
+        .timeline-item::before { content: ''; position: absolute; left: 15px; top: 40px; bottom: 0; width: 2px; background: linear-gradient(180deg, #ec4899, #f472b6); }
+        .timeline-item:last-child::before { display: none; }
+        .highlight-box { background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(244, 114, 182, 0.1)); border-left: 4px solid #ec4899; padding: 16px; border-radius: 8px; margin: 16px 0; }
+        nav { position: sticky; top: 0; z-index: 100; }
+        .scroll-indicator { position: fixed; top: 80px; right: 20px; width: 4px; height: 200px; background: rgba(236, 72, 153, 0.2); border-radius: 2px; }
+        .scroll-progress { width: 100%; background: linear-gradient(180deg, #ec4899, #f472b6); border-radius: 2px; transition: height 0.1s; }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden" data-theme="light">
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-pink-600/10 rounded-full blur-[120px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
+    </div>
+
+    <!-- Scroll Progress Indicator -->
+    <div class="scroll-indicator hidden md:block">
+        <div class="scroll-progress" id="scroll-progress" style="height: 0%"></div>
+    </div>
+
+    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="p-2.5 bg-gradient-to-br from-pink-500 to-purple-400 rounded-xl shadow-lg"><i data-lucide="book-open" class="w-6 h-6 text-white"></i></a>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-purple-400">AI Complete Guide</h1>
+                    <p class="text-[10px] opacity-60">คู่มือสมบูรณ์การสร้าง AI</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="flex bg-[var(--bg-main)] rounded-lg p-1 border border-[var(--border-color)]">
+                    <button onclick="setTheme('dark')" class="p-1.5 rounded hover:bg-slate-800 hover:text-white text-[var(--text-muted)]"><i data-lucide="moon" class="w-4 h-4"></i></button>
+                    <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]"><i data-lucide="sun" class="w-4 h-4"></i></button>
+                </div>
+                <a href="index.html" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i> กลับหน้าหลัก</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 container mx-auto px-4 py-8 max-w-5xl">
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+            <div class="inline-block p-4 bg-pink-500/20 rounded-full mb-4">
+                <i data-lucide="graduation-cap" class="w-16 h-16 text-pink-500"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-purple-400">
+                คู่มือสมบูรณ์การสร้าง AI
+            </h1>
+            <p class="text-lg opacity-70 max-w-2xl mx-auto">เรียนรู้ทุกขั้นตอนการสร้างและฝึกอบรม AI ตั้งแต่พื้นฐานจนถึงขั้นสูง พร้อมตัวอย่างและคำอธิบายละเอียด</p>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="glass-panel p-6 rounded-2xl mb-8">
+            <h3 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="list" class="w-5 h-5 text-pink-500"></i> สารบัญ</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <a href="#chapter1" class="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 rounded-lg text-sm transition-colors">1. AI คืออะไร?</a>
+                <a href="#chapter2" class="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 rounded-lg text-sm transition-colors">2. ประเภทของ AI</a>
+                <a href="#chapter3" class="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 rounded-lg text-sm transition-colors">3. Machine Learning</a>
+                <a href="#chapter4" class="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 rounded-lg text-sm transition-colors">4. Deep Learning</a>
+                <a href="#chapter5" class="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 rounded-lg text-sm transition-colors">5. การฝึกอบรม AI</a>
+                <a href="#chapter6" class="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 rounded-lg text-sm transition-colors">6. Neural Networks</a>
+                <a href="#chapter7" class="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 rounded-lg text-sm transition-colors">7. NLP & Text AI</a>
+                <a href="#chapter8" class="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 rounded-lg text-sm transition-colors">8. Computer Vision</a>
+            </div>
+        </div>
+
+        <!-- Chapter 1: What is AI? -->
+        <div class="glass-panel p-8 rounded-2xl mb-8" id="chapter1">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="step-number">1</div>
+                <h2 class="text-3xl font-bold">AI คืออะไร?</h2>
+            </div>
+
+            <div class="space-y-6">
+                <p class="text-lg leading-relaxed">
+                    <strong>Artificial Intelligence (AI)</strong> หรือ ปัญญาประดิษฐ์ คือ ระบบคอมพิวเตอร์ที่สามารถทำงานที่ต้องใช้สติปัญญาของมนุษย์ได้ เช่น การเรียนรู้ การแก้ปัญหา การรับรู้ และการตัดสินใจ
+                </p>
+
+                <div class="highlight-box">
+                    <h4 class="font-bold mb-2 flex items-center gap-2"><i data-lucide="lightbulb" class="w-5 h-5"></i> แนวคิดหลัก</h4>
+                    <p>AI ไม่ใช่แค่โปรแกรมที่ทำตามคำสั่ง แต่เป็นระบบที่สามารถ <strong>"เรียนรู้"</strong> จากข้อมูลและปรับปรุงตัวเองได้</p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold mb-3">องค์ประกอบสำคัญของ AI</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="glass-panel p-4 rounded-lg">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i data-lucide="database" class="w-5 h-5 text-pink-500"></i>
+                                <h5 class="font-bold">Data</h5>
+                            </div>
+                            <p class="text-sm opacity-70">ข้อมูลสำหรับฝึกอบรม</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i data-lucide="cpu" class="w-5 h-5 text-pink-500"></i>
+                                <h5 class="font-bold">Algorithm</h5>
+                            </div>
+                            <p class="text-sm opacity-70">ขั้นตอนการประมวลผล</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i data-lucide="zap" class="w-5 h-5 text-pink-500"></i>
+                                <h5 class="font-bold">Computing Power</h5>
+                            </div>
+                            <p class="text-sm opacity-70">กำลังประมวลผล</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chapter 2: Types of AI -->
+        <div class="glass-panel p-8 rounded-2xl mb-8" id="chapter2">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="step-number">2</div>
+                <h2 class="text-3xl font-bold">ประเภทของ AI</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="timeline-item">
+                    <div class="step-number">A</div>
+                    <h4 class="font-bold text-xl mb-2 mt-3">Narrow AI (Weak AI)</h4>
+                    <p class="mb-3">AI ที่ออกแบบมาเพื่อทำงานเฉพาะอย่างหนึ่ง เช่น แชทบอท, แนะนำสินค้า, จดจำใบหน้า</p>
+                    <div class="glass-panel p-4 rounded-lg">
+                        <p class="text-sm"><strong>ตัวอย่าง:</strong> Siri, Google Assistant, Netflix Recommendation, Face ID</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="step-number">B</div>
+                    <h4 class="font-bold text-xl mb-2 mt-3">General AI (Strong AI)</h4>
+                    <p class="mb-3">AI ที่มีสติปัญญาเทียบเท่ามนุษย์ สามารถเรียนรู้และทำงานได้หลากหลาย (ยังไม่มีจริงในปัจจุบัน)</p>
+                    <div class="glass-panel p-4 rounded-lg">
+                        <p class="text-sm"><strong>สถานะ:</strong> กำลังพัฒนา ยังไม่มีในโลกความเป็นจริง</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="step-number">C</div>
+                    <h4 class="font-bold text-xl mb-2 mt-3">Super AI</h4>
+                    <p class="mb-3">AI ที่ฉลาดกว่ามนุษย์ในทุกด้าน (เป็นเพียงทฤษฎี)</p>
+                    <div class="glass-panel p-4 rounded-lg">
+                        <p class="text-sm"><strong>สถานะ:</strong> เป็นเพียงแนวคิดทางทฤษฎี</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chapter 3: Machine Learning -->
+        <div class="glass-panel p-8 rounded-2xl mb-8" id="chapter3">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="step-number">3</div>
+                <h2 class="text-3xl font-bold">Machine Learning</h2>
+            </div>
+
+            <div class="space-y-6">
+                <p class="text-lg leading-relaxed">
+                    <strong>Machine Learning (ML)</strong> คือ วิธีการที่ทำให้คอมพิวเตอร์สามารถเรียนรู้จากข้อมูลโดยไม่ต้องเขียนโปรแกรมโดยตรง
+                </p>
+
+                <div>
+                    <h4 class="font-bold mb-3">3 ประเภทหลักของ Machine Learning</h4>
+                    
+                    <div class="space-y-4">
+                        <div class="glass-panel p-5 rounded-lg section-card">
+                            <div class="flex items-start gap-3">
+                                <div class="p-2 bg-blue-500/20 rounded-lg">
+                                    <i data-lucide="target" class="w-6 h-6 text-blue-500"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-lg mb-2">1. Supervised Learning (การเรียนรู้แบบมีผู้สอน)</h5>
+                                    <p class="mb-3">เรียนรู้จากข้อมูลที่มีคำตอบแล้ว</p>
+                                    <div class="code-block">
+<strong>ตัวอย่าง:</strong>
+Input: รูปภาพแมว → Output: "แมว"
+Input: อาการไข้ ไอ → Output: "โควิด"
+Input: ข้อความ → Output: "บวก/ลบ"</div>
+                                    <p class="text-sm opacity-70 mt-2"><strong>ใช้สำหรับ:</strong> การจำแนกประเภท, การทำนาย</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-5 rounded-lg section-card">
+                            <div class="flex items-start gap-3">
+                                <div class="p-2 bg-purple-500/20 rounded-lg">
+                                    <i data-lucide="search" class="w-6 h-6 text-purple-500"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-lg mb-2">2. Unsupervised Learning (การเรียนรู้แบบไม่มีผู้สอน)</h5>
+                                    <p class="mb-3">เรียนรู้จากข้อมูลที่ไม่มีคำตอบ AI จะหาแพทเทิร์นเอง</p>
+                                    <div class="code-block">
+<strong>ตัวอย่าง:</strong>
+- จัดกลุ่มลูกค้าตามพฤติกรรม
+- หารูปแบบการซื้อสินค้า
+- ตรวจจับความผิดปกติ</div>
+                                    <p class="text-sm opacity-70 mt-2"><strong>ใช้สำหรับ:</strong> การจัดกลุ่ม, หาความสัมพันธ์</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-5 rounded-lg section-card">
+                            <div class="flex items-start gap-3">
+                                <div class="p-2 bg-green-500/20 rounded-lg">
+                                    <i data-lucide="trophy" class="w-6 h-6 text-green-500"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-lg mb-2">3. Reinforcement Learning (การเรียนรู้เชิงเสริมแรง)</h5>
+                                    <p class="mb-3">เรียนรู้จากการลองผิดลองถูก ได้รับรางวัลเมื่อทำถูก</p>
+                                    <div class="code-block">
+<strong>ตัวอย่าง:</strong>
+- AI เล่นเกม (AlphaGo)
+- หุ่นยนต์เดิน
+- รถยนต์ขับขี่อัตโนมัติ</div>
+                                    <p class="text-sm opacity-70 mt-2"><strong>ใช้สำหรับ:</strong> เกม, หุ่นยนต์, การควบคุมอัตโนมัติ</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chapter 4: Deep Learning -->
+        <div class="glass-panel p-8 rounded-2xl mb-8" id="chapter4">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="step-number">4</div>
+                <h2 class="text-3xl font-bold">Deep Learning</h2>
+            </div>
+
+            <div class="space-y-6">
+                <p class="text-lg leading-relaxed">
+                    <strong>Deep Learning</strong> คือ Machine Learning ที่ใช้ Neural Network ที่มีหลายชั้น (Deep) เลียนแบบการทำงานของสมองมนุษย์
+                </p>
+
+                <div class="highlight-box">
+                    <h4 class="font-bold mb-2">ทำไมต้อง "Deep"?</h4>
+                    <p>ยิ่งมีชั้นมาก AI ก็ยิ่งสามารถเรียนรู้รูปแบบที่ซับซ้อนได้มากขึ้น เหมือนสมองมนุษย์ที่มีเซลล์ประสาทหลายชั้นเชื่อมต่อกัน</p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold mb-3">ความแตกต่าง Machine Learning vs Deep Learning</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="glass-panel p-5 rounded-lg">
+                            <h5 class="font-bold mb-3 text-blue-500">Machine Learning</h5>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex items-start gap-2"><i data-lucide="circle" class="w-3 h-3 mt-1"></i> ต้องสกัดฟีเจอร์เอง</li>
+                                <li class="flex items-start gap-2"><i data-lucide="circle" class="w-3 h-3 mt-1"></i> ใช้ข้อมูลน้อยกว่า</li>
+                                <li class="flex items-start gap-2"><i data-lucide="circle" class="w-3 h-3 mt-1"></i> เร็วกว่า</li>
+                                <li class="flex items-start gap-2"><i data-lucide="circle" class="w-3 h-3 mt-1"></i> เข้าใจง่ายกว่า</li>
+                            </ul>
+                        </div>
+                        <div class="glass-panel p-5 rounded-lg">
+                            <h5 class="font-bold mb-3 text-pink-500">Deep Learning</h5>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex items-start gap-2"><i data-lucide="circle" class="w-3 h-3 mt-1"></i> สกัดฟีเจอร์อัตโนมัติ</li>
+                                <li class="flex items-start gap-2"><i data-lucide="circle" class="w-3 h-3 mt-1"></i> ต้องใช้ข้อมูลมาก</li>
+                                <li class="flex items-start gap-2"><i data-lucide="circle" class="w-3 h-3 mt-1"></i> ช้ากว่า</li>
+                                <li class="flex items-start gap-2"><i data-lucide="circle" class="w-3 h-3 mt-1"></i> แม่นยำกว่าในงานซับซ้อน</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold mb-3">ประเภทของ Deep Learning</h4>
+                    <div class="space-y-3">
+                        <div class="glass-panel p-4 rounded-lg">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i data-lucide="grid-3x3" class="w-5 h-5 text-pink-500"></i>
+                                <h5 class="font-bold">CNN (Convolutional Neural Network)</h5>
+                            </div>
+                            <p class="text-sm">เชี่ยวชาญด้านภาพ: จดจำใบหน้า, อ่านป้ายรถ, วินิจฉัยโรคจากภาพเอกซเรย์</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i data-lucide="repeat" class="w-5 h-5 text-pink-500"></i>
+                                <h5 class="font-bold">RNN (Recurrent Neural Network)</h5>
+                            </div>
+                            <p class="text-sm">เชี่ยวชาญด้านลำดับ: แปลภาษา, ทำนายหุ้น, สร้างข้อความ</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i data-lucide="zap" class="w-5 h-5 text-pink-500"></i>
+                                <h5 class="font-bold">Transformer</h5>
+                            </div>
+                            <p class="text-sm">เทคโนโลยีใหม่: GPT, BERT, ChatGPT - เข้าใจภาษาได้ดีมาก</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chapter 5: Training Process -->
+        <div class="glass-panel p-8 rounded-2xl mb-8" id="chapter5">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="step-number">5</div>
+                <h2 class="text-3xl font-bold">การฝึกอบรม AI</h2>
+            </div>
+
+            <div class="space-y-6">
+                <p class="text-lg leading-relaxed mb-4">
+                    การฝึกอบรม AI คือกระบวนการให้ AI เรียนรู้จากข้อมูล เพื่อให้สามารถทำงานได้ดีขึ้น
+                </p>
+
+                <div>
+                    <h4 class="font-bold mb-4">ขั้นตอนการฝึกอบรม AI</h4>
+                    
+                    <div class="space-y-4">
+                        <div class="timeline-item">
+                            <div class="step-number">1</div>
+                            <div class="mt-3">
+                                <h5 class="font-bold text-lg mb-2">เตรียมข้อมูล (Data Preparation)</h5>
+                                <p class="mb-3">รวบรวมและทำความสะอาดข้อมูล</p>
+                                <div class="code-block">
+<strong>ขั้นตอน:</strong>
+1. รวบรวมข้อมูล (Data Collection)
+2. ทำความสะอาด (Data Cleaning)
+3. ติดป้ายกำกับ (Data Labeling)
+4. แบ่งข้อมูล: Train 70%, Validation 15%, Test 15%</div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="step-number">2</div>
+                            <div class="mt-3">
+                                <h5 class="font-bold text-lg mb-2">เลือกโมเดล (Model Selection)</h5>
+                                <p class="mb-3">เลือก Algorithm ที่เหมาะสมกับงาน</p>
+                                <div class="glass-panel p-4 rounded-lg">
+                                    <p class="text-sm"><strong>ตัวอย่าง:</strong> CNN สำหรับภาพ, RNN สำหรับข้อความ, Random Forest สำหรับตาราง</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="step-number">3</div>
+                            <div class="mt-3">
+                                <h5 class="font-bold text-lg mb-2">การฝึกอบรม (Training)</h5>
+                                <p class="mb-3">ให้โมเดลเรียนรู้จากข้อมูล</p>
+                                <div class="code-block">
+<strong>วนซ้ำหลายรอบ (Epochs):</strong>
+1. โมเดลคาดการณ์ผล (Forward Pass)
+2. คำนวณความผิดพลาด (Loss Calculation)
+3. ปรับน้ำหนัก (Backpropagation)
+4. อัพเดทพารามิเตอร์ (Optimization)</div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="step-number">4</div>
+                            <div class="mt-3">
+                                <h5 class="font-bold text-lg mb-2">ประเมินผล (Evaluation)</h5>
+                                <p class="mb-3">ทดสอบความแม่นยำด้วยข้อมูลทดสอบ</p>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div class="glass-panel p-3 rounded">
+                                        <p class="font-bold text-sm">Accuracy</p>
+                                        <p class="text-xs opacity-70">ความแม่นยำโดยรวม</p>
+                                    </div>
+                                    <div class="glass-panel p-3 rounded">
+                                        <p class="font-bold text-sm">Precision</p>
+                                        <p class="text-xs opacity-70">ความแม่นยำของการทำนายบวก</p>
+                                    </div>
+                                    <div class="glass-panel p-3 rounded">
+                                        <p class="font-bold text-sm">Recall</p>
+                                        <p class="text-xs opacity-70">เปอร์เซ็นต์ที่จับได้หมด</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="step-number">5</div>
+                            <div class="mt-3">
+                                <h5 class="font-bold text-lg mb-2">ปรับแต่ง (Fine-tuning)</h5>
+                                <p class="mb-3">ปรับพารามิเตอร์เพื่อผลลัพธ์ที่ดีขึ้น</p>
+                                <div class="highlight-box">
+                                    <p class="text-sm"><strong>Hyperparameters:</strong> Learning Rate, Batch Size, Number of Epochs, Number of Layers</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="step-number">6</div>
+                            <div class="mt-3">
+                                <h5 class="font-bold text-lg mb-2">นำไปใช้งาน (Deployment)</h5>
+                                <p class="mb-3">ปล่อยโมเดลให้ใช้งานจริง</p>
+                                <div class="glass-panel p-4 rounded-lg">
+                                    <p class="text-sm">ติดตามผลและปรับปรุงต่อเนื่อง (Monitoring & Updating)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h4 class="font-bold mb-2 flex items-center gap-2"><i data-lucide="alert-circle" class="w-5 h-5"></i> ปัญหาที่พบบ่อย</h4>
+                    <div class="space-y-2 text-sm">
+                        <p><strong>Overfitting:</strong> โมเดลจำข้อมูล Training แต่ทำงานกับข้อมูลใหม่ได้แย่ → แก้ด้วย Regularization, Dropout</p>
+                        <p><strong>Underfitting:</strong> โมเดลไม่ซับซ้อนพอ เรียนรู้ไม่เพียงพอ → แก้ด้วยเพิ่มชั้น, เพิ่ม Epochs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chapter 6: Neural Networks -->
+        <div class="glass-panel p-8 rounded-2xl mb-8" id="chapter6">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="step-number">6</div>
+                <h2 class="text-3xl font-bold">Neural Networks</h2>
+            </div>
+
+            <div class="space-y-6">
+                <p class="text-lg leading-relaxed">
+                    <strong>Neural Network</strong> คือ โครงสร้างการเรียนรู้ที่เลียนแบบเซลล์สมอง (Neuron) เชื่อมต่อกันเป็นชั้นๆ
+                </p>
+
+                <div>
+                    <h4 class="font-bold mb-4">โครงสร้างของ Neural Network</h4>
+                    <div class="space-y-3">
+                        <div class="glass-panel p-5 rounded-lg">
+                            <h5 class="font-bold mb-2 flex items-center gap-2">
+                                <i data-lucide="arrow-right" class="w-5 h-5 text-green-500"></i>
+                                Input Layer (ชั้นรับข้อมูล)
+                            </h5>
+                            <p class="text-sm">รับข้อมูลเข้ามา เช่น พิกเซลของภาพ, คำในประโยค</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-lg">
+                            <h5 class="font-bold mb-2 flex items-center gap-2">
+                                <i data-lucide="cpu" class="w-5 h-5 text-blue-500"></i>
+                                Hidden Layers (ชั้นประมวลผล)
+                            </h5>
+                            <p class="text-sm">ประมวลผลและสกัดฟีเจอร์ ยิ่งมีหลายชั้น ยิ่งเรียนรู้ได้ซับซ้อน</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-lg">
+                            <h5 class="font-bold mb-2 flex items-center gap-2">
+                                <i data-lucide="arrow-left" class="w-5 h-5 text-pink-500"></i>
+                                Output Layer (ชั้นแสดงผล)
+                            </h5>
+                            <p class="text-sm">แสดงผลลัพธ์ เช่น ความน่าจะเป็นของแต่ละคลาส</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold mb-3">การทำงานของ Neuron</h4>
+                    <div class="code-block">
+<strong>สมการของ Neuron:</strong>
+
+1. คูณข้อมูลกับน้ำหนัก (Weighted Sum)
+   output = (input1 × weight1) + (input2 × weight2) + ... + bias
+
+2. ผ่าน Activation Function
+   final_output = activation(output)
+
+<strong>Activation Functions:</strong>
+- ReLU: f(x) = max(0, x)        → เร็ว, นิยมใช้
+- Sigmoid: f(x) = 1/(1+e^-x)    → Output 0-1
+- Tanh: f(x) = (e^x-e^-x)/(e^x+e^-x) → Output -1 to 1</div>
+                </div>
+
+                <div class="highlight-box">
+                    <h4 class="font-bold mb-2">ทำไมต้องมี Activation Function?</h4>
+                    <p class="text-sm">เพื่อให้ Neural Network เรียนรู้รูปแบบที่ไม่เป็นเส้นตรง (Non-linear) ได้ ถ้าไม่มี Network จะทำได้แค่เส้นตรงธรรมดา</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chapter 7: NLP -->
+        <div class="glass-panel p-8 rounded-2xl mb-8" id="chapter7">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="step-number">7</div>
+                <h2 class="text-3xl font-bold">NLP & Text AI</h2>
+            </div>
+
+            <div class="space-y-6">
+                <p class="text-lg leading-relaxed">
+                    <strong>Natural Language Processing (NLP)</strong> คือ การทำให้คอมพิวเตอร์เข้าใจและประมวลผลภาษามนุษย์
+                </p>
+
+                <div>
+                    <h4 class="font-bold mb-4">ขั้นตอนการประมวลผลข้อความ</h4>
+                    <div class="space-y-3">
+                        <div class="timeline-item">
+                            <div class="step-number">1</div>
+                            <div class="mt-3">
+                                <h5 class="font-bold">Tokenization (แบ่งคำ)</h5>
+                                <div class="code-block mt-2">
+Input: "ฉันชอบเรียน AI"
+Output: ["ฉัน", "ชอบ", "เรียน", "AI"]</div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="step-number">2</div>
+                            <div class="mt-3">
+                                <h5 class="font-bold">Vectorization (แปลงเป็นตัวเลข)</h5>
+                                <div class="code-block mt-2">
+"ฉัน" → [0.2, 0.8, -0.1, ...]
+"ชอบ" → [0.5, 0.3, 0.9, ...]</div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="step-number">3</div>
+                            <div class="mt-3">
+                                <h5 class="font-bold">Model Processing (ประมวลผลด้วยโมเดล)</h5>
+                                <p class="text-sm mt-2">ใช้ Transformer, RNN, หรือ LSTM ประมวลผล</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold mb-3">งาน NLP ที่นิยม</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="glass-panel p-4 rounded-lg">
+                            <h5 class="font-bold text-sm mb-2">Text Classification</h5>
+                            <p class="text-xs opacity-70">จำแนกประเภทข้อความ (Spam, Sentiment)</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg">
+                            <h5 class="font-bold text-sm mb-2">Named Entity Recognition</h5>
+                            <p class="text-xs opacity-70">หาชื่อคน สถานที่ องค์กร</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg">
+                            <h5 class="font-bold text-sm mb-2">Machine Translation</h5>
+                            <p class="text-xs opacity-70">แปลภาษา (Google Translate)</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg">
+                            <h5 class="font-bold text-sm mb-2">Question Answering</h5>
+                            <p class="text-xs opacity-70">ตอบคำถาม (ChatGPT)</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg">
+                            <h5 class="font-bold text-sm mb-2">Text Summarization</h5>
+                            <p class="text-xs opacity-70">สรุปข้อความยาว</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg">
+                            <h5 class="font-bold text-sm mb-2">Text Generation</h5>
+                            <p class="text-xs opacity-70">สร้างข้อความใหม่</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chapter 8: Computer Vision -->
+        <div class="glass-panel p-8 rounded-2xl mb-8" id="chapter8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="step-number">8</div>
+                <h2 class="text-3xl font-bold">Computer Vision</h2>
+            </div>
+
+            <div class="space-y-6">
+                <p class="text-lg leading-relaxed">
+                    <strong>Computer Vision</strong> คือ การทำให้คอมพิวเตอร์มองเห็นและเข้าใจภาพเหมือนมนุษย์
+                </p>
+
+                <div>
+                    <h4 class="font-bold mb-4">การทำงานของ CNN กับภาพ</h4>
+                    <div class="space-y-3">
+                        <div class="glass-panel p-5 rounded-lg">
+                            <h5 class="font-bold mb-2">1. Convolution Layer</h5>
+                            <p class="text-sm mb-2">สกัดฟีเจอร์จากภาพ เช่น ขอบ, เส้น, รูปร่าง</p>
+                            <div class="code-block text-xs">
+Filter 3x3 เลื่อนผ่านภาพ → คูณและบวก → ได้ Feature Map</div>
+                        </div>
+
+                        <div class="glass-panel p-5 rounded-lg">
+                            <h5 class="font-bold mb-2">2. Pooling Layer</h5>
+                            <p class="text-sm mb-2">ลดขนาดภาพ เก็บแค่ข้อมูลสำคัญ</p>
+                            <div class="code-block text-xs">
+Max Pooling: เลือกค่าสูงสุดในแต่ละบล็อก
+Average Pooling: หาค่าเฉลี่ยในแต่ละบล็อก</div>
+                        </div>
+
+                        <div class="glass-panel p-5 rounded-lg">
+                            <h5 class="font-bold mb-2">3. Fully Connected Layer</h5>
+                            <p class="text-sm">เชื่อมต่อทุก Neuron เพื่อตัดสินใจขั้นสุดท้าย</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold mb-3">งาน Computer Vision ที่นิยม</h4>
+                    <div class="space-y-3">
+                        <div class="glass-panel p-4 rounded-lg section-card">
+                            <h5 class="font-bold mb-2">Image Classification</h5>
+                            <p class="text-sm opacity-70">จำแนกภาพ: แมว/สุนัข, โรคจากภาพเอกซเรย์</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg section-card">
+                            <h5 class="font-bold mb-2">Object Detection</h5>
+                            <p class="text-sm opacity-70">หาวัตถุในภาพพร้อมตำแหน่ง: YOLO, Faster R-CNN</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg section-card">
+                            <h5 class="font-bold mb-2">Face Recognition</h5>
+                            <p class="text-sm opacity-70">จดจำใบหน้า: Face ID, ระบบเข้าออกอาคาร</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg section-card">
+                            <h5 class="font-bold mb-2">Image Segmentation</h5>
+                            <p class="text-sm opacity-70">แยกวัตถุออกจากพื้นหลัง: U-Net, Mask R-CNN</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg section-card">
+                            <h5 class="font-bold mb-2">OCR (Optical Character Recognition)</h5>
+                            <p class="text-sm opacity-70">อ่านตัวอักษรจากภาพ: Google Lens</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h4 class="font-bold mb-2">🎯 Tips สำหรับ Computer Vision</h4>
+                    <ul class="text-sm space-y-1">
+                        <li>• ใช้ Data Augmentation (หมุน ย่อ ขยาย) เพื่อเพิ่มข้อมูล</li>
+                        <li>• Transfer Learning: ใช้โมเดลที่ฝึกแล้ว (VGG, ResNet) ประหยัดเวลา</li>
+                        <li>• ภาพต้องมีคุณภาพดี ความละเอียดเหมาะสม</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary & Resources -->
+        <div class="glass-panel p-8 rounded-2xl">
+            <h3 class="text-2xl font-bold mb-6 text-center">สรุปและแนะนำเพิ่มเติม</h3>
+            
+            <div class="space-y-6">
+                <div class="highlight-box">
+                    <h4 class="font-bold mb-3">🎓 เส้นทางการเรียนรู้ AI</h4>
+                    <div class="space-y-2 text-sm">
+                        <p><strong>ระดับเริ่มต้น:</strong> Python → NumPy → Pandas → Matplotlib</p>
+                        <p><strong>ระดับกลาง:</strong> Scikit-learn → TensorFlow/PyTorch → Keras</p>
+                        <p><strong>ระดับสูง:</strong> Advanced Architectures → Research Papers → Custom Models</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold mb-3">📚 แหล่งเรียนรู้แนะนำ</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="glass-panel p-4 rounded-lg">
+                            <h5 class="font-bold text-sm mb-2">คอร์สออนไลน์</h5>
+                            <ul class="text-xs opacity-70 space-y-1">
+                                <li>• Coursera - Machine Learning by Andrew Ng</li>
+                                <li>• Fast.ai - Practical Deep Learning</li>
+                                <li>• Google - Machine Learning Crash Course</li>
+                            </ul>
+                        </div>
+                        <div class="glass-panel p-4 rounded-lg">
+                            <h5 class="font-bold text-sm mb-2">เครื่องมือและแพลตฟอร์ม</h5>
+                            <ul class="text-xs opacity-70 space-y-1">
+                                <li>• Google Colab - ฟรี GPU สำหรับทดสอบ</li>
+                                <li>• Kaggle - แข่งขัน + Dataset</li>
+                                <li>• Hugging Face - โมเดลสำเร็จรูป</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center pt-6 border-t border-[var(--border-color)]">
+                    <p class="text-sm opacity-70 mb-4">พร้อมเริ่มต้นฝึกอบรม AI แล้วหรือยัง?</p>
+                    <a href="index.html" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-xl font-bold hover:shadow-lg transition-all">
+                        <i data-lucide="rocket" class="w-5 h-5"></i>
+                        เริ่มใช้งาน AI Training Suite
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 pt-8 border-t border-[var(--border-color)]">
+            <p class="text-sm opacity-60">Created with ❤️ by Jarunyoo Thonganek / นายจรัญญู ทองเอนก</p>
+        </div>
+    </main>
+
+    <script>
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+
+        // Scroll progress indicator
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrollPercent = (scrollTop / scrollHeight) * 100;
+            document.getElementById('scroll-progress').style.height = scrollPercent + '%';
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

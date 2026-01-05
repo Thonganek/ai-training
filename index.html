@@ -3,25 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Training for Research & Health by Ton</title>
-    
-    <!-- Libraries -->
+    <title>AI For Research And Health Care By TON Training Suite - Main Menu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
     
-    <!-- Config Tailwind for Dynamic Themes -->
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Sarabun', 'sans-serif'], mono: ['Fira Code', 'monospace'] },
-                    animation: {
-                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    }
+                    fontFamily: { sans: ['Sarabun', 'sans-serif'] },
                 }
             }
         }
@@ -29,22 +21,21 @@
 
     <style>
         :root {
-            --bg-main: #020617;
-            --bg-panel: rgba(15, 23, 42, 0.6);
-            --text-main: #e2e8f0;
-            --text-muted: #94a3b8;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --accent-color: #0ea5e9;
-        }
-
-        /* Light Theme Override */
-        [data-theme="light"] {
             --bg-main: #f8fafc;
             --bg-panel: rgba(255, 255, 255, 0.9);
             --text-main: #0f172a;
             --text-muted: #64748b;
             --border-color: rgba(0, 0, 0, 0.1);
             --accent-color: #0284c7;
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #020617;
+            --bg-panel: rgba(15, 23, 42, 0.6);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-color: #0ea5e9;
         }
 
         body { 
@@ -60,62 +51,22 @@
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-            transition: background 0.5s, border 0.5s;
+            transition: all 0.3s;
         }
 
-        /* Other Styles */
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
+        }
+
         .animate-float { animation: float 8s ease-in-out infinite; }
         @keyframes float {
             0% { transform: translate(0, 0px); }
             50% { transform: translate(0, -20px); }
             100% { transform: translate(0, 0px); }
         }
-
-        /* Steps & Tabs */
-        .tab-active { 
-            background: var(--accent-color);
-            color: white; 
-            box-shadow: 0 0 15px rgba(14, 165, 233, 0.3); 
-        }
-        .tab-inactive { 
-            background: transparent; 
-            color: var(--text-muted); 
-            border: 1px solid var(--border-color);
-        }
-        
-        .step-card-active { 
-            border-color: var(--accent-color); 
-            background: rgba(14, 165, 233, 0.1); 
-        }
-        .step-card-inactive { 
-            border-color: var(--border-color); 
-            background: transparent; 
-        }
-
-        /* Canvas for Drawing */
-        canvas#draw-canvas {
-            background: white;
-            cursor: crosshair;
-            border-radius: 8px;
-            border: 2px dashed var(--text-muted);
-        }
-
-        /* Training Visualizer Custom Scroll */
-        .scroller {
-            scrollbar-width: thin;
-            scrollbar-color: var(--accent-color) transparent;
-        }
-
-        /* API Status Indicators */
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .status-ready { background-color: #94a3b8; }
-        .status-working { background-color: #fbbf24; box-shadow: 0 0 8px #fbbf24; animation: pulse 1s infinite; }
-        .status-active { background-color: #22c55e; box-shadow: 0 0 8px #22c55e; }
-        .status-dead { background-color: #ef4444; }
-
     </style>
 </head>
-<!-- Set default data-theme to light -->
 <body class="min-h-screen overflow-x-hidden selection:bg-cyan-500 selection:text-white" data-theme="light">
 
     <!-- Ambient Background -->
@@ -124,1792 +75,156 @@
         <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
     </div>
 
-    <!-- Navbar -->
-    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel flex flex-col md:flex-row justify-between items-center sticky top-0 gap-4 md:gap-0">
-        <div class="flex items-center gap-3 w-full md:w-auto">
-            <div class="p-2.5 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/20">
-                <i data-lucide="brain-circuit" class="w-6 h-6 text-white"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-                    AI Training Suite
-                </h1>
-                <div class="flex items-center gap-2">
-                    <p class="text-[10px] opacity-60 uppercase tracking-widest font-semibold">Jarunyoo Thonganek</p>
-                    <span class="w-1 h-1 bg-current rounded-full opacity-50"></span>
-                    <p class="text-[10px] text-cyan-500">นายจรัญญู ทองเอนก</p>
+    <!-- Header -->
+    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/20">
+                    <i data-lucide="brain-circuit" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+                        AI For Research And Health Care By TON 
+                    </h1>
+                    <div class="flex items-center gap-2">
+                        <p class="text-[10px] opacity-60 uppercase tracking-widest font-semibold">Jarunyoo Thonganek</p>
+                        <span class="w-1 h-1 bg-current rounded-full opacity-50"></span>
+                        <p class="text-[10px] text-cyan-500">นายจรัญญู ทองเอนก</p>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="flex flex-wrap justify-center items-center gap-4">
-             <!-- API Status Monitor Button -->
-             <button onclick="toggleAPIModal()" class="flex items-center gap-2 px-3 py-1.5 bg-slate-800/10 border border-[var(--border-color)] rounded-lg text-xs font-bold hover:bg-slate-800/20 transition-all text-[var(--text-main)]" title="Check API Status">
-                <i data-lucide="activity" class="w-4 h-4 text-green-500"></i>
-                <span class="hidden lg:inline">API Status</span>
-            </button>
-
-            <!-- Theme Switcher -->
+            
             <div class="flex bg-[var(--bg-main)] rounded-lg p-1 border border-[var(--border-color)]">
-                <button onclick="setTheme('dark')" class="p-1.5 rounded hover:bg-slate-800 hover:text-white text-[var(--text-muted)]" title="Dark Mode"><i data-lucide="moon" class="w-4 h-4"></i></button>
-                <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]" title="Light Mode"><i data-lucide="sun" class="w-4 h-4"></i></button>
-            </div>
-
-            <div class="h-6 w-px bg-[var(--border-color)] hidden md:block"></div>
-
-            <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto justify-center">
-                <button onclick="switchMode('text')" id="btn-text" class="tab-active px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="database" class="w-4 h-4"></i> 
-                    <span>Text Research</span>
+                <button onclick="setTheme('dark')" class="p-1.5 rounded hover:bg-slate-800 hover:text-white text-[var(--text-muted)]" title="Dark Mode">
+                    <i data-lucide="moon" class="w-4 h-4"></i>
                 </button>
-                
-                <button onclick="switchMode('visual')" id="btn-visual" class="tab-inactive px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="scan-face" class="w-4 h-4"></i> 
-                    <span>Deep Visual</span>
-                </button>
-
-                <!-- NEW BUTTON: LLM Architect -->
-                <button onclick="switchMode('llm')" id="btn-llm" class="tab-inactive px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap border-purple-500/50 text-purple-400 hover:bg-purple-500/10">
-                    <i data-lucide="network" class="w-4 h-4"></i> 
-                    <span>LLM Architect</span>
+                <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]" title="Light Mode">
+                    <i data-lucide="sun" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
     </nav>
 
-    <main class="relative z-10 p-4 md:p-8 container mx-auto max-w-[1600px] min-h-[calc(100vh-100px)]">
+    <!-- Main Content -->
+    <main class="relative z-10 container mx-auto px-4 py-12 max-w-6xl">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold mb-4">Welcome to AI Training Suite</h2>
+            <p class="text-lg opacity-70">ระบบฝึกอบรมและทดสอบ AI แบบครบวงจร</p>
+        </div>
 
-        <!-- ==================== MODE 1: TEXT TRAINING ==================== -->
-        <div id="mode-text" class="grid grid-cols-12 gap-6 animate-fade-in h-full">
-            <!-- Left Panel -->
-            <div class="col-span-12 lg:col-span-4 flex flex-col gap-5 h-full">
-                <div class="glass-panel p-6 rounded-2xl relative flex flex-col h-full">
-                    <h2 class="text-lg font-bold mb-1 flex items-center gap-2">
-                        <i data-lucide="book-open-check" class="text-emerald-400"></i> Knowledge Pipeline
-                    </h2>
-                    <p class="text-xs opacity-60 mb-4">เชื่อมต่อข้อมูลงานวิจัยและสถิติเข้าสู่ระบบ (Supports: .txt, .csv, .json)</p>
-                    
-                    <!-- Flexible Connectors -->
-                    <div class="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)] mb-4 opacity-80">
-                        <div class="space-y-3">
-                            <!-- File Attach -->
-                            <div class="flex gap-2">
-                                <button onclick="document.getElementById('local-file-upload').click()" class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs border border-[var(--border-color)] transition-colors text-[var(--text-main)]">
-                                    <i data-lucide="paperclip" class="w-3 h-3 text-blue-400"></i> Attach File
-                                </button>
-                                <input type="file" id="local-file-upload" class="hidden" accept=".txt,.csv,.json,.md" onchange="handleFileUpload(this)">
-                                
-                                <button onclick="handleSheetImport()" class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs border border-[var(--border-color)] transition-colors text-[var(--text-main)]">
-                                    <i data-lucide="link" class="w-3 h-3 text-green-400"></i> Link URL
-                                </button>
-                            </div>
-                        </div>
+        <!-- Module Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Text Research -->
+            <a href="text_research.html" class="glass-panel p-6 rounded-2xl block group">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-3 bg-emerald-500/20 rounded-xl group-hover:bg-emerald-500/30 transition-colors">
+                        <i data-lucide="database" class="w-6 h-6 text-emerald-500"></i>
                     </div>
-
-                    <!-- Input -->
-                    <div class="relative flex-1 min-h-[200px]">
-                        <textarea id="knowledge-input" class="w-full h-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl p-4 font-mono text-sm focus:border-cyan-500 outline-none resize-none leading-relaxed transition-all placeholder-slate-500" 
-                        placeholder="วางข้อมูลงานวิจัย, สถิติ หรือแนบไฟล์ที่นี่ (รองรับข้อมูลขนาดใหญ่)..."></textarea>
-                        <div class="absolute bottom-2 right-2 text-[10px] opacity-50 bg-[var(--bg-main)] px-2 rounded border border-[var(--border-color)]" id="token-count">0 chars</div>
-                    </div>
-
-                    <!-- Visualizer -->
-                    <div id="nlp-visualizer" class="hidden mt-4 p-4 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)]">
-                        <h4 class="text-xs font-bold text-purple-400 mb-2 flex justify-between items-center">
-                            <span><i data-lucide="cpu" class="w-3 h-3 inline mr-1"></i> NLP Training Core</span>
-                            <span class="text-[10px] opacity-50" id="proc-speed">0 words/s</span>
-                        </h4>
-                        
-                        <!-- Step 1: Token Stream -->
-                        <div class="mb-3">
-                            <div class="flex justify-between text-[10px] opacity-60 mb-1">
-                                <span>1. Tokenization & Extraction</span>
-                                <span id="step-1-status" class="text-yellow-500">Waiting...</span>
-                            </div>
-                            <div id="vis-tokens" class="h-24 bg-black/30 rounded-lg p-2 overflow-y-auto flex flex-wrap content-start gap-1 scroller border border-[var(--border-color)] font-mono text-[10px]">
-                                <!-- Tokens will stream here -->
-                            </div>
-                        </div>
-
-                        <!-- Step 2: Vector Matrix -->
-                        <div>
-                            <div class="flex justify-between text-[10px] opacity-60 mb-1">
-                                <span>2. Vector Embedding (1024-dim)</span>
-                                <span id="step-2-status" class="text-slate-500">...</span>
-                            </div>
-                            <div id="vis-vectors" class="h-20 bg-black/40 rounded-lg p-2 overflow-hidden font-mono text-[8px] text-green-500/80 leading-none break-all relative border border-[var(--border-color)]">
-                                <!-- Matrix Rain will happen here -->
-                            </div>
-                        </div>
-
-                        <!-- Confirmation Button -->
-                        <div id="train-confirm-area" class="hidden mt-4 pt-3 border-t border-[var(--border-color)] text-center">
-                            <p class="text-xs text-green-400 mb-2 font-bold"><i data-lucide="check-circle" class="w-3 h-3 inline"></i> Deep Learning Complete</p>
-                            <button onclick="confirmTraining()" class="w-full py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-lg text-sm font-bold shadow-lg animate-pulse transition-all">
-                                Save Model to Memory
-                            </button>
-                        </div>
-                    </div>
-
-                    <button onclick="startTextTraining()" id="btn-start-train" class="w-full mt-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg transition-all flex justify-center items-center gap-2">
-                        <i data-lucide="zap"></i> Start Training Process
-                    </button>
+                    <h3 class="text-xl font-bold">Text Research</h3>
                 </div>
-            </div>
+                <p class="text-sm opacity-70 mb-4">ฝึกอบรม AI ด้วยข้อมูลงานวิจัย สถิติ และเอกสาร พร้อมระบบแชทอัจฉริยะ</p>
+                <div class="flex items-center text-sm text-emerald-500 font-semibold">
+                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </div>
+            </a>
 
-            <!-- Right Panel: Chat -->
-            <div class="col-span-12 lg:col-span-8 flex flex-col h-[calc(100vh-140px)]">
-                <div class="glass-panel flex-1 rounded-2xl flex flex-col overflow-hidden relative">
-                    <!-- Chat Header -->
-                    <div class="p-4 border-b border-[var(--border-color)] flex items-center justify-between z-10 bg-[var(--bg-panel)]">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-indigo-500/20 rounded-full flex items-center justify-center border border-indigo-500/30">
-                                <i data-lucide="bot" class="text-indigo-400 w-5 h-5"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-sm">AI Research Assistant</h3>
-                                <p class="text-[10px] opacity-60 flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Gemini Pro Active
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center gap-2">
-                            <!-- Response Source Selector -->
-                            <div class="flex items-center bg-[var(--bg-main)] rounded-lg border border-[var(--border-color)] px-2 py-1">
-                                <span class="text-[16px] opacity-60 mr-2">Source:</span>
-                                <select id="chat-source" onchange="handleSourceChange(this)" class="bg-transparent text-xs font-bold outline-none cursor-pointer text-[var(--text-main)] max-w-[100px] md:max-w-[150px]">
-                                    <option value="api">1. 🌐 General AI</option>
-                                    <option value="hybrid">2. 🧠 Trained Memory (Hybrid)</option>
-                                    <option value="strict">3. 🔒 Only Data Training</option>
-                                    <option value="offline">4. 🚫 Offline Logic (No API)</option>
-                                </select>
-                            </div>
-
-                            <!-- NEW: Response Length Selector (Token Control) -->
-                            <div class="flex items-center bg-[var(--bg-main)] rounded-lg border border-[var(--border-color)] px-2 py-1 hidden md:flex" title="Limit Response Length to save tokens">
-                                <span class="text-[10px] opacity-60 mr-2"><i data-lucide="scissors" class="w-3 h-3"></i>:</span>
-                                <select id="chat-length" class="bg-transparent text-xs font-bold outline-none cursor-pointer text-[var(--text-main)]">
-                                    <option value="short">⚡ Short (ประหยัด)</option>
-                                    <option value="medium" selected>📝 Normal</option>
-                                    <option value="long">📚 Detailed</option>
-                                </select>
-                            </div>
-
-                            <button onclick="clearChat()" class="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg flex items-center gap-2 text-xs font-bold transition-all">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i> <span class="hidden md:inline">New Chat</span>
-                            </button>
-                        </div>
+            <!-- Deep Visual -->
+            <a href="deep_visual.html" class="glass-panel p-6 rounded-2xl block group">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-3 bg-blue-500/20 rounded-xl group-hover:bg-blue-500/30 transition-colors">
+                        <i data-lucide="scan-face" class="w-6 h-6 text-blue-500"></i>
                     </div>
+                    <h3 class="text-xl font-bold">Deep Visual</h3>
+                </div>
+                <p class="text-sm opacity-70 mb-4">ฝึกอบรม AI ด้วยรูปภาพ ใช้ CNN ในการจดจำและทำนายผล</p>
+                <div class="flex items-center text-sm text-blue-500 font-semibold">
+                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </div>
+            </a>
 
-                    <!-- Chat Box -->
-                    <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 bg-[var(--bg-main)]/50 relative">
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div>
-                            <div class="glass-panel p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm">
-                                สวัสดีครับ ผมคือ AI ผู้ช่วยวิจัย ที่คุณต้น จรัญญูู ทองเอนก เป็นคนสร้างผมขึ้นมา<br>พร้อมช่วยงานวิจัย สถิติ ให้คำแนะนำและวิเคราะห์ข้อมูลทางการแพทย์ครับ
-                            </div>
-                        </div>
+            <!-- LLM Architect -->
+            <a href="llm_architect.html" class="glass-panel p-6 rounded-2xl block group">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-3 bg-purple-500/20 rounded-xl group-hover:bg-purple-500/30 transition-colors">
+                        <i data-lucide="network" class="w-6 h-6 text-purple-500"></i>
                     </div>
+                    <h3 class="text-xl font-bold">LLM Architect</h3>
+                </div>
+                <p class="text-sm opacity-70 mb-4">สร้างและทดสอบ Neural Network สำหรับ Text Generation</p>
+                <div class="flex items-center text-sm text-purple-500 font-semibold">
+                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </div>
+            </a>
 
-                    <!-- Input & Attachment -->
-                    <div class="p-4 border-t border-[var(--border-color)] z-10 bg-[var(--bg-panel)]">
-                        <!-- Preview Attached File -->
-                        <div id="chat-attachment-preview" class="hidden mb-2 px-3 py-1.5 text-xs text-blue-500 bg-blue-500/10 rounded-lg border border-blue-500/20 flex justify-between items-center w-fit max-w-full">
-                            <div class="flex items-center gap-2 overflow-hidden">
-                                <i data-lucide="file" class="w-3 h-3 flex-shrink-0"></i>
-                                <span id="chat-file-name" class="truncate font-semibold">filename.docx</span>
-                            </div>
-                            <button onclick="clearChatAttachment()" class="ml-2 hover:text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button>
-                        </div>
-
-                        <form onsubmit="handleChatSubmit(event)" class="flex gap-2 items-center">
-                            <!-- Paperclip Button -->
-                            <button type="button" onclick="document.getElementById('chat-file-upload').click()" class="p-3 bg-[var(--bg-main)] hover:bg-[var(--accent-color)] hover:text-white border border-[var(--border-color)] rounded-xl transition-all text-[var(--text-muted)]" title="Attach File">
-                                <i data-lucide="paperclip" class="w-5 h-5"></i>
-                            </button>
-                            <!-- Supports all files -->
-                            <input type="file" id="chat-file-upload" class="hidden" onchange="handleChatFileSelect(this)">
-                            
-                            <input type="text" id="user-input" class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all" placeholder="ถามคำถามวิจัยทั่วไป (General Knowledge)...">
-                            <button type="submit" class="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500"><i data-lucide="send" class="w-5 h-5"></i></button>
-                        </form>
+            <!-- AI Training Center -->
+            <a href="ai_training_center.html" class="glass-panel p-6 rounded-2xl block group">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-3 bg-orange-500/20 rounded-xl group-hover:bg-orange-500/30 transition-colors">
+                        <i data-lucide="graduation-cap" class="w-6 h-6 text-orange-500"></i>
                     </div>
+                    <h3 class="text-xl font-bold">AI Training Center</h3>
+                </div>
+                <p class="text-sm opacity-70 mb-4">ศูนย์ฝึกอบรมและจัดการข้อมูล AI แบบรวมศูนย์</p>
+                <div class="flex items-center text-sm text-orange-500 font-semibold">
+                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </div>
+            </a>
+
+            <!-- AI Complete Guide (NEW) -->
+            <a href="ai_guide.html" class="glass-panel p-6 rounded-2xl block group">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-3 bg-pink-500/20 rounded-xl group-hover:bg-pink-500/30 transition-colors">
+                        <i data-lucide="book-open" class="w-6 h-6 text-pink-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold">AI Complete Guide</h3>
+                </div>
+                <p class="text-sm opacity-70 mb-4">คู่มือสมบูรณ์: อธิบายการสร้าง AI อย่างละเอียดทุกขั้นตอน</p>
+                <div class="flex items-center text-sm text-pink-500 font-semibold">
+                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </div>
+            </a>
+        </div>
+
+        <!-- Features -->
+        <div class="glass-panel p-8 rounded-2xl">
+            <h3 class="text-2xl font-bold mb-6 text-center">คุณสมบัติหลัก</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="inline-block p-4 bg-blue-500/10 rounded-full mb-3">
+                        <i data-lucide="zap" class="w-8 h-8 text-blue-500"></i>
+                    </div>
+                    <h4 class="font-bold mb-2">ฝึกอบรมรวดเร็ว</h4>
+                    <p class="text-sm opacity-70">ระบบประมวลผลที่รวดเร็ว รองรับข้อมูลขนาดใหญ่</p>
+                </div>
+                <div class="text-center">
+                    <div class="inline-block p-4 bg-emerald-500/10 rounded-full mb-3">
+                        <i data-lucide="brain" class="w-8 h-8 text-emerald-500"></i>
+                    </div>
+                    <h4 class="font-bold mb-2">AI ฉลาด</h4>
+                    <p class="text-sm opacity-70">ใช้ Gemini Pro API พร้อมระบบ Memory ขั้นสูง</p>
+                </div>
+                <div class="text-center">
+                    <div class="inline-block p-4 bg-purple-500/10 rounded-full mb-3">
+                        <i data-lucide="eye" class="w-8 h-8 text-purple-500"></i>
+                    </div>
+                    <h4 class="font-bold mb-2">Visual Training</h4>
+                    <p class="text-sm opacity-70">ฝึก AI ด้วยภาพและวิดีโอแบบ Real-time</p>
                 </div>
             </div>
         </div>
-
-        <!-- ==================== MODE 2: DEEP VISUAL TRAINING ==================== -->
-        <div id="mode-visual" class="grid grid-cols-12 gap-6 hidden animate-fade-in">
-            <!-- Sidebar Pipeline -->
-            <div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
-                <div class="glass-panel p-6 rounded-2xl">
-                    <h2 class="text-lg font-bold mb-4 text-blue-400 flex items-center gap-2">
-                        <i data-lucide="layers"></i> Deep Visual Pipeline
-                    </h2>
-                    <div class="space-y-3">
-                        <div onclick="visualStep(1)" id="v-step-1" class="step-card-active p-4 rounded-xl border cursor-pointer transition-all">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-blue-500/20 p-2 rounded-lg text-blue-400"><i data-lucide="upload"></i></div>
-                                <div><h3 class="font-bold text-sm">1. Dataset</h3><p class="text-[10px] opacity-60">Upload & Label</p></div>
-                            </div>
-                        </div>
-                        <div onclick="visualStep(2)" id="v-step-2" class="step-card-inactive p-4 rounded-xl border cursor-pointer transition-all">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-purple-500/20 p-2 rounded-lg text-purple-400"><i data-lucide="network"></i></div>
-                                <div><h3 class="font-bold text-sm">2. Neural Network</h3><p class="text-[10px] opacity-60">CNN Architecture</p></div>
-                            </div>
-                        </div>
-                        <div onclick="visualStep(3)" id="v-step-3" class="step-card-inactive p-4 rounded-xl border cursor-pointer transition-all">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-orange-500/20 p-2 rounded-lg text-orange-400"><i data-lucide="zap"></i></div>
-                                <div><h3 class="font-bold text-sm">3. Training</h3><p class="text-[10px] opacity-60">Backpropagation</p></div>
-                            </div>
-                        </div>
-                        <div onclick="visualStep(4)" id="v-step-4" class="step-card-inactive p-4 rounded-xl border cursor-pointer transition-all">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-green-500/20 p-2 rounded-lg text-green-400"><i data-lucide="scan-eye"></i></div>
-                                <div><h3 class="font-bold text-sm">4. Inference</h3><p class="text-[10px] opacity-60">Test & Predict</p></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Visual Area -->
-            <div class="col-span-12 lg:col-span-9">
-                <div class="glass-panel rounded-2xl p-6 min-h-[600px] flex flex-col items-center border-[var(--border-color)] relative overflow-hidden" id="visual-workspace">
-                    
-                    <!-- STEP 1: UPLOAD & LABEL -->
-                    <div id="visual-content-1" class="w-full h-full flex flex-col items-center justify-center animate-fade-in">
-                        <div class="text-center mb-6">
-                            <h3 class="text-2xl font-bold mb-2">Prepare Dataset</h3>
-                            <p class="opacity-60 text-sm">อัปโหลดภาพหรือถ่ายภาพจากกล้อง เพื่อสอน AI (AI จะจำภาพเหล่านี้ไว้เปรียบเทียบ)</p>
-                        </div>
-                        
-                        <!-- Training Camera Container (Hidden by default) -->
-                        <div id="train-camera-container" class="hidden w-full max-w-md flex-col items-center gap-2 mb-4 p-4 bg-black/20 rounded-xl border border-[var(--border-color)]">
-                            <div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
-                                <video id="train-webcam" autoplay playsinline class="w-full h-full object-cover"></video>
-                                <div class="absolute top-2 right-2 flex items-center gap-1 bg-red-600/80 text-white px-2 py-0.5 rounded text-[10px] animate-pulse">
-                                    <div class="w-2 h-2 bg-white rounded-full"></div> REC
-                                </div>
-                            </div>
-                            <div class="flex gap-2 w-full">
-                                <button onclick="captureTrainingImage()" class="flex-1 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-bold flex justify-center items-center gap-2">
-                                    <i data-lucide="camera"></i> Capture & Add
-                                </button>
-                                <button onclick="closeTrainCamera()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm">Close</button>
-                            </div>
-                        </div>
-
-                        <!-- Buttons Row -->
-                        <div class="flex flex-wrap justify-center gap-4 mb-4">
-                            <select id="label-selector" class="bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-4 py-2 text-sm focus:border-blue-500 outline-none">
-                                <option value="Normal">Label: Normal (ปกติ)</option>
-                                <option value="Abnormal">Label: Abnormal (ผิดปกติ)</option>
-                                <option value="Risk">Label: Risk (มีความเสี่ยง)</option>
-                            </select>
-                            
-                            <button onclick="document.getElementById('visual-upload').click()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
-                                <i data-lucide="plus"></i> Add Images
-                            </button>
-                            
-                            <button onclick="toggleTrainCamera()" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
-                                <i data-lucide="video"></i> Use Camera
-                            </button>
-
-                            <input type="file" id="visual-upload" multiple accept="image/*" class="hidden" onchange="handleVisualUpload(this)">
-                        </div>
-
-                        <div id="dataset-grid" class="w-full max-w-3xl h-64 border-2 border-dashed border-[var(--border-color)] rounded-xl p-4 overflow-y-auto grid grid-cols-4 gap-2 bg-[var(--bg-main)]/30">
-                            <div class="col-span-4 flex flex-col items-center justify-center h-full text-[var(--text-muted)]">
-                                <i data-lucide="image-plus" class="w-8 h-8 mb-2 opacity-50"></i>
-                                <span class="text-xs">No images yet. Upload or Capture to start.</span>
-                            </div>
-                        </div>
-
-                        <button onclick="visualStep(2)" id="btn-next-step1" class="mt-6 px-8 py-2 bg-[var(--bg-main)] border border-[var(--border-color)] hover:border-blue-500 rounded-lg text-sm opacity-50 cursor-not-allowed" disabled>
-                            Next: Build Network >
-                        </button>
-                    </div>
-
-                    <!-- STEP 2: CNN ARCHITECTURE -->
-                    <div id="visual-content-2" class="w-full h-full hidden flex-col items-center animate-fade-in">
-                        <h3 class="text-xl font-bold mb-6 text-purple-400">CNN Architecture Visualization</h3>
-                        
-                        <div class="flex items-center gap-2 overflow-x-auto p-4 w-full justify-center">
-                            <!-- Input Layer -->
-                            <div class="flex flex-col items-center">
-                                <div class="w-16 h-16 bg-white border border-slate-300 grid grid-cols-3 gap-0.5 p-0.5">
-                                    <div class="bg-black/80"></div><div class="bg-black/20"></div><div class="bg-black/60"></div>
-                                    <div class="bg-black/10"></div><div class="bg-black/90"></div><div class="bg-black/30"></div>
-                                    <div class="bg-black/50"></div><div class="bg-black/40"></div><div class="bg-black/10"></div>
-                                </div>
-                                <span class="text-[10px] mt-2">Input Image</span>
-                            </div>
-                            <i data-lucide="arrow-right" class="opacity-50"></i>
-                            
-                            <!-- Conv Layer -->
-                            <div class="flex flex-col items-center p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                                <div class="space-y-1">
-                                    <div class="w-12 h-1 bg-blue-500 rounded"></div>
-                                    <div class="w-12 h-1 bg-blue-500 rounded"></div>
-                                    <div class="w-12 h-1 bg-blue-500 rounded"></div>
-                                </div>
-                                <span class="text-[10px] mt-2 text-blue-400">Conv2D</span>
-                            </div>
-                            <i data-lucide="arrow-right" class="opacity-50"></i>
-
-                            <!-- Pooling -->
-                            <div class="flex flex-col items-center p-2 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-                                <div class="w-8 h-8 border border-orange-500 grid grid-cols-2">
-                                    <div class="bg-orange-500/50"></div><div></div>
-                                    <div></div><div class="bg-orange-500/50"></div>
-                                </div>
-                                <span class="text-[10px] mt-2 text-orange-400">MaxPooling</span>
-                            </div>
-                            <i data-lucide="arrow-right" class="opacity-50"></i>
-
-                            <!-- Flatten -->
-                            <div class="flex flex-col items-center">
-                                <div class="h-16 w-2 bg-slate-500 rounded"></div>
-                                <span class="text-[10px] mt-2">Flatten</span>
-                            </div>
-                            <i data-lucide="arrow-right" class="opacity-50"></i>
-
-                            <!-- Dense/Output -->
-                            <div class="flex flex-col items-center p-2 bg-green-500/10 border border-green-500/30 rounded-lg">
-                                <div class="flex gap-1">
-                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                                </div>
-                                <span class="text-[10px] mt-2 text-green-400">Softmax</span>
-                            </div>
-                        </div>
-
-                        <div class="mt-8 p-4 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)] w-full max-w-lg">
-                            <h4 class="text-xs font-bold mb-2">Model Summary</h4>
-                            <div class="font-mono text-[10px] opacity-70 space-y-1">
-                                <div class="flex justify-between"><span>Layer (type)</span><span>Output Shape</span><span>Param #</span></div>
-                                <div class="w-full h-px bg-[var(--border-color)]"></div>
-                                <div class="flex justify-between"><span>conv2d_1 (Conv2D)</span><span>(None, 26, 26, 32)</span><span>320</span></div>
-                                <div class="flex justify-between"><span>max_pooling (MaxPooling)</span><span>(None, 13, 13, 32)</span><span>0</span></div>
-                                <div class="flex justify-between"><span>flatten_1 (Flatten)</span><span>(None, 5408)</span><span>0</span></div>
-                                <div class="flex justify-between"><span>dense_1 (Dense)</span><span>(None, 3)</span><span>16227</span></div>
-                            </div>
-                        </div>
-
-                        <button onclick="visualStep(3)" class="mt-6 px-8 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold">
-                            Initialize & Train >
-                        </button>
-                    </div>
-
-                    <!-- STEP 3: TRAINING PROCESS -->
-                    <div id="visual-content-3" class="w-full h-full hidden flex-col items-center justify-center animate-fade-in">
-                        <h3 class="text-xl font-bold mb-2 text-orange-400">Training Model...</h3>
-                        <p class="text-xs opacity-60 mb-6">Learning features from uploaded dataset...</p>
-                        
-                        <div class="relative w-64 h-64 bg-black border-2 border-[var(--border-color)] rounded-lg overflow-hidden mb-6">
-                            <!-- Simulated Pixel Scanning -->
-                            <div class="absolute inset-0 grid grid-cols-12 grid-rows-12 gap-px opacity-30" id="matrix-bg">
-                                <!-- JS Generated -->
-                            </div>
-                            <div class="absolute inset-0 bg-green-500/20 h-2 w-full animate-[scan_1.5s_linear_infinite]"></div>
-                            <div class="absolute bottom-2 left-2 font-mono text-green-400 text-xs" id="loss-display">Loss: 0.99</div>
-                            <div class="absolute bottom-2 right-2 font-mono text-blue-400 text-xs" id="acc-display">Acc: 0%</div>
-                        </div>
-
-                        <div class="w-full max-w-md bg-[var(--border-color)] h-2 rounded-full overflow-hidden">
-                            <div id="train-progress" class="bg-gradient-to-r from-blue-500 to-green-500 h-full w-0 transition-all duration-300"></div>
-                        </div>
-                        <p class="text-xs mt-2 opacity-60" id="epoch-status">Epoch 0/50</p>
-                    </div>
-
-                    <!-- STEP 4: INFERENCE (DRAW / UPLOAD / CAMERA) -->
-                    <div id="visual-content-4" class="w-full h-full hidden flex-col items-center animate-fade-in">
-                        <h3 class="text-xl font-bold mb-4 text-green-400">Test Model (Comparison Mode)</h3>
-                        
-                        <!-- Tabs -->
-                        <div class="flex gap-2 mb-4 bg-[var(--bg-main)] p-1 rounded-lg border border-[var(--border-color)]">
-                            <button onclick="setInferMode('draw')" id="btn-infer-draw" class="px-4 py-1.5 rounded text-xs bg-white/10 font-bold">Draw</button>
-                            <button onclick="setInferMode('upload')" id="btn-infer-upload" class="px-4 py-1.5 rounded text-xs hover:bg-white/5 opacity-60">Upload</button>
-                            <button onclick="setInferMode('camera')" id="btn-infer-camera" class="px-4 py-1.5 rounded text-xs hover:bg-white/5 opacity-60">Camera</button>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-8 w-full max-w-4xl">
-                            <!-- Input Area -->
-                            <div class="flex-1 flex flex-col items-center">
-                                <!-- Draw Mode -->
-                                <div id="infer-draw" class="infer-panel">
-                                    <canvas id="draw-canvas" width="250" height="250"></canvas>
-                                    <button onclick="clearCanvas()" class="mt-2 text-xs text-red-400 hover:underline">Clear Canvas</button>
-                                </div>
-                                <!-- Upload Mode -->
-                                <div id="infer-upload" class="infer-panel hidden flex-col items-center justify-center w-[250px] h-[250px] border-2 border-dashed border-[var(--border-color)] rounded-lg">
-                                    <input type="file" id="test-image-upload" class="hidden" onchange="handleTestImage(this)">
-                                    <button onclick="document.getElementById('test-image-upload').click()" class="flex flex-col items-center opacity-60 hover:opacity-100">
-                                        <i data-lucide="image-plus" class="w-8 h-8 mb-2"></i>
-                                        <span class="text-xs">Select Image</span>
-                                    </button>
-                                    <img id="test-preview" class="hidden w-full h-full object-cover rounded-lg">
-                                </div>
-                                <!-- Camera Mode -->
-                                <div id="infer-camera" class="infer-panel hidden flex-col items-center">
-                                    <div class="w-[250px] h-[250px] bg-black rounded-lg overflow-hidden relative">
-                                        <video id="webcam" autoplay playsinline class="w-full h-full object-cover"></video>
-                                        <div class="absolute inset-0 flex items-center justify-center" id="cam-placeholder">
-                                            <button onclick="startCamera()" class="px-4 py-2 bg-blue-600 rounded text-xs text-white">Start Camera</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Result Area -->
-                            <div class="flex-1 bg-[var(--bg-main)]/50 rounded-xl border border-[var(--border-color)] p-6 flex flex-col justify-center">
-                                <h4 class="text-sm font-bold mb-4 border-b border-[var(--border-color)] pb-2">Similarity Match</h4>
-                                
-                                <div class="space-y-4 mb-4" id="bars-container">
-                                    <div>
-                                        <div class="flex justify-between text-xs mb-1"><span>Normal</span><span id="pred-normal">0%</span></div>
-                                        <div class="w-full h-2 bg-black/20 rounded-full"><div id="bar-normal" class="h-full bg-green-500 rounded-full w-0 transition-all duration-500"></div></div>
-                                    </div>
-                                    <div>
-                                        <div class="flex justify-between text-xs mb-1"><span>Abnormal</span><span id="pred-abnormal">0%</span></div>
-                                        <div class="w-full h-2 bg-black/20 rounded-full"><div id="bar-abnormal" class="h-full bg-red-500 rounded-full w-0 transition-all duration-500"></div></div>
-                                    </div>
-                                    <div>
-                                        <div class="flex justify-between text-xs mb-1"><span>Risk</span><span id="pred-risk">0%</span></div>
-                                        <div class="w-full h-2 bg-black/20 rounded-full"><div id="bar-risk" class="h-full bg-orange-500 rounded-full w-0 transition-all duration-500"></div></div>
-                                    </div>
-                                </div>
-
-                                <!-- MATCH RESULTS CONTAINER -->
-                                <div id="match-results-list" class="space-y-2 mb-4 min-h-[50px]"></div>
-
-                                <button onclick="predict()" id="btn-predict" class="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl font-bold shadow-lg flex justify-center items-center gap-2">
-                                    <i data-lucide="scan"></i> Compare & Predict
-                                </button>
-                                <p class="text-[10px] text-center mt-2 opacity-50">Comparing input pixels with training dataset...</p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== MODE 3: LLM ARCHITECT (NEURAL NETWORK BUILDER) ==================== -->
-        <div id="mode-llm" class="grid grid-cols-12 gap-6 hidden animate-fade-in h-full">
-            <!-- Sidebar: Config & Data -->
-            <div class="col-span-12 lg:col-span-4 flex flex-col gap-5 h-full">
-                <div class="glass-panel p-6 rounded-2xl h-full flex flex-col">
-                    <h2 class="text-lg font-bold mb-4 text-purple-400 flex items-center gap-2">
-                        <i data-lucide="brain-circuit"></i> LLM Neural Architect
-                    </h2>
-                    
-                    <!-- Network Config -->
-                    <div class="mb-4 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)]">
-                        <h3 class="text-xs font-bold mb-2 opacity-70">Architecture Hyperparameters</h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-[10px] opacity-60">Hidden Layers</label>
-                                <input type="number" id="llm-layers" value="3" min="1" max="5" class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
-                            </div>
-                            <div>
-                                <label class="text-[10px] opacity-60">Neurons/Layer</label>
-                                <input type="number" id="llm-neurons" value="8" min="4" max="16" class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
-                            </div>
-                            <div>
-                                <label class="text-[10px] opacity-60">Context Window</label>
-                                <select class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
-                                    <option>2 Tokens (Bigram)</option>
-                                    <option>3 Tokens (Trigram)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[10px] opacity-60">Learning Rate</label>
-                                <select class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
-                                    <option>0.01 (Adam)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Training Data Input -->
-                    <div class="flex-1 flex flex-col">
-                        <h3 class="text-xs font-bold mb-2 opacity-70">Training Corpus (Text Data)</h3>
-                        <textarea id="llm-train-data" class="flex-1 w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl p-3 font-mono text-xs focus:border-purple-500 outline-none resize-none mb-2" placeholder="Paste text here to train the Neural Network... (e.g., Medical reports, Research abstracts)"></textarea>
-                        <button onclick="trainLLM()" id="btn-train-llm" class="w-full py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg text-sm font-bold shadow-lg transition-all flex justify-center items-center gap-2">
-                            <i data-lucide="play-circle"></i> Train Neural Network
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main: Visualizer & Output -->
-            <div class="col-span-12 lg:col-span-8 flex flex-col gap-5 h-full">
-                <!-- Neural Network Visualizer Canvas -->
-                <div class="glass-panel p-4 rounded-2xl flex-1 flex flex-col relative overflow-hidden bg-black/80">
-                    <div class="absolute top-4 left-4 z-10 bg-black/50 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
-                        <span class="text-xs font-mono text-green-400" id="llm-status">Status: Idle</span>
-                    </div>
-                    <canvas id="nn-canvas" class="w-full h-full object-contain"></canvas>
-                </div>
-
-                <!-- Text Generation / Inference -->
-                <div class="glass-panel p-6 rounded-2xl h-[200px] flex flex-col">
-                    <h3 class="text-sm font-bold mb-2 flex items-center gap-2">
-                        <i data-lucide="message-square"></i> Test Generation (Inference)
-                    </h3>
-                    <div class="flex gap-2 mb-2">
-                        <input type="text" id="llm-seed" class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm outline-none" placeholder="Start typing (e.g. 'The patient')...">
-                        <button onclick="generateText()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold flex items-center gap-2">
-                            <i data-lucide="wand-2"></i> Generate
-                        </button>
-                    </div>
-                    <div id="llm-output" class="flex-1 bg-white/20 rounded-lg p-3 text-sm font-mono text-blue-1000 overflow-y-auto border border-[var(--border-color)]">
-                        <span class="opacity-50">// Generated text will appear here...</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </main>
 
-    <!-- Alert Modal -->
-    <div id="alert-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-        <div class="glass-panel p-6 rounded-2xl max-w-sm w-full shadow-2xl">
-            <h3 class="text-lg font-bold mb-2 flex items-center gap-2" id="alert-title">Title</h3>
-            <p class="text-sm opacity-80 mb-6" id="alert-msg">Message</p>
-            <button onclick="document.getElementById('alert-modal').classList.add('hidden')" class="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm">Close</button>
-        </div>
-    </div>
-
-    <!-- NEW: API Status Modal -->
-    <div id="api-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-        <div class="glass-panel p-6 rounded-2xl max-w-md w-full shadow-2xl relative">
-            <button onclick="toggleAPIModal()" class="absolute top-4 right-4 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button>
-            <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i data-lucide="activity" class="text-green-500"></i> API Health Monitor</h3>
-            <div class="space-y-2 max-h-[300px] overflow-y-auto scroller pr-2" id="api-status-list">
-                <!-- JS will populate this -->
-            </div>
-            <div class="mt-4 pt-4 border-t border-[var(--border-color)] text-[10px] opacity-60 text-center">
-                System automatically rotates keys if Quota Exceeded (429) or Error occurs.
-            </div>
-        </div>
-    </div>
-
-<script>
-    // ใส่ API Key ของคุณที่นี่ (จะวนใช้ทีละตัวถ้าตัวก่อนหน้าใช้ไม่ได้)
-    const API_KEYS = [
-        "AIzaSyDiqXPAnfMICeehtGSC6VwDJaH9HqTIa-E",
-        "AIzaSyAuGmhGGfVIgdcBS-bDPu06I_fQpIy2Sng",
-        "AIzaSyAXn2RnKle5RdJsD74PHVQbQAcOkPffkb4",
-    ];
-    
-    // Extended Status Tracking
-    let keyHealth = API_KEYS.map((k, i) => ({
-        id: i + 1,
-        key: k,
-        status: 'ready', // ready, working, active, dead
-        msg: 'Ready'
-    }));
-
-    let currentKeyIndex = 0;
-    
-    // Initial Memory with Developer Credit
-    let memory = ["คุณคือ AI ผู้ช่วยวิจัย ที่พัฒนาโดย นายจรัญญู ทองเอนก"];
-    
-    // --- STORAGE LOGIC ---
-    function loadMemory() {
-        const saved = localStorage.getItem('ai_memory');
-        if(saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                if(parsed.length > 0) memory = parsed;
-            } catch(e) { console.error("Load Memory Error", e); }
-        }
-    }
-
-    function saveMemoryToStorage() {
-        localStorage.setItem('ai_memory', JSON.stringify(memory));
-    }
-
-    // Listen for changes from other tabs (training.html)
-    window.addEventListener('storage', (e) => {
-        if(e.key === 'ai_memory') {
-            loadMemory();
-            showAlert("System Sync", "ได้รับข้อมูลใหม่จาก Training Center เรียบร้อยแล้ว!");
-        }
-    });
-
-    // Initialize
-    loadMemory();
-
-    let visualDataset = [];
-    let isDrawing = false;
-    let trainInterval;
-    let trainStream = null;
-    let currentChatFile = null;
-    let lastUserQuestion = ""; // For Learning/Teaching
-
-    // --- THEME ---
-    function setTheme(theme) {
-        document.body.setAttribute('data-theme', theme);
-    }
-
-    // --- NAVIGATION ---
-    function switchMode(mode) {
-        document.getElementById('mode-text').classList.toggle('hidden', mode !== 'text');
-        document.getElementById('mode-visual').classList.toggle('hidden', mode !== 'visual');
-        document.getElementById('mode-llm').classList.toggle('hidden', mode !== 'llm');
-        
-        // Update Tab States
-        const tabs = ['text', 'visual', 'llm'];
-        tabs.forEach(t => {
-            const btn = document.getElementById(`btn-${t}`);
-            // Reset base classes first
-            let baseClass = "px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap";
-            
-            if (t === mode) {
-                btn.className = baseClass + " tab-active";
-            } else {
-                btn.className = baseClass + " tab-inactive hover:bg-[var(--accent-color)]/10";
-            }
-        });
-
-        if(mode === 'llm') {
-            initNeuralNetworkVisualizer();
-        }
-    }
-
-    // --- TEXT TRAINING (DEEP & DETAILED) ---
-    function handleFileUpload(input) {
-        const file = input.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const text = e.target.result;
-            const textArea = document.getElementById('knowledge-input');
-            const timestamp = new Date().toLocaleTimeString();
-            textArea.value += (textArea.value ? "\n\n" : "") + `[File: ${file.name} @ ${timestamp}]\n` + text;
-            
-            // Trigger token count update
-            document.getElementById('token-count').innerText = textArea.value.length + " chars";
-            showAlert("File Attached", `Successfully loaded content from ${file.name}`);
-        };
-        // Read as text for text/csv/json/md files
-        reader.readAsText(file);
-    }
-
-    function handleSheetImport() {
-        const url = prompt("Enter CSV/Google Sheet URL:");
-        if(url) {
-            const textArea = document.getElementById('knowledge-input');
-            textArea.value += (textArea.value ? "\n\n" : "") + `[Linked URL: ${url}]\nSimulated data load...`;
-            document.getElementById('token-count').innerText = textArea.value.length + " chars";
-        }
-    }
-
-    // --- NEW: ADVANCED TRAINING PROCESS VISUALIZER ---
-    async function startTextTraining() {
-        const input = document.getElementById('knowledge-input').value.trim();
-        if(!input) return showAlert("Error", "Please enter data or attach a file first");
-
-        // UI Setup
-        document.getElementById('nlp-visualizer').classList.remove('hidden');
-        document.getElementById('btn-start-train').classList.add('hidden');
-        
-        // Clear previous
-        const visTokens = document.getElementById('vis-tokens');
-        visTokens.innerHTML = '';
-        document.getElementById('vis-vectors').innerHTML = '';
-        
-        // Tokenization Simulation (Split by spacing/newline for visual)
-        let tokens = input.split(/[\s\n]+/);
-        // Handle massive text blocks without spaces (Thai) by chunking chars if needed
-        if(tokens.length < input.length / 20) {
-            // Heuristic: If tokens are too few relative to length, it might be unspaced Thai.
-            // We'll split visually by character chunks for the "Stream" effect.
-            tokens = input.match(/.{1,10}/g) || [];
-        }
-        
-        const totalTokens = tokens.length;
-        let processedCount = 0;
-        
-        // Initial Status
-        document.getElementById('step-1-status').innerHTML = `<span class="animate-pulse text-yellow-500">Initializing Pipeline...</span>`;
-
-        // CHUNK PROCESSING SYSTEM (Optimized for 10,000+ words)
-        const chunkSize = 20; // Words per frame
-        let index = 0;
-        let startTime = Date.now();
-
-        function processChunk() {
-            const chunkEnd = Math.min(index + chunkSize, totalTokens);
-            let fragment = document.createDocumentFragment();
-            
-            for (let i = index; i < chunkEnd; i++) {
-                const token = tokens[i];
-                if (!token) continue;
-                
-                const span = document.createElement('span');
-                // Smart Highlighting: Highlight longer words/concepts
-                const isConcept = token.length > 5 || /[\u0E00-\u0E7F]/.test(token); // Simple heuristic
-                
-                span.className = isConcept 
-                    ? "inline-block px-1.5 py-0.5 m-0.5 bg-blue-500/20 text-blue-300 text-[10px] rounded border border-blue-500/30 animate-fade-in" 
-                    : "inline-block px-1 m-0.5 text-slate-500 text-[10px]";
-                span.innerText = token;
-                fragment.appendChild(span);
-            }
-            
-            visTokens.appendChild(fragment);
-            
-            // Auto Scroll
-            visTokens.scrollTop = visTokens.scrollHeight;
-            
-            // DOM Memory Management (Rolling Window: Keep last ~300 items)
-            if (visTokens.children.length > 300) {
-                for(let k=0; k<chunkSize; k++) {
-                    if(visTokens.firstChild) visTokens.removeChild(visTokens.firstChild);
-                }
-            }
-
-            processedCount = chunkEnd;
-            
-            // Calculate Speed
-            const elapsed = (Date.now() - startTime) / 1000;
-            const speed = Math.round(processedCount / (elapsed || 1));
-            document.getElementById('proc-speed').innerText = `${speed} words/s`;
-            document.getElementById('step-1-status').innerHTML = `<span class="text-yellow-500">Scanning & Tokenizing: ${processedCount}/${totalTokens}</span>`;
-
-            index += chunkSize;
-
-            if (index < totalTokens) {
-                requestAnimationFrame(processChunk);
-            } else {
-                document.getElementById('step-1-status').innerHTML = `<span class="text-green-500 font-bold">Extraction Complete (${totalTokens} tokens)</span>`;
-                startDeepVectorization();
-            }
+    <script>
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
         }
 
-        processChunk();
-    }
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
 
-    function startDeepVectorization() {
-        // Matrix Rain Effect for Vectorization
-        const visVectors = document.getElementById('vis-vectors');
-        document.getElementById('step-2-status').innerHTML = `<span class="animate-pulse text-blue-400">Generating Embeddings...</span>`;
-        
-        let progress = 0;
-        visVectors.innerHTML = "";
-
-        const interval = setInterval(() => {
-            // Generate simulated vector data (Hex dumps / Floats)
-            const chunk = Array(12).fill(0).map(() => Math.random().toFixed(4)).join(' ');
-            const row = document.createElement('div');
-            row.className = "text-[8px] whitespace-nowrap opacity-0 animate-fade-in text-emerald-500 font-mono";
-            row.innerText = `[VEC-${progress}] ${chunk} ...`;
-            visVectors.appendChild(row);
-            visVectors.scrollTop = visVectors.scrollHeight;
-
-            progress += 5; // increment
-            
-            if (progress >= 100) {
-                clearInterval(interval);
-                document.getElementById('step-2-status').innerHTML = `<span class="text-green-500 font-bold">Vectorized 1024-Dimensions Ready</span>`;
-                
-                // Show Save Button
-                document.getElementById('train-confirm-area').classList.remove('hidden');
-            }
-        }, 50); // Speed of matrix rain
-    }
-
-    function confirmTraining() {
-        const input = document.getElementById('knowledge-input').value;
-        memory.push(input);
-        saveMemoryToStorage(); // SYNC
-        
-        showAlert("Training Complete", "Data has been vectorized and saved to Trained Memory.");
-        
-        // Reset UI
-        document.getElementById('knowledge-input').value = '';
-        document.getElementById('token-count').innerText = "0 chars";
-        document.getElementById('nlp-visualizer').classList.add('hidden');
-        document.getElementById('train-confirm-area').classList.add('hidden');
-        document.getElementById('btn-start-train').classList.remove('hidden');
-    }
-
-    // --- VISUAL TRAINING ---
-    function visualStep(step) {
-        for(let i=1; i<=4; i++) {
-            const card = document.getElementById(`v-step-${i}`);
-            const content = document.getElementById(`visual-content-${i}`);
-            if(i === step) {
-                card.className = "step-card-active p-4 rounded-xl border cursor-pointer transition-all";
-                content.classList.remove('hidden');
-                content.classList.add('flex');
-                if(step === 3) startTrainingSim();
-                if(step === 4) initCanvas();
-            } else {
-                card.className = "step-card-inactive p-4 rounded-xl border cursor-pointer transition-all";
-                content.classList.add('hidden');
-                content.classList.remove('flex');
-            }
-        }
-    }
-
-    // Training Camera Logic
-    async function toggleTrainCamera() {
-        const container = document.getElementById('train-camera-container');
-        if (container.classList.contains('hidden')) {
-            container.classList.remove('hidden');
-            container.classList.add('flex');
-            try {
-                trainStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                document.getElementById('train-webcam').srcObject = trainStream;
-            } catch(e) {
-                showAlert("Error", "Camera access denied");
-                closeTrainCamera();
-            }
-        } else {
-            closeTrainCamera();
-        }
-    }
-
-    function closeTrainCamera() {
-        const container = document.getElementById('train-camera-container');
-        container.classList.add('hidden');
-        container.classList.remove('flex');
-        if (trainStream) {
-            trainStream.getTracks().forEach(track => track.stop());
-            trainStream = null;
-        }
-    }
-
-    function captureTrainingImage() {
-        const video = document.getElementById('train-webcam');
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        const dataUrl = canvas.toDataURL('image/jpeg');
-        
-        const label = document.getElementById('label-selector').value;
-        addToDataset(dataUrl, label);
-    }
-
-    function handleVisualUpload(input) {
-        const label = document.getElementById('label-selector').value;
-        const files = Array.from(input.files);
-        
-        files.forEach(file => {
-            const reader = new FileReader();
-            reader.onload = e => addToDataset(e.target.result, label);
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function addToDataset(imgSrc, label) {
-        const grid = document.getElementById('dataset-grid');
-        if(visualDataset.length === 0) grid.innerHTML = ''; 
-
-        const div = document.createElement('div');
-        div.className = "relative group h-20 bg-black/20 rounded-lg overflow-hidden border border-[var(--border-color)] animate-fade-in";
-        div.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 right-0 bg-black/60 text-[8px] text-white p-1 truncate">${label}</div>`;
-        grid.appendChild(div);
-        visualDataset.push({ img: imgSrc, label });
-
-        document.getElementById('btn-next-step1').disabled = false;
-        document.getElementById('btn-next-step1').classList.remove('opacity-50', 'cursor-not-allowed');
-        document.getElementById('btn-next-step1').classList.add('bg-blue-600', 'text-white');
-    }
-
-    function startTrainingSim() {
-        let epoch = 0;
-        let loss = 0.99;
-        let acc = 0;
-        const bg = document.getElementById('matrix-bg');
-        // Gen matrix
-        let html = '';
-        for(let i=0; i<144; i++) html += `<div class="bg-green-500 rounded-full transition-opacity duration-300" style="opacity:${Math.random()}"></div>`;
-        bg.innerHTML = html;
-
-        trainInterval = setInterval(() => {
-            epoch++;
-            loss -= 0.02;
-            acc += 2;
-            if(loss < 0.01) loss = 0.01;
-            if(acc > 98) acc = 99;
-
-            document.getElementById('train-progress').style.width = (epoch * 2) + "%";
-            document.getElementById('epoch-status').innerText = `Epoch ${epoch}/50`;
-            document.getElementById('loss-display').innerText = `Loss: ${loss.toFixed(2)}`;
-            document.getElementById('acc-display').innerText = `Acc: ${acc}%`;
-
-            // Randomize matrix
-            Array.from(bg.children).forEach(d => d.style.opacity = Math.random());
-
-            if(epoch >= 50) {
-                clearInterval(trainInterval);
-                setTimeout(() => visualStep(4), 1000);
-            }
-        }, 100);
-    }
-
-    // --- INFERENCE (DRAW/CAM/UPLOAD) ---
-    function setInferMode(mode) {
-        document.querySelectorAll('.infer-panel').forEach(p => p.classList.add('hidden'));
-        document.querySelectorAll('.infer-panel').forEach(p => p.classList.remove('flex'));
-        document.getElementById(`infer-${mode}`).classList.remove('hidden');
-        document.getElementById(`infer-${mode}`).classList.add('flex');
-        
-        // Update buttons style
-        ['draw','upload','camera'].forEach(m => {
-            const btn = document.getElementById(`btn-infer-${m}`);
-            if(m === mode) {
-                btn.classList.remove('opacity-60', 'hover:bg-white/5');
-                btn.classList.add('bg-white/10', 'font-bold');
-            } else {
-                btn.classList.add('opacity-60', 'hover:bg-white/5');
-                btn.classList.remove('bg-white/10', 'font-bold');
-            }
-        });
-    }
-
-    // Canvas Logic
-    function initCanvas() {
-        const canvas = document.getElementById('draw-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "white";
-        ctx.fillRect(0,0,250,250);
-        
-        let painting = false;
-        
-        function startPosition(e) { painting = true; draw(e); }
-        function finishedPosition() { painting = false; ctx.beginPath(); }
-        function draw(e) {
-            if(!painting) return;
-            const rect = canvas.getBoundingClientRect();
-            ctx.lineWidth = 10;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = 'black';
-            
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-        }
-        
-        canvas.addEventListener('mousedown', startPosition);
-        canvas.addEventListener('mouseup', finishedPosition);
-        canvas.addEventListener('mousemove', draw);
-    }
-
-    function clearCanvas() {
-        const canvas = document.getElementById('draw-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "white";
-        ctx.fillRect(0,0,250,250);
-    }
-
-    // Camera Logic
-    async function startCamera() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            const video = document.getElementById('webcam');
-            video.srcObject = stream;
-            document.getElementById('cam-placeholder').classList.add('hidden');
-        } catch(e) {
-            showAlert("Error", "Camera not accessible (HTTPS required)");
-        }
-    }
-
-    // Upload Logic
-    function handleTestImage(input) {
-        const file = input.files[0];
-        if(file) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = document.getElementById('test-preview');
-                img.src = e.target.result;
-                img.classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    // ============================================
-    // REAL PREDICTION LOGIC
-    // ============================================
-    
-    async function getPixelData(source, w=64, h=64) {
-        return new Promise((resolve) => {
-            const canvas = document.createElement('canvas');
-            canvas.width = w;
-            canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.imageSmoothingEnabled = false;
-
-            if (typeof source === 'string') {
-                const img = new Image();
-                img.onload = () => {
-                    ctx.drawImage(img, 0, 0, w, h);
-                    resolve(ctx.getImageData(0, 0, w, h).data);
-                };
-                img.src = source;
-            } else {
-                ctx.drawImage(source, 0, 0, w, h);
-                resolve(ctx.getImageData(0, 0, w, h).data);
-            }
-        });
-    }
-
-    function calculateSimilarity(pixels1, pixels2) {
-        let diff = 0;
-        for (let i = 0; i < pixels1.length; i += 4) {
-            diff += Math.abs(pixels1[i] - pixels2[i]);        // R
-            diff += Math.abs(pixels1[i+1] - pixels2[i+1]); // G
-            diff += Math.abs(pixels1[i+2] - pixels2[i+2]); // B
-        }
-        const maxDiff = (pixels1.length / 4) * 255 * 3;
-        return Math.max(0, 100 * (1 - (diff / maxDiff)));
-    }
-
-    async function predict() {
-        // 1. Check Data
-        if(visualDataset.length === 0) return showAlert("AI Memory Empty", "Please go to Step 1 and upload/label training data first.");
-
-        const btn = document.getElementById('btn-predict');
-        btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> Analyzing...`;
-        
-        // 2. Identify Input Source
-        let inputSource;
-        if (!document.getElementById('infer-draw').classList.contains('hidden')) {
-            inputSource = document.getElementById('draw-canvas');
-        } else if (!document.getElementById('infer-upload').classList.contains('hidden')) {
-            const img = document.getElementById('test-preview');
-            if(!img.src) { btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`; return showAlert("Alert", "Please upload an image first."); }
-            inputSource = img.src;
-        } else {
-             const vid = document.getElementById('webcam');
-             if(vid.paused) { btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`; return showAlert("Alert", "Camera not active"); }
-             inputSource = vid;
-        }
-
-        // 3. Process Input
-        const inputPixels = await getPixelData(inputSource);
-        
-        // 4. Compare All & Store
-        let matches = [];
-        for (let data of visualDataset) {
-            const trainPixels = await getPixelData(data.img);
-            const similarity = calculateSimilarity(inputPixels, trainPixels);
-            matches.push({ label: data.label, score: similarity, img: data.img });
-        }
-
-        // 5. Sort matches (High to Low)
-        matches.sort((a, b) => b.score - a.score);
-
-        // 6. Check for 100% (or very close > 99.5%)
-        const perfectMatch = matches.find(m => m.score > 99.5);
-        const resultsList = document.getElementById('match-results-list');
-        resultsList.innerHTML = ''; // Clear old
-
-        if (perfectMatch) {
-            // EXCLUSIVE DISPLAY
-            document.getElementById('bars-container').classList.add('hidden'); // Hide bars
-            
-            resultsList.innerHTML = `
-                <div class="bg-green-500/10 border border-green-500 rounded-xl p-4 flex flex-col items-center animate-pulse">
-                    <div class="text-green-400 font-bold text-lg mb-2 flex items-center gap-2"><i data-lucide="check-circle-2"></i> PERFECT MATCH FOUND!</div>
-                    <img src="${perfectMatch.img}" class="w-32 h-32 object-cover rounded-lg border-2 border-green-500 mb-2">
-                    <div class="text-white font-bold text-xl">${perfectMatch.label}</div>
-                    <div class="text-green-400 text-sm">Confidence: 100%</div>
-                </div>
-            `;
-        } else {
-            // STANDARD SORTED DISPLAY (Top 3)
-            document.getElementById('bars-container').classList.remove('hidden'); // Show bars
-            
-            // Show heading
-            resultsList.innerHTML = `<div class="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-2">Closest Training Images:</div>`;
-            
-            matches.slice(0, 3).forEach((m, idx) => {
-                const colorClass = m.label === 'Normal' ? 'text-green-400' : (m.label === 'Abnormal' ? 'text-red-400' : 'text-orange-400');
-                resultsList.innerHTML += `
-                    <div class="flex items-center gap-3 bg-black/20 p-2 rounded-lg border border-[var(--border-color)]">
-                        <span class="text-xs font-mono opacity-50">#${idx+1}</span>
-                        <img src="${m.img}" class="w-10 h-10 object-cover rounded">
-                        <div class="flex-1">
-                            <div class="text-xs font-bold ${colorClass}">${m.label}</div>
-                            <div class="text-left text-[10px] opacity-70">Similarity: ${m.score.toFixed(1)}%</div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Update Bars based on max scores per category
-            let maxScores = { "Normal": 0, "Abnormal": 0, "Risk": 0 };
-            matches.forEach(m => {
-                if(m.score > maxScores[m.label]) maxScores[m.label] = m.score;
-            });
-            updateBars(maxScores);
-        }
-
-        btn.innerHTML = `<i data-lucide="scan"></i> Compare & Predict`;
         lucide.createIcons();
-    }
-
-    function updateBars(scores) {
-        const n = scores['Normal'] || 0;
-        const a = scores['Abnormal'] || 0;
-        const r = scores['Risk'] || 0;
-
-        const total = n + a + r || 1; 
-        const expN = Math.exp(n/10);
-        const expA = Math.exp(a/10);
-        const expR = Math.exp(r/10);
-        const expTotal = expN + expA + expR;
-
-        document.getElementById('bar-normal').style.width = ((expN / expTotal) * 100) + "%";
-        document.getElementById('pred-normal').innerText = n.toFixed(1) + "%";
-        
-        document.getElementById('bar-abnormal').style.width = ((expA / expTotal) * 100) + "%";
-        document.getElementById('pred-abnormal').innerText = a.toFixed(1) + "%";
-
-        document.getElementById('bar-risk').style.width = ((expR / expTotal) * 100) + "%";
-        document.getElementById('pred-risk').innerText = r.toFixed(1) + "%";
-    }
-
-    function showAlert(t,m) {
-        document.getElementById('alert-title').innerText = t;
-        document.getElementById('alert-msg').innerText = m;
-        document.getElementById('alert-modal').classList.remove('hidden');
-    }
-    
-    // --- CHAT FILE HANDLING ---
-    function handleChatFileSelect(input) {
-        const file = input.files[0];
-        if (file) {
-            currentChatFile = file;
-            document.getElementById('chat-file-name').innerText = file.name;
-            document.getElementById('chat-attachment-preview').classList.remove('hidden');
-            document.getElementById('chat-attachment-preview').classList.add('flex');
-        }
-    }
-
-    function clearChatAttachment() {
-        currentChatFile = null;
-        document.getElementById('chat-file-upload').value = ""; // Reset input
-        document.getElementById('chat-attachment-preview').classList.add('hidden');
-        document.getElementById('chat-attachment-preview').classList.remove('flex');
-    }
-
-    // --- HANDLE SOURCE CHANGE ---
-    function handleSourceChange(select) {
-        const input = document.getElementById('user-input');
-        input.className = "flex-1 bg-[var(--bg-main)] border rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all"; // reset class
-        
-        if (select.value === 'hybrid') {
-            input.placeholder = "ถามแบบผสมผสาน (AI + Memory)...";
-            input.classList.add('border-blue-500');
-        } else if (select.value === 'strict') {
-            input.placeholder = "ถามเจาะจงเฉพาะข้อมูลที่เทรน (Strict Mode)...";
-            input.classList.add('border-emerald-500');
-        } else if (select.value === 'offline') {
-            input.placeholder = "ค้นหาคำเป๊ะๆ จาก Memory (ไม่ใช้ AI)...";
-            input.classList.add('border-slate-500');
-        } else {
-            input.placeholder = "ถามคำถามวิจัยทั่วไป (General Knowledge)...";
-            input.classList.add('border-[var(--border-color)]');
-        }
-    }
-
-    // --- NEW: API VISUALIZATION LOGIC ---
-    function toggleAPIModal() {
-        const modal = document.getElementById('api-modal');
-        const list = document.getElementById('api-status-list');
-        
-        if(modal.classList.contains('hidden')) {
-            renderAPIStatus(); // Refresh data
-            modal.classList.remove('hidden');
-        } else {
-            modal.classList.add('hidden');
-        }
-    }
-
-    function renderAPIStatus() {
-        const list = document.getElementById('api-status-list');
-        list.innerHTML = "";
-        
-        keyHealth.forEach((k, index) => {
-            let colorClass = "status-ready";
-            let textClass = "text-[var(--text-muted)]";
-            
-            if (k.status === 'working') { colorClass = "status-working"; textClass = "text-yellow-400"; }
-            if (k.status === 'active') { colorClass = "status-active"; textClass = "text-green-400"; }
-            if (k.status === 'dead') { colorClass = "status-dead"; textClass = "text-red-400 line-through opacity-50"; }
-            
-            // Mask Key
-            const maskedKey = k.key.substring(0, 4) + "••••••••" + k.key.substring(k.key.length - 4);
-            
-            const div = document.createElement('div');
-            div.className = "flex items-center justify-between p-2 rounded-lg bg-black/10 border border-[var(--border-color)]";
-            div.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <div class="status-dot ${colorClass}"></div>
-                    <div>
-                        <div class="text-xs font-bold ${textClass}">Key #${index + 1}</div>
-                        <div class="text-[10px] opacity-40 font-mono">${maskedKey}</div>
-                    </div>
-                </div>
-                <div class="text-[10px] font-bold ${textClass}">${k.msg}</div>
-            `;
-            list.appendChild(div);
-        });
-    }
-    
-    // --- SMART API KEY ROTATION WITH VISUAL FEEDBACK (IMPROVED) ---
-async function callGeminiAPI(payload, loadingId) {
-let lastError = null;
-const startKeyIndex = currentKeyIndex;
-    // Loop through ALL keys
-    for (let i = 0; i < API_KEYS.length; i++) {
-        const actualIndex = (startKeyIndex + i) % API_KEYS.length;
-        const apiKey = API_KEYS[actualIndex];
-
-        // ALWAYS set to 'working' (yellow) when trying - regardless of previous status
-        keyHealth[actualIndex].status = 'working';
-        keyHealth[actualIndex].msg = 'Connecting...';
-        renderAPIStatus();
-
-        try {
-            // Update UI to show current attempt
-            if (loadingId) {
-                const loadingElem = document.querySelector(`#${loadingId} .glass-panel`);
-                if (loadingElem) {
-                      loadingElem.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Processing... (Key #${actualIndex + 1})`;
-                      lucide.createIcons();
-                }
-            }
-
-            // Attempt Fetch
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
-                method: 'POST', 
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify(payload)
-            });
-
-            // Check for errors
-            if (res.status === 429) {
-                throw new Error("Quota Exceeded (429)");
-            }
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.error?.message || `HTTP Error ${res.status}`);
-            }
-
-            // SUCCESS!
-            keyHealth[actualIndex].status = 'active';
-            keyHealth[actualIndex].msg = 'Active (200 OK)';
-            
-            // Reset other keys from 'active' to 'ready'
-            keyHealth.forEach((k, idx) => {
-                if(idx !== actualIndex && k.status === 'active') {
-                      k.status = 'ready'; 
-                      k.msg = 'Ready'; 
-                }
-            });
-            
-            renderAPIStatus();
-            currentKeyIndex = actualIndex;
-            
-            return await res.json();
-
-        } catch (e) {
-            lastError = e;
-            console.warn(`Key #${actualIndex + 1} failed: ${e.message}`);
-            
-            // Mark as DEAD
-            keyHealth[actualIndex].status = 'dead';
-            keyHealth[actualIndex].msg = e.message.includes('429') ? 'Quota Exceeded' : 'Error';
-            renderAPIStatus();
-            
-            // Show error message on UI
-            if (loadingId) {
-                const loadingElem = document.querySelector(`#${loadingId} .glass-panel`);
-                if (loadingElem) {
-                    loadingElem.innerHTML = `<span class="text-orange-400 font-bold"><i data-lucide="alert-triangle" class="w-3 h-3 inline"></i> Key #${actualIndex + 1} Failed! Switching...</span>`;
-                    lucide.createIcons();
-                }
-            }
-            
-            // Delay before next attempt
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-    }
-
-    // All keys failed
-    throw new Error(`System Busy: All ${API_KEYS.length} keys failed. Last error: ${lastError?.message}`);
-}
-
-// --- CHAT LOGIC (UPDATED WITH TOKEN CONTROL) ---
-async function handleChatSubmit(e) {
-    e.preventDefault();
-    const input = document.getElementById('user-input');
-    const msg = input.value.trim();
-    const source = document.getElementById('chat-source').value;
-    const lengthMode = document.getElementById('chat-length').value;
-    
-    if (!msg && !currentChatFile) return;
-
-    let userDisplayMsg = msg;
-    let contextMsg = msg;
-
-    if (currentChatFile) {
-        userDisplayMsg = (msg ? msg + "<br>" : "") + `<div class='inline-flex items-center gap-2 bg-black/10 px-2 py-1 rounded text-xs mt-1'><i data-lucide='paperclip' class='w-3 h-3'></i> ${currentChatFile.name}</div>`;
-        contextMsg = (msg ? msg + "\n" : "") + `[User Attached File: ${currentChatFile.name}]`;
-    }
-    
-    lastUserQuestion = contextMsg;
-    addMsg('user', userDisplayMsg);
-    input.value = '';
-    clearChatAttachment();
-    
-    if(source !== 'api') {
-        if(memory.length <= 1) {
-              setTimeout(() => {
-                  addMsg('ai', `⚠️ <b>Memory Empty:</b> ระบบยังไม่มีข้อมูลที่ถูกเทรนเข้ามาในหน่วยความจำครับ<br><br>กรุณาไปที่แถบ <b>"Text Research"</b> ด้านซ้าย หรือ <b>"Templates"</b> แล้วนำเข้าข้อมูลก่อนครับ`);
-              }, 500);
-              return;
-        }
-    }
-
-    // Offline Logic
-    if (source === 'offline') {
-        const tempId = "thinking-" + Date.now();
-        const box = document.getElementById('chat-box');
-        const div = document.createElement('div');
-        div.id = tempId;
-        div.className = "flex gap-4";
-        div.innerHTML = `<div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0"><i data-lucide="cpu" class="w-4 h-4 text-white"></i></div><div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2"><i data-lucide="search" class="w-3 h-3 animate-bounce"></i> Searching Local Memory...</div>`;
-        box.appendChild(div);
-        box.scrollTop = box.scrollHeight;
-        lucide.createIcons();
-
-        setTimeout(() => {
-            document.getElementById(tempId).remove();
-            const keywords = contextMsg.toLowerCase().split(/[\s,]+/);
-            const results = memory.filter(doc => keywords.some(k => k.length > 2 && doc.toLowerCase().includes(k)));
-
-            if (results.length > 0) {
-                const content = results.map(r => `> ${r.substring(0, 150)}...`).join('\n\n');
-                addMsg('ai', `<b>[OFFLINE MODE]</b> พบข้อมูลที่ตรงกับคำค้นหา ${results.length} รายการครับ:\n\n${content}\n\n*ระบบนี้แสดงผลการค้นหาตามคำเป๊ะๆ (Keyword Matching) ไม่ได้ใช้สมอง AI เรียบเรียงครับ*`);
-            } else {
-                addMsg('ai', `<b>[OFFLINE MODE]</b> ไม่พบข้อมูลที่ตรงกันใน Memory ครับ\n\nโหมดนี้ทำงานโดยการหา "คำที่เหมือนกันเป๊ะๆ" เท่านั้น ลองใช้คำค้นหาที่มีใน Template ดูครับ เช่น "งานวิจัย", "สถิติ", "Mean"`);
-            }
-        }, 800);
-        return;
-    }
-
-    // Token & Style Configuration
-    let maxTokens = 500;
-    let styleInstruction = "Answer clearly and moderately.";
-
-    if (lengthMode === 'short') {
-        maxTokens = 150;
-        styleInstruction = "Answer very briefly and concisely. Do not elaborate unnecessarily. Limit to 2-3 key sentences.";
-    } else if (lengthMode === 'long') {
-        maxTokens = 2000;
-        styleInstruction = "Answer in detail. Provide comprehensive explanations, examples, or breakdowns if applicable.";
-    }
-
-    // Prompt Engineering
-    let prompt = "";
-    const context = memory.join('\n\n--- NEXT DOCUMENT ---\n\n');
-
-    if(source === 'strict') {
-        prompt = `You are a strict research assistant AI. Answer using ONLY the CONTEXT below. If not found, say "Not found in Trained Memory".\n\nINSTRUCTION: ${styleInstruction}\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
-    } else if (source === 'hybrid') {
-        prompt = `You are a smart research assistant AI. Use CONTEXT as primary truth but can use general knowledge.\n\nINSTRUCTION: ${styleInstruction}\n\nCONTEXT:\n${context}\n\nUSER QUESTION:\n${contextMsg}\n\nANSWER:`;
-    } else {
-        prompt = `You are a helpful AI Research Assistant. Answer the following question in Thai.\n\nINSTRUCTION: ${styleInstruction}\n\nQ: ${contextMsg}`;
-    }
-
-    // Call Gemini
-    try {
-        const tempId = "thinking-" + Date.now();
-        const box = document.getElementById('chat-box');
-        const div = document.createElement('div');
-        div.id = tempId;
-        div.className = "flex gap-4";
-        div.innerHTML = `<div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div><div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-60 flex items-center gap-2"><i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Initializing...</div>`;
-        box.appendChild(div);
-        box.scrollTop = box.scrollHeight;
-        lucide.createIcons();
-
-        const payload = {
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-                maxOutputTokens: maxTokens,
-                temperature: 0.7
-            }
-        };
-
-        const data = await callGeminiAPI(payload, tempId);
-        
-        document.getElementById(tempId).remove();
-
-        if (data.candidates && data.candidates[0].content) {
-            addMsg('ai', data.candidates[0].content.parts[0].text);
-        } else {
-            console.error("Gemini Error:", data);
-            let detail = "";
-            if (data.promptFeedback) detail = `(Safety Block: ${JSON.stringify(data.promptFeedback)})`;
-            addMsg('ai', `Error: AI did not return a response. <br><span class="text-xs text-red-300 opacity-80">${detail}</span>`);
-        }
-    } catch(e) {
-        document.querySelectorAll('[id^="thinking-"]').forEach(el => el.remove());
-        addMsg('ai', `<span class="text-red-400 font-bold">Connection Failed:</span> ${e.message}`);
-    }
-}
-
-function addMsg(role, text) {
-    const box = document.getElementById('chat-box');
-    const div = document.createElement('div');
-    const msgId = "msg-" + Date.now();
-
-    let actionButtons = "";
-    if(role === 'ai') {
-        actionButtons = `
-            <div class="flex justify-end gap-2 mt-2 pt-2 border-t border-[var(--border-color)]">
-                <button onclick="enableEdit('${msgId}')" class="text-[10px] text-blue-400 hover:underline flex items-center gap-1"><i data-lucide="edit-3" class="w-3 h-3"></i> แก้ไข/สอน (Correct)</button>
-                <button onclick="copyToClipboard('${msgId}')" class="text-[10px] opacity-50 hover:opacity-100 flex items-center gap-1"><i data-lucide="copy" class="w-3 h-3"></i> Copy</button>
-            </div>
-        `;
-    }
-
-    div.className = "flex gap-4 " + (role === 'user' ? "flex-row-reverse" : "");
-    div.innerHTML = `
-        <div class="w-8 h-8 rounded-full ${role==='user'?'bg-slate-500':'bg-indigo-500/20'} flex items-center justify-center flex-shrink-0"><i data-lucide="${role==='user'?'user':'bot'}" class="w-4 h-4"></i></div>
-        <div class="glass-panel p-4 rounded-2xl ${role==='user'?'bg-blue-600 border-none text-white':'rounded-tl-none'} max-w-[85%] text-sm group">
-            <div id="${msgId}-content">${marked.parse(text)}</div>
-            <div id="${msgId}-edit-area" class="hidden mt-2">
-                 <textarea id="${msgId}-textarea" class="w-full bg-black/20 border border-[var(--border-color)] rounded p-2 text-xs mb-2 h-24"></textarea>
-                 <button onclick="saveCorrection('${msgId}')" class="px-3 py-1 bg-green-600 text-white rounded text-xs">Save & Teach</button>
-                 <button onclick="cancelEdit('${msgId}')" class="px-3 py-1 bg-white/10 rounded text-xs ml-1">Cancel</button>
-            </div>
-            ${actionButtons}
-        </div>
-    `;
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
-    lucide.createIcons();
-}
-
-// --- CORRECTION / TEACHING LOGIC ---
-function enableEdit(msgId) {
-    const contentDiv = document.getElementById(`${msgId}-content`);
-    const editArea = document.getElementById(`${msgId}-edit-area`);
-    const textarea = document.getElementById(`${msgId}-textarea`);
-    textarea.value = contentDiv.innerText.trim();
-    contentDiv.classList.add('hidden');
-    editArea.classList.remove('hidden');
-}
-
-function cancelEdit(msgId) {
-    document.getElementById(`${msgId}-content`).classList.remove('hidden');
-    document.getElementById(`${msgId}-edit-area`).classList.add('hidden');
-}
-
-function saveCorrection(msgId) {
-    const newText = document.getElementById(`${msgId}-textarea`).value;
-    document.getElementById(`${msgId}-content`).innerHTML = marked.parse(newText);
-    cancelEdit(msgId);
-    const teachingEntry = `[Human Correction]\nQ: ${lastUserQuestion}\nA: ${newText}`;
-    memory.push(teachingEntry);
-    saveMemoryToStorage();
-    showAlert("AI Learned!", "บันทึกคำตอบที่ถูกต้องลงใน Memory แล้ว AI จะจำคำตอบนี้ในครั้งถัดไป");
-}
-
-function copyToClipboard(msgId) {
-    const text = document.getElementById(`${msgId}-content`).innerText;
-    navigator.clipboard.writeText(text);
-}
-
-// CLEAR CHAT
-function clearChat() {
-    const box = document.getElementById('chat-box');
-    box.innerHTML = `
-        <div class="flex gap-4">
-            <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30"><i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i></div>
-            <div class="glass-panel p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm">
-                เริ่มบทสนทนาใหม่แล้วครับ (New Chat)<br>ถามข้อมูลวิจัยใหม่ได้เลยครับ
-            </div>
-        </div>
-    `;
-    clearChatAttachment();
-    lucide.createIcons();
-    showAlert("Chat Cleared", "ล้างหน้าจอแชทเรียบร้อย (หน่วยความจำที่เทรนไว้ยังอยู่)");
-}
-
-/* ==========================================================================
-   MODE 3: MICRO LLM LOGIC & VISUALIZATION (Markov Chain / N-Gram Simulated)
-   ========================================================================== */
-
-class TinyLLM {
-    constructor() {
-        this.ngrams = {};
-        this.vocab = [];
-        this.isTrained = false;
-        this.contextSize = 2; // Bigram by default
-    }
-
-    tokenize(text) {
-        // Simple tokenization: lowercase, remove special chars, split by space
-        return text.toLowerCase()
-            .replace(/[^\w\s\u0E00-\u0E7F]/g, '')
-            .split(/\s+/)
-            .filter(t => t.length > 0);
-    }
-
-    train(text) {
-        const tokens = this.tokenize(text);
-        this.vocab = [...new Set(tokens)];
-        this.ngrams = {};
-
-        // Build N-Gram Model
-        for (let i = 0; i < tokens.length - this.contextSize; i++) {
-            let context = tokens.slice(i, i + this.contextSize).join(' ');
-            let nextWord = tokens[i + this.contextSize];
-
-            if (!this.ngrams[context]) {
-                this.ngrams[context] = {};
-            }
-            if (!this.ngrams[context][nextWord]) {
-                this.ngrams[context][nextWord] = 0;
-            }
-            this.ngrams[context][nextWord]++;
-        }
-        this.isTrained = true;
-    }
-
-    predictNext(currentContext) {
-        if (!this.ngrams[currentContext]) return null;
-        
-        const possibleNext = this.ngrams[currentContext];
-        const words = Object.keys(possibleNext);
-        
-        // Weighted random choice
-        let total = 0;
-        words.forEach(w => total += possibleNext[w]);
-        
-        let r = Math.random() * total;
-        for (let w of words) {
-            r -= possibleNext[w];
-            if (r <= 0) return w;
-        }
-        return words[0];
-    }
-}
-
-const myLLM = new TinyLLM();
-let isLLMTraining = false;
-let nnCanvas, nnCtx;
-let nnNodes = [];
-let nnSignals = [];
-
-function initNeuralNetworkVisualizer() {
-    nnCanvas = document.getElementById('nn-canvas');
-    if (!nnCanvas) return;
-    
-    const parent = nnCanvas.parentElement;
-    nnCanvas.width = parent.clientWidth;
-    nnCanvas.height = parent.clientHeight;
-    nnCtx = nnCanvas.getContext('2d');
-
-    generateNNStructure();
-    animateNN();
-}
-
-function generateNNStructure() {
-    nnNodes = [];
-    const layers = parseInt(document.getElementById('llm-layers').value) + 2; // Input + Hidden + Output
-    const neuronsPerLayer = parseInt(document.getElementById('llm-neurons').value);
-    
-    const colSpacing = nnCanvas.width / (layers + 1);
-    
-    for(let l = 0; l < layers; l++) {
-        const rowSpacing = nnCanvas.height / (neuronsPerLayer + 1);
-        for(let n = 0; n < neuronsPerLayer; n++) {
-            nnNodes.push({
-                x: colSpacing * (l + 1),
-                y: rowSpacing * (n + 1),
-                layer: l,
-                active: 0
-            });
-        }
-    }
-}
-
-function trainLLM() {
-    const text = document.getElementById('llm-train-data').value;
-    if(!text) return showAlert("No Data", "Please paste some text to train the LLM.");
-    
-    document.getElementById('btn-train-llm').innerText = "Training...";
-    document.getElementById('llm-status').innerText = "Status: Backpropagation...";
-    
-    isLLMTraining = true;
-
-    // Simulate training time + Real Logic
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += 10;
-        fireNeurons(); // Visual effect
-        
-        if(progress >= 100) {
-            clearInterval(interval);
-            myLLM.train(text);
-            isLLMTraining = false;
-            document.getElementById('btn-train-llm').innerHTML = `<i data-lucide="check"></i> Trained`;
-            document.getElementById('llm-status').innerText = `Status: Trained (Vocab: ${myLLM.vocab.length})`;
-            showAlert("LLM Trained", `Neural Network adjusted weights for ${myLLM.vocab.length} unique tokens.`);
-            lucide.createIcons();
-        }
-    }, 200);
-}
-
-function generateText() {
-    if(!myLLM.isTrained) return showAlert("Not Trained", "Please train the model first.");
-    
-    const seed = document.getElementById('llm-seed').value.trim();
-    if(!seed) return showAlert("No Seed", "Enter a starting word.");
-    
-    const outputDiv = document.getElementById('llm-output');
-    outputDiv.innerText = seed;
-    
-    let currentWords = myLLM.tokenize(seed);
-    if(currentWords.length < 2) currentWords = [currentWords[0], currentWords[0]]; // fallback padding
-    
-    let genCount = 0;
-    const maxGen = 20;
-    
-    const genInterval = setInterval(() => {
-        // Prepare context (Last 2 words)
-        const context = currentWords.slice(-2).join(' ');
-        const next = myLLM.predictNext(context);
-        
-        fireNeurons(); // Visual
-        
-        if(next) {
-            outputDiv.innerText += " " + next;
-            currentWords.push(next);
-        } else {
-            outputDiv.innerText += " [END]";
-            clearInterval(genInterval);
-        }
-        
-        genCount++;
-        if(genCount >= maxGen) clearInterval(genInterval);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
-    }, 300);
-}
-
-// Visualizer Animation Loop
-function fireNeurons() {
-    // Randomly activate signals
-    const inputNodes = nnNodes.filter(n => n.layer === 0);
-    const startNode = inputNodes[Math.floor(Math.random() * inputNodes.length)];
-    
-    nnSignals.push({
-        x: startNode.x,
-        y: startNode.y,
-        targetLayer: 1,
-        progress: 0
-    });
-}
-
-function animateNN() {
-    if (!nnCtx) return;
-    nnCtx.clearRect(0, 0, nnCanvas.width, nnCanvas.height);
-    
-    // Draw Connections
-    nnCtx.lineWidth = 0.5;
-    nnCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-    
-    for(let i=0; i<nnNodes.length; i++) {
-        const n1 = nnNodes[i];
-        for(let j=0; j<nnNodes.length; j++) {
-            const n2 = nnNodes[j];
-            if (n2.layer === n1.layer + 1) {
-                nnCtx.beginPath();
-                nnCtx.moveTo(n1.x, n1.y);
-                nnCtx.lineTo(n2.x, n2.y);
-                nnCtx.stroke();
-            }
-        }
-    }
-
-    // Draw Nodes
-    for(let n of nnNodes) {
-        nnCtx.beginPath();
-        nnCtx.arc(n.x, n.y, 4, 0, Math.PI * 2);
-        nnCtx.fillStyle = n.active > 0 ? `rgba(0, 255, 255, ${n.active})` : '#333';
-        nnCtx.fill();
-        nnCtx.strokeStyle = '#555';
-        nnCtx.stroke();
-        
-        if(n.active > 0) n.active -= 0.05; // Decay
-    }
-
-    // Draw Signals
-    for(let i = nnSignals.length - 1; i >= 0; i--) {
-        const sig = nnSignals[i];
-        sig.progress += 0.05;
-        
-        // Find next layer position
-        const layerNodes = nnNodes.filter(n => n.layer === sig.targetLayer);
-        const targetX = layerNodes[0].x; // Approx x
-        
-        // Lerp X
-        const currentX = sig.x + (targetX - sig.x) * sig.progress; // Simplified movement
-        
-        // Draw Signal
-        nnCtx.beginPath();
-        nnCtx.arc(currentX, sig.y, 3, 0, Math.PI * 2);
-        nnCtx.fillStyle = '#f0f';
-        nnCtx.fill();
-        
-        if (sig.progress >= 1) {
-            // Signal hit layer
-            const hitNodes = nnNodes.filter(n => n.layer === sig.targetLayer);
-            if(hitNodes.length > 0) {
-                 // Spread signal to random node in this layer
-                 const hitNode = hitNodes[Math.floor(Math.random() * hitNodes.length)];
-                 hitNode.active = 1.0;
-                 
-                 if (sig.targetLayer < 4) { // Propagate
-                     nnSignals.push({
-                         x: hitNode.x,
-                         y: hitNode.y,
-                         targetLayer: sig.targetLayer + 1,
-                         progress: 0
-                     });
-                 }
-            }
-            nnSignals.splice(i, 1);
-        }
-    }
-
-    requestAnimationFrame(animateNN);
-}
-
-lucide.createIcons();
-</script>
+    </script>
 </body>
 </html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Architect - AI Training Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-main: #f8fafc; --bg-panel: rgba(255, 255, 255, 0.9); --text-main: #0f172a; --text-muted: #64748b; --border-color: rgba(0, 0, 0, 0.1); --accent-color: #0284c7; }
+        [data-theme="dark"] { --bg-main: #020617; --bg-panel: rgba(15, 23, 42, 0.6); --text-main: #e2e8f0; --text-muted: #94a3b8; --border-color: rgba(255, 255, 255, 0.08); --accent-color: #0ea5e9; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: background-color 0.5s, color 0.5s; }
+        .glass-panel { background: var(--bg-panel); backdrop-filter: blur(12px); border: 1px solid var(--border-color); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
+        .animate-float { animation: float 8s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } 100% { transform: translate(0, 0px); } }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden" data-theme="light">
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-pink-600/10 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
+    </div>
+
+    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="p-2.5 bg-gradient-to-br from-purple-500 to-pink-400 rounded-xl shadow-lg"><i data-lucide="brain-circuit" class="w-6 h-6 text-white"></i></a>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">LLM Architect</h1>
+                    <p class="text-[10px] opacity-60">สร้าง Neural Network สำหรับ Text Generation</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="flex bg-[var(--bg-main)] rounded-lg p-1 border border-[var(--border-color)]">
+                    <button onclick="setTheme('dark')" class="p-1.5 rounded hover:bg-slate-800 hover:text-white text-[var(--text-muted)]"><i data-lucide="moon" class="w-4 h-4"></i></button>
+                    <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]"><i data-lucide="sun" class="w-4 h-4"></i></button>
+                </div>
+                <a href="index.html" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i> กลับหน้าหลัก</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 p-4 md:p-8 container mx-auto max-w-[1600px]">
+        <div class="grid grid-cols-12 gap-6 h-full">
+            <div class="col-span-12 lg:col-span-4 flex flex-col gap-5 h-full">
+                <div class="glass-panel p-6 rounded-2xl h-full flex flex-col">
+                    <h2 class="text-lg font-bold mb-4 text-purple-400 flex items-center gap-2"><i data-lucide="brain-circuit"></i> LLM Neural Architect</h2>
+                    
+                    <div class="mb-4 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)]">
+                        <h3 class="text-xs font-bold mb-2 opacity-70">Architecture Hyperparameters</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] opacity-60">Hidden Layers</label>
+                                <input type="number" id="llm-layers" value="3" min="1" max="5" class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[10px] opacity-60">Neurons/Layer</label>
+                                <input type="number" id="llm-neurons" value="8" min="4" max="16" class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[10px] opacity-60">Context Window</label>
+                                <select class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
+                                    <option>2 Tokens (Bigram)</option>
+                                    <option>3 Tokens (Trigram)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] opacity-60">Learning Rate</label>
+                                <select class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
+                                    <option>0.01 (Adam)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 flex flex-col">
+                        <h3 class="text-xs font-bold mb-2 opacity-70">Training Corpus (Text Data)</h3>
+                        <textarea id="llm-train-data" class="flex-1 w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl p-3 font-mono text-xs focus:border-purple-500 outline-none resize-none mb-2" placeholder="Paste text here to train the Neural Network... (e.g., Medical reports, Research abstracts)"></textarea>
+                        <button onclick="trainLLM()" id="btn-train-llm" class="w-full py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg text-sm font-bold shadow-lg transition-all flex justify-center items-center gap-2">
+                            <i data-lucide="play-circle"></i> Train Neural Network
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-8 flex flex-col gap-5 h-full">
+                <div class="glass-panel p-4 rounded-2xl flex-1 flex flex-col relative overflow-hidden bg-black/80">
+                    <div class="absolute top-4 left-4 z-10 bg-black/50 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
+                        <span class="text-xs font-mono text-green-400" id="llm-status">Status: Idle</span>
+                    </div>
+                    <canvas id="nn-canvas" class="w-full h-full object-contain"></canvas>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl h-[200px] flex flex-col">
+                    <h3 class="text-sm font-bold mb-2 flex items-center gap-2"><i data-lucide="message-square"></i> Test Generation (Inference)</h3>
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="llm-seed" class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm outline-none" placeholder="Start typing (e.g. 'The patient')...">
+                        <button onclick="generateText()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold flex items-center gap-2"><i data-lucide="wand-2"></i> Generate</button>
+                    </div>
+                    <div id="llm-output" class="flex-1 bg-white/20 rounded-lg p-3 text-sm font-mono text-blue-1000 overflow-y-auto border border-[var(--border-color)]">
+                        <span class="opacity-50">// Generated text will appear here...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script>
+    function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    }
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+
+    class TinyLLM {
+        constructor() {
+            this.ngrams = {};
+            this.vocab = [];
+            this.isTrained = false;
+            this.contextSize = 2;
+        }
+
+        tokenize(text) {
+            return text.toLowerCase().replace(/[^\w\s\u0E00-\u0E7F]/g, '').split(/\s+/).filter(t => t.length > 0);
+        }
+
+        train(text) {
+            const tokens = this.tokenize(text);
+            this.vocab = [...new Set(tokens)];
+            this.ngrams = {};
+
+            for (let i = 0; i < tokens.length - this.contextSize; i++) {
+                let context = tokens.slice(i, i + this.contextSize).join(' ');
+                let nextWord = tokens[i + this.contextSize];
+
+                if (!this.ngrams[context]) this.ngrams[context] = {};
+                if (!this.ngrams[context][nextWord]) this.ngrams[context][nextWord] = 0;
+                this.ngrams[context][nextWord]++;
+            }
+            this.isTrained = true;
+        }
+
+        predictNext(currentContext) {
+            if (!this.ngrams[currentContext]) return null;
+            const possibleNext = this.ngrams[currentContext];
+            const words = Object.keys(possibleNext);
+            let total = 0;
+            words.forEach(w => total += possibleNext[w]);
+            let r = Math.random() * total;
+            for (let w of words) {
+                r -= possibleNext[w];
+                if (r <= 0) return w;
+            }
+            return words[0];
+        }
+    }
+
+    const myLLM = new TinyLLM();
+    let isLLMTraining = false;
+    let nnCanvas, nnCtx;
+    let nnNodes = [];
+    let nnSignals = [];
+
+    function initNeuralNetworkVisualizer() {
+        nnCanvas = document.getElementById('nn-canvas');
+        if (!nnCanvas) return;
+        const parent = nnCanvas.parentElement;
+        nnCanvas.width = parent.clientWidth;
+        nnCanvas.height = parent.clientHeight;
+        nnCtx = nnCanvas.getContext('2d');
+        generateNNStructure();
+        animateNN();
+    }
+
+    function generateNNStructure() {
+        nnNodes = [];
+        const layers = parseInt(document.getElementById('llm-layers').value) + 2;
+        const neuronsPerLayer = parseInt(document.getElementById('llm-neurons').value);
+        const colSpacing = nnCanvas.width / (layers + 1);
+        for(let l = 0; l < layers; l++) {
+            const rowSpacing = nnCanvas.height / (neuronsPerLayer + 1);
+            for(let n = 0; n < neuronsPerLayer; n++) {
+                nnNodes.push({ x: colSpacing * (l + 1), y: rowSpacing * (n + 1), layer: l, active: 0 });
+            }
+        }
+    }
+
+    function trainLLM() {
+        const text = document.getElementById('llm-train-data').value;
+        if(!text) return alert("Please paste some text to train the LLM.");
+        document.getElementById('btn-train-llm').innerText = "Training...";
+        document.getElementById('llm-status').innerText = "Status: Backpropagation...";
+        isLLMTraining = true;
+
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            fireNeurons();
+            if(progress >= 100) {
+                clearInterval(interval);
+                myLLM.train(text);
+                isLLMTraining = false;
+                document.getElementById('btn-train-llm').innerHTML = `<i data-lucide="check"></i> Trained`;
+                document.getElementById('llm-status').innerText = `Status: Trained (Vocab: ${myLLM.vocab.length})`;
+                alert(`LLM Trained\n\nNeural Network adjusted weights for ${myLLM.vocab.length} unique tokens.`);
+                lucide.createIcons();
+            }
+        }, 200);
+    }
+
+    function generateText() {
+        if(!myLLM.isTrained) return alert("Please train the model first.");
+        const seed = document.getElementById('llm-seed').value.trim();
+        if(!seed) return alert("Enter a starting word.");
+        const outputDiv = document.getElementById('llm-output');
+        outputDiv.innerText = seed;
+        let currentWords = myLLM.tokenize(seed);
+        if(currentWords.length < 2) currentWords = [currentWords[0], currentWords[0]];
+        let genCount = 0;
+        const maxGen = 20;
+        const genInterval = setInterval(() => {
+            const context = currentWords.slice(-2).join(' ');
+            const next = myLLM.predictNext(context);
+            fireNeurons();
+            if(next) {
+                outputDiv.innerText += " " + next;
+                currentWords.push(next);
+            } else {
+                outputDiv.innerText += " [END]";
+                clearInterval(genInterval);
+            }
+            genCount++;
+            if(genCount >= maxGen) clearInterval(genInterval);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }, 300);
+    }
+
+    function fireNeurons() {
+        const inputNodes = nnNodes.filter(n => n.layer === 0);
+        const startNode = inputNodes[Math.floor(Math.random() * inputNodes.length)];
+        nnSignals.push({ x: startNode.x, y: startNode.y, targetLayer: 1, progress: 0 });
+    }
+
+    function animateNN() {
+        if (!nnCtx) return;
+        nnCtx.clearRect(0, 0, nnCanvas.width, nnCanvas.height);
+        nnCtx.lineWidth = 0.5;
+        nnCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        for(let i=0; i<nnNodes.length; i++) {
+            const n1 = nnNodes[i];
+            for(let j=0; j<nnNodes.length; j++) {
+                const n2 = nnNodes[j];
+                if (n2.layer === n1.layer + 1) {
+                    nnCtx.beginPath();
+                    nnCtx.moveTo(n1.x, n1.y);
+                    nnCtx.lineTo(n2.x, n2.y);
+                    nnCtx.stroke();
+                }
+            }
+        }
+
+        for(let n of nnNodes) {
+            nnCtx.beginPath();
+            nnCtx.arc(n.x, n.y, 4, 0, Math.PI * 2);
+            nnCtx.fillStyle = n.active > 0 ? `rgba(0, 255, 255, ${n.active})` : '#333';
+            nnCtx.fill();
+            nnCtx.strokeStyle = '#555';
+            nnCtx.stroke();
+            if(n.active > 0) n.active -= 0.05;
+        }
+
+        for(let i = nnSignals.length - 1; i >= 0; i--) {
+            const sig = nnSignals[i];
+            sig.progress += 0.05;
+            const layerNodes = nnNodes.filter(n => n.layer === sig.targetLayer);
+            const targetX = layerNodes[0].x;
+            const currentX = sig.x + (targetX - sig.x) * sig.progress;
+            nnCtx.beginPath();
+            nnCtx.arc(currentX, sig.y, 3, 0, Math.PI * 2);
+            nnCtx.fillStyle = '#f0f';
+            nnCtx.fill();
+            if (sig.progress >= 1) {
+                const hitNodes = nnNodes.filter(n => n.layer === sig.targetLayer);
+                if(hitNodes.length > 0) {
+                    const hitNode = hitNodes[Math.floor(Math.random() * hitNodes.length)];
+                    hitNode.active = 1.0;
+                    if (sig.targetLayer < 4) {
+                        nnSignals.push({ x: hitNode.x, y: hitNode.y, targetLayer: sig.targetLayer + 1, progress: 0 });
+                    }
+                }
+                nnSignals.splice(i, 1);
+            }
+        }
+        requestAnimationFrame(animateNN);
+    }
+
+    window.addEventListener('load', initNeuralNetworkVisualizer);
+    lucide.createIcons();
+</script>
+</body>
+</html>
