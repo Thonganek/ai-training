@@ -18,7 +18,10 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Sarabun', 'sans-serif'], mono: ['Fira Code', 'monospace'] }
+                    fontFamily: { sans: ['Sarabun', 'sans-serif'], mono: ['Fira Code', 'monospace'] },
+                    animation: {
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
                 }
             }
         }
@@ -122,14 +125,14 @@
     </div>
 
     <!-- Navbar -->
-    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel flex justify-between items-center sticky top-0">
-        <div class="flex items-center gap-3">
+    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel flex flex-col md:flex-row justify-between items-center sticky top-0 gap-4 md:gap-0">
+        <div class="flex items-center gap-3 w-full md:w-auto">
             <div class="p-2.5 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/20">
                 <i data-lucide="brain-circuit" class="w-6 h-6 text-white"></i>
             </div>
             <div>
                 <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-                    AI Training for Research & Health by Ton
+                    AI Training Suite
                 </h1>
                 <div class="flex items-center gap-2">
                     <p class="text-[10px] opacity-60 uppercase tracking-widest font-semibold">Jarunyoo Thonganek</p>
@@ -139,11 +142,11 @@
             </div>
         </div>
         
-        <div class="flex items-center gap-4">
+        <div class="flex flex-wrap justify-center items-center gap-4">
              <!-- API Status Monitor Button -->
              <button onclick="toggleAPIModal()" class="flex items-center gap-2 px-3 py-1.5 bg-slate-800/10 border border-[var(--border-color)] rounded-lg text-xs font-bold hover:bg-slate-800/20 transition-all text-[var(--text-main)]" title="Check API Status">
                 <i data-lucide="activity" class="w-4 h-4 text-green-500"></i>
-                <span class="hidden md:inline">API Status</span>
+                <span class="hidden lg:inline">API Status</span>
             </button>
 
             <!-- Theme Switcher -->
@@ -152,22 +155,23 @@
                 <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]" title="Light Mode"><i data-lucide="sun" class="w-4 h-4"></i></button>
             </div>
 
-            <div class="h-6 w-px bg-[var(--border-color)]"></div>
+            <div class="h-6 w-px bg-[var(--border-color)] hidden md:block"></div>
 
-            <div class="flex gap-2">
-                <button onclick="switchMode('text')" id="btn-text" class="tab-active px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+            <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto justify-center">
+                <button onclick="switchMode('text')" id="btn-text" class="tab-active px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="database" class="w-4 h-4"></i> 
                     <span>Text Research</span>
                 </button>
                 
-                <a href="training.html" class="tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 hover:bg-purple-500/10 hover:border-purple-500 hover:text-purple-500">
-                    <i data-lucide="library" class="w-4 h-4"></i> 
-                    <span>Training Center ↗</span>
-                </a>
-
-                <button onclick="switchMode('visual')" id="btn-visual" class="tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+                <button onclick="switchMode('visual')" id="btn-visual" class="tab-inactive px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="scan-face" class="w-4 h-4"></i> 
                     <span>Deep Visual</span>
+                </button>
+
+                <!-- NEW BUTTON: LLM Architect -->
+                <button onclick="switchMode('llm')" id="btn-llm" class="tab-inactive px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap border-purple-500/50 text-purple-400 hover:bg-purple-500/10">
+                    <i data-lucide="network" class="w-4 h-4"></i> 
+                    <span>LLM Architect</span>
                 </button>
             </div>
         </div>
@@ -198,21 +202,6 @@
                                 <button onclick="handleSheetImport()" class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs border border-[var(--border-color)] transition-colors text-[var(--text-main)]">
                                     <i data-lucide="link" class="w-3 h-3 text-green-400"></i> Link URL
                                 </button>
-                            </div>
-                            
-                            <!-- Training Config (Flexibility) -->
-                            <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-[var(--border-color)]">
-                                <div>
-                                    <label class="text-[10px] opacity-60">Epochs</label>
-                                    <input type="number" value="10" class="w-full bg-transparent border border-[var(--border-color)] rounded px-2 py-1 text-xs">
-                                </div>
-                                <div>
-                                    <label class="text-[10px] opacity-60">Learning Rate</label>
-                                    <select class="w-full bg-transparent border border-[var(--border-color)] rounded px-2 py-1 text-xs">
-                                        <option>0.01 (Fast)</option>
-                                        <option>0.001 (Stable)</option>
-                                    </select>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -350,7 +339,7 @@
             </div>
         </div>
 
-        <!-- ==================== MODE 3: DEEP VISUAL TRAINING ==================== -->
+        <!-- ==================== MODE 2: DEEP VISUAL TRAINING ==================== -->
         <div id="mode-visual" class="grid grid-cols-12 gap-6 hidden animate-fade-in">
             <!-- Sidebar Pipeline -->
             <div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
@@ -610,6 +599,83 @@
                 </div>
             </div>
         </div>
+
+        <!-- ==================== MODE 3: LLM ARCHITECT (NEURAL NETWORK BUILDER) ==================== -->
+        <div id="mode-llm" class="grid grid-cols-12 gap-6 hidden animate-fade-in h-full">
+            <!-- Sidebar: Config & Data -->
+            <div class="col-span-12 lg:col-span-4 flex flex-col gap-5 h-full">
+                <div class="glass-panel p-6 rounded-2xl h-full flex flex-col">
+                    <h2 class="text-lg font-bold mb-4 text-purple-400 flex items-center gap-2">
+                        <i data-lucide="brain-circuit"></i> LLM Neural Architect
+                    </h2>
+                    
+                    <!-- Network Config -->
+                    <div class="mb-4 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)]">
+                        <h3 class="text-xs font-bold mb-2 opacity-70">Architecture Hyperparameters</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] opacity-60">Hidden Layers</label>
+                                <input type="number" id="llm-layers" value="3" min="1" max="5" class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[10px] opacity-60">Neurons/Layer</label>
+                                <input type="number" id="llm-neurons" value="8" min="4" max="16" class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[10px] opacity-60">Context Window</label>
+                                <select class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
+                                    <option>2 Tokens (Bigram)</option>
+                                    <option>3 Tokens (Trigram)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] opacity-60">Learning Rate</label>
+                                <select class="w-full bg-black/20 border border-[var(--border-color)] rounded px-2 py-1 text-xs">
+                                    <option>0.01 (Adam)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Training Data Input -->
+                    <div class="flex-1 flex flex-col">
+                        <h3 class="text-xs font-bold mb-2 opacity-70">Training Corpus (Text Data)</h3>
+                        <textarea id="llm-train-data" class="flex-1 w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl p-3 font-mono text-xs focus:border-purple-500 outline-none resize-none mb-2" placeholder="Paste text here to train the Neural Network... (e.g., Medical reports, Research abstracts)"></textarea>
+                        <button onclick="trainLLM()" id="btn-train-llm" class="w-full py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg text-sm font-bold shadow-lg transition-all flex justify-center items-center gap-2">
+                            <i data-lucide="play-circle"></i> Train Neural Network
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main: Visualizer & Output -->
+            <div class="col-span-12 lg:col-span-8 flex flex-col gap-5 h-full">
+                <!-- Neural Network Visualizer Canvas -->
+                <div class="glass-panel p-4 rounded-2xl flex-1 flex flex-col relative overflow-hidden bg-black/80">
+                    <div class="absolute top-4 left-4 z-10 bg-black/50 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
+                        <span class="text-xs font-mono text-green-400" id="llm-status">Status: Idle</span>
+                    </div>
+                    <canvas id="nn-canvas" class="w-full h-full object-contain"></canvas>
+                </div>
+
+                <!-- Text Generation / Inference -->
+                <div class="glass-panel p-6 rounded-2xl h-[200px] flex flex-col">
+                    <h3 class="text-sm font-bold mb-2 flex items-center gap-2">
+                        <i data-lucide="message-square"></i> Test Generation (Inference)
+                    </h3>
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="llm-seed" class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm outline-none" placeholder="Start typing (e.g. 'The patient')...">
+                        <button onclick="generateText()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold flex items-center gap-2">
+                            <i data-lucide="wand-2"></i> Generate
+                        </button>
+                    </div>
+                    <div id="llm-output" class="flex-1 bg-black/20 rounded-lg p-3 text-sm font-mono text-green-300 overflow-y-auto border border-[var(--border-color)]">
+                        <span class="opacity-50">// Generated text will appear here...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- Alert Modal -->
@@ -698,17 +764,25 @@
     function switchMode(mode) {
         document.getElementById('mode-text').classList.toggle('hidden', mode !== 'text');
         document.getElementById('mode-visual').classList.toggle('hidden', mode !== 'visual');
+        document.getElementById('mode-llm').classList.toggle('hidden', mode !== 'llm');
         
         // Update Tab States
-        const tabs = ['text', 'visual'];
+        const tabs = ['text', 'visual', 'llm'];
         tabs.forEach(t => {
             const btn = document.getElementById(`btn-${t}`);
+            // Reset base classes first
+            let baseClass = "px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap";
+            
             if (t === mode) {
-                btn.className = "tab-active px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2";
+                btn.className = baseClass + " tab-active";
             } else {
-                btn.className = "tab-inactive px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2";
+                btn.className = baseClass + " tab-inactive hover:bg-[var(--accent-color)]/10";
             }
         });
+
+        if(mode === 'llm') {
+            initNeuralNetworkVisualizer();
+        }
     }
 
     // --- TEXT TRAINING (DEEP & DETAILED) ---
@@ -1098,7 +1172,7 @@
     function calculateSimilarity(pixels1, pixels2) {
         let diff = 0;
         for (let i = 0; i < pixels1.length; i += 4) {
-            diff += Math.abs(pixels1[i] - pixels2[i]);       // R
+            diff += Math.abs(pixels1[i] - pixels2[i]);        // R
             diff += Math.abs(pixels1[i+1] - pixels2[i+1]); // G
             diff += Math.abs(pixels1[i+2] - pixels2[i+2]); // B
         }
@@ -1319,8 +1393,8 @@ const startKeyIndex = currentKeyIndex;
             if (loadingId) {
                 const loadingElem = document.querySelector(`#${loadingId} .glass-panel`);
                 if (loadingElem) {
-                     loadingElem.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Processing... (Key #${actualIndex + 1})`;
-                     lucide.createIcons();
+                      loadingElem.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Processing... (Key #${actualIndex + 1})`;
+                      lucide.createIcons();
                 }
             }
 
@@ -1347,8 +1421,8 @@ const startKeyIndex = currentKeyIndex;
             // Reset other keys from 'active' to 'ready'
             keyHealth.forEach((k, idx) => {
                 if(idx !== actualIndex && k.status === 'active') {
-                     k.status = 'ready'; 
-                     k.msg = 'Ready'; 
+                      k.status = 'ready'; 
+                      k.msg = 'Ready'; 
                 }
             });
             
@@ -1582,6 +1656,257 @@ function clearChat() {
     clearChatAttachment();
     lucide.createIcons();
     showAlert("Chat Cleared", "ล้างหน้าจอแชทเรียบร้อย (หน่วยความจำที่เทรนไว้ยังอยู่)");
+}
+
+/* ==========================================================================
+   MODE 3: MICRO LLM LOGIC & VISUALIZATION (Markov Chain / N-Gram Simulated)
+   ========================================================================== */
+
+class TinyLLM {
+    constructor() {
+        this.ngrams = {};
+        this.vocab = [];
+        this.isTrained = false;
+        this.contextSize = 2; // Bigram by default
+    }
+
+    tokenize(text) {
+        // Simple tokenization: lowercase, remove special chars, split by space
+        return text.toLowerCase()
+            .replace(/[^\w\s\u0E00-\u0E7F]/g, '')
+            .split(/\s+/)
+            .filter(t => t.length > 0);
+    }
+
+    train(text) {
+        const tokens = this.tokenize(text);
+        this.vocab = [...new Set(tokens)];
+        this.ngrams = {};
+
+        // Build N-Gram Model
+        for (let i = 0; i < tokens.length - this.contextSize; i++) {
+            let context = tokens.slice(i, i + this.contextSize).join(' ');
+            let nextWord = tokens[i + this.contextSize];
+
+            if (!this.ngrams[context]) {
+                this.ngrams[context] = {};
+            }
+            if (!this.ngrams[context][nextWord]) {
+                this.ngrams[context][nextWord] = 0;
+            }
+            this.ngrams[context][nextWord]++;
+        }
+        this.isTrained = true;
+    }
+
+    predictNext(currentContext) {
+        if (!this.ngrams[currentContext]) return null;
+        
+        const possibleNext = this.ngrams[currentContext];
+        const words = Object.keys(possibleNext);
+        
+        // Weighted random choice
+        let total = 0;
+        words.forEach(w => total += possibleNext[w]);
+        
+        let r = Math.random() * total;
+        for (let w of words) {
+            r -= possibleNext[w];
+            if (r <= 0) return w;
+        }
+        return words[0];
+    }
+}
+
+const myLLM = new TinyLLM();
+let isLLMTraining = false;
+let nnCanvas, nnCtx;
+let nnNodes = [];
+let nnSignals = [];
+
+function initNeuralNetworkVisualizer() {
+    nnCanvas = document.getElementById('nn-canvas');
+    if (!nnCanvas) return;
+    
+    const parent = nnCanvas.parentElement;
+    nnCanvas.width = parent.clientWidth;
+    nnCanvas.height = parent.clientHeight;
+    nnCtx = nnCanvas.getContext('2d');
+
+    generateNNStructure();
+    animateNN();
+}
+
+function generateNNStructure() {
+    nnNodes = [];
+    const layers = parseInt(document.getElementById('llm-layers').value) + 2; // Input + Hidden + Output
+    const neuronsPerLayer = parseInt(document.getElementById('llm-neurons').value);
+    
+    const colSpacing = nnCanvas.width / (layers + 1);
+    
+    for(let l = 0; l < layers; l++) {
+        const rowSpacing = nnCanvas.height / (neuronsPerLayer + 1);
+        for(let n = 0; n < neuronsPerLayer; n++) {
+            nnNodes.push({
+                x: colSpacing * (l + 1),
+                y: rowSpacing * (n + 1),
+                layer: l,
+                active: 0
+            });
+        }
+    }
+}
+
+function trainLLM() {
+    const text = document.getElementById('llm-train-data').value;
+    if(!text) return showAlert("No Data", "Please paste some text to train the LLM.");
+    
+    document.getElementById('btn-train-llm').innerText = "Training...";
+    document.getElementById('llm-status').innerText = "Status: Backpropagation...";
+    
+    isLLMTraining = true;
+
+    // Simulate training time + Real Logic
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 10;
+        fireNeurons(); // Visual effect
+        
+        if(progress >= 100) {
+            clearInterval(interval);
+            myLLM.train(text);
+            isLLMTraining = false;
+            document.getElementById('btn-train-llm').innerHTML = `<i data-lucide="check"></i> Trained`;
+            document.getElementById('llm-status').innerText = `Status: Trained (Vocab: ${myLLM.vocab.length})`;
+            showAlert("LLM Trained", `Neural Network adjusted weights for ${myLLM.vocab.length} unique tokens.`);
+            lucide.createIcons();
+        }
+    }, 200);
+}
+
+function generateText() {
+    if(!myLLM.isTrained) return showAlert("Not Trained", "Please train the model first.");
+    
+    const seed = document.getElementById('llm-seed').value.trim();
+    if(!seed) return showAlert("No Seed", "Enter a starting word.");
+    
+    const outputDiv = document.getElementById('llm-output');
+    outputDiv.innerText = seed;
+    
+    let currentWords = myLLM.tokenize(seed);
+    if(currentWords.length < 2) currentWords = [currentWords[0], currentWords[0]]; // fallback padding
+    
+    let genCount = 0;
+    const maxGen = 20;
+    
+    const genInterval = setInterval(() => {
+        // Prepare context (Last 2 words)
+        const context = currentWords.slice(-2).join(' ');
+        const next = myLLM.predictNext(context);
+        
+        fireNeurons(); // Visual
+        
+        if(next) {
+            outputDiv.innerText += " " + next;
+            currentWords.push(next);
+        } else {
+            outputDiv.innerText += " [END]";
+            clearInterval(genInterval);
+        }
+        
+        genCount++;
+        if(genCount >= maxGen) clearInterval(genInterval);
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+    }, 300);
+}
+
+// Visualizer Animation Loop
+function fireNeurons() {
+    // Randomly activate signals
+    const inputNodes = nnNodes.filter(n => n.layer === 0);
+    const startNode = inputNodes[Math.floor(Math.random() * inputNodes.length)];
+    
+    nnSignals.push({
+        x: startNode.x,
+        y: startNode.y,
+        targetLayer: 1,
+        progress: 0
+    });
+}
+
+function animateNN() {
+    if (!nnCtx) return;
+    nnCtx.clearRect(0, 0, nnCanvas.width, nnCanvas.height);
+    
+    // Draw Connections
+    nnCtx.lineWidth = 0.5;
+    nnCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    
+    for(let i=0; i<nnNodes.length; i++) {
+        const n1 = nnNodes[i];
+        for(let j=0; j<nnNodes.length; j++) {
+            const n2 = nnNodes[j];
+            if (n2.layer === n1.layer + 1) {
+                nnCtx.beginPath();
+                nnCtx.moveTo(n1.x, n1.y);
+                nnCtx.lineTo(n2.x, n2.y);
+                nnCtx.stroke();
+            }
+        }
+    }
+
+    // Draw Nodes
+    for(let n of nnNodes) {
+        nnCtx.beginPath();
+        nnCtx.arc(n.x, n.y, 4, 0, Math.PI * 2);
+        nnCtx.fillStyle = n.active > 0 ? `rgba(0, 255, 255, ${n.active})` : '#333';
+        nnCtx.fill();
+        nnCtx.strokeStyle = '#555';
+        nnCtx.stroke();
+        
+        if(n.active > 0) n.active -= 0.05; // Decay
+    }
+
+    // Draw Signals
+    for(let i = nnSignals.length - 1; i >= 0; i--) {
+        const sig = nnSignals[i];
+        sig.progress += 0.05;
+        
+        // Find next layer position
+        const layerNodes = nnNodes.filter(n => n.layer === sig.targetLayer);
+        const targetX = layerNodes[0].x; // Approx x
+        
+        // Lerp X
+        const currentX = sig.x + (targetX - sig.x) * sig.progress; // Simplified movement
+        
+        // Draw Signal
+        nnCtx.beginPath();
+        nnCtx.arc(currentX, sig.y, 3, 0, Math.PI * 2);
+        nnCtx.fillStyle = '#f0f';
+        nnCtx.fill();
+        
+        if (sig.progress >= 1) {
+            // Signal hit layer
+            const hitNodes = nnNodes.filter(n => n.layer === sig.targetLayer);
+            if(hitNodes.length > 0) {
+                 // Spread signal to random node in this layer
+                 const hitNode = hitNodes[Math.floor(Math.random() * hitNodes.length)];
+                 hitNode.active = 1.0;
+                 
+                 if (sig.targetLayer < 4) { // Propagate
+                     nnSignals.push({
+                         x: hitNode.x,
+                         y: hitNode.y,
+                         targetLayer: sig.targetLayer + 1,
+                         progress: 0
+                     });
+                 }
+            }
+            nnSignals.splice(i, 1);
+        }
+    }
+
+    requestAnimationFrame(animateNN);
 }
 
 lucide.createIcons();
