@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Quiz & Assessment - ทดสอบความรู้ AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-main: #f8fafc; --bg-panel: rgba(255, 255, 255, 0.9); --text-main: #0f172a; --text-muted: #64748b; --border-color: rgba(0, 0, 0, 0.1); --accent-color: #f43f5e; }
+        [data-theme="dark"] { --bg-main: #020617; --bg-panel: rgba(15, 23, 42, 0.6); --text-main: #e2e8f0; --text-muted: #94a3b8; --border-color: rgba(255, 255, 255, 0.08); --accent-color: #fb7185; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: all 0.5s; }
+        .glass-panel { background: var(--bg-panel); backdrop-filter: blur(12px); border: 1px solid var(--border-color); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
+        .animate-float { animation: float 8s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } }
+        .choice-btn { transition: all 0.3s; border: 2px solid var(--border-color); }
+        .choice-btn:hover { border-color: var(--accent-color); background: rgba(244, 63, 94, 0.1); }
+        .choice-btn.selected { border-color: var(--accent-color); background: rgba(244, 63, 94, 0.2); }
+        .choice-btn.correct { border-color: #22c55e; background: rgba(34, 197, 94, 0.2); }
+        .choice-btn.wrong { border-color: #ef4444; background: rgba(239, 68, 68, 0.2); }
+        .progress-bar { transition: width 0.5s ease; }
+        @keyframes confetti { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        .confetti { position: fixed; width: 10px; height: 10px; animation: confetti 3s ease-out forwards; }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden" data-theme="light">
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-rose-600/10 rounded-full blur-[120px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-pink-600/10 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
+    </div>
+
+    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel sticky top-0">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="p-2.5 bg-gradient-to-br from-rose-500 to-pink-400 rounded-xl shadow-lg"><i data-lucide="brain-circuit" class="w-6 h-6 text-white"></i></a>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 to-pink-400">AI Quiz & Assessment</h1>
+                    <p class="text-[10px] opacity-60">ทดสอบความรู้ AI</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="flex bg-[var(--bg-main)] rounded-lg p-1 border border-[var(--border-color)]">
+                    <button onclick="setTheme('dark')" class="p-1.5 rounded hover:bg-slate-800 hover:text-white text-[var(--text-muted)]"><i data-lucide="moon" class="w-4 h-4"></i></button>
+                    <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]"><i data-lucide="sun" class="w-4 h-4"></i></button>
+                </div>
+                <a href="index.html" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i> กลับหน้าหลัก</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 container mx-auto px-4 py-8 max-w-5xl">
+        <!-- Start Screen -->
+        <div id="startScreen">
+            <div class="text-center mb-8">
+                <div class="inline-block p-4 bg-rose-500/20 rounded-full mb-4">
+                    <i data-lucide="trophy" class="w-16 h-16 text-rose-500"></i>
+                </div>
+                <h1 class="text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-rose-400 to-pink-400">AI Quiz & Assessment</h1>
+                <p class="text-lg opacity-70">ทดสอบความรู้ AI และรับ Certificate</p>
+            </div>
+
+            <!-- Level Selection -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="glass-panel p-6 rounded-2xl cursor-pointer hover:scale-105 transition-transform" onclick="startQuiz('beginner')">
+                    <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="smile" class="w-6 h-6 text-green-500"></i>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Beginner</h3>
+                    <p class="text-sm opacity-70 mb-4">พื้นฐาน AI และ Machine Learning</p>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="opacity-60">10 คำถาม</span>
+                        <span class="text-green-500 font-bold">เริ่มต้น →</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl cursor-pointer hover:scale-105 transition-transform" onclick="startQuiz('intermediate')">
+                    <div class="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="zap" class="w-6 h-6 text-orange-500"></i>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Intermediate</h3>
+                    <p class="text-sm opacity-70 mb-4">Deep Learning และ Neural Networks</p>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="opacity-60">15 คำถาม</span>
+                        <span class="text-orange-500 font-bold">เริ่มต้น →</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl cursor-pointer hover:scale-105 transition-transform" onclick="startQuiz('advanced')">
+                    <div class="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="flame" class="w-6 h-6 text-red-500"></i>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Advanced</h3>
+                    <p class="text-sm opacity-70 mb-4">Architectures และ Research</p>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="opacity-60">20 คำถาม</span>
+                        <span class="text-red-500 font-bold">เริ่มต้น →</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="award" class="w-5 h-5 text-rose-500"></i> Top Scorers</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-4 p-3 bg-[var(--bg-main)] rounded-lg">
+                        <div class="text-2xl">🥇</div>
+                        <div class="flex-1">
+                            <p class="font-bold">Somchai P.</p>
+                            <p class="text-xs opacity-60">Advanced Level</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-rose-500">98%</p>
+                            <p class="text-xs opacity-60">19/20</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 p-3 bg-[var(--bg-main)] rounded-lg">
+                        <div class="text-2xl">🥈</div>
+                        <div class="flex-1">
+                            <p class="font-bold">Nattaya K.</p>
+                            <p class="text-xs opacity-60">Intermediate Level</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-orange-500">95%</p>
+                            <p class="text-xs opacity-60">14/15</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 p-3 bg-[var(--bg-main)] rounded-lg">
+                        <div class="text-2xl">🥉</div>
+                        <div class="flex-1">
+                            <p class="font-bold">Preecha S.</p>
+                            <p class="text-xs opacity-60">Beginner Level</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-green-500">92%</p>
+                            <p class="text-xs opacity-60">9/10</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quizScreen" class="hidden">
+            <!-- Progress Bar -->
+            <div class="glass-panel p-4 rounded-xl mb-6">
+                <div class="flex items-center justify-between mb-2 text-sm">
+                    <span id="questionCounter">คำถามที่ 1/10</span>
+                    <span id="timer">⏱️ 15:00</span>
+                </div>
+                <div class="h-2 bg-[var(--bg-main)] rounded-full overflow-hidden">
+                    <div id="progressBar" class="progress-bar h-full bg-gradient-to-r from-rose-500 to-pink-500" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <!-- Question -->
+            <div class="glass-panel p-8 rounded-2xl mb-6">
+                <h2 class="text-2xl font-bold mb-6" id="question">คำถามจะแสดงที่นี่</h2>
+                <div class="space-y-3" id="choices"></div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex gap-4">
+                <button onclick="previousQuestion()" id="btnPrev" class="px-6 py-3 bg-white/5 border border-[var(--border-color)] rounded-xl hover:bg-white/10 disabled:opacity-50" disabled>
+                    <i data-lucide="chevron-left" class="w-4 h-4 inline mr-2"></i> ย้อนกลับ
+                </button>
+                <button onclick="nextQuestion()" id="btnNext" class="flex-1 py-3 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-xl font-bold hover:from-rose-500 hover:to-pink-500">
+                    ต่อไป <i data-lucide="chevron-right" class="w-4 h-4 inline ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="hidden">
+            <div class="text-center mb-8">
+                <div id="resultIcon" class="inline-block p-6 bg-green-500/20 rounded-full mb-4">
+                    <i data-lucide="trophy" class="w-24 h-24 text-green-500"></i>
+                </div>
+                <h1 class="text-4xl font-bold mb-3" id="resultTitle">ยินดีด้วย!</h1>
+                <p class="text-lg opacity-70" id="resultSubtitle">คุณทำได้ดีมาก</p>
+            </div>
+
+            <div class="glass-panel p-8 rounded-2xl mb-6">
+                <div class="text-center mb-6">
+                    <div class="text-6xl font-bold text-rose-500 mb-2" id="scoreDisplay">0%</div>
+                    <p class="opacity-70" id="scoreDetail">0/10 ข้อ</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="text-center p-4 bg-green-500/10 rounded-lg">
+                        <div class="text-2xl font-bold text-green-500" id="correctCount">0</div>
+                        <p class="text-xs opacity-60">ถูก</p>
+                    </div>
+                    <div class="text-center p-4 bg-red-500/10 rounded-lg">
+                        <div class="text-2xl font-bold text-red-500" id="wrongCount">0</div>
+                        <p class="text-xs opacity-60">ผิด</p>
+                    </div>
+                    <div class="text-center p-4 bg-blue-500/10 rounded-lg">
+                        <div class="text-2xl font-bold text-blue-500" id="timeSpent">0:00</div>
+                        <p class="text-xs opacity-60">เวลา</p>
+                    </div>
+                </div>
+
+                <div id="certificateSection" class="hidden p-6 bg-gradient-to-r from-rose-500/10 to-pink-500/10 border border-rose-500/20 rounded-xl text-center">
+                    <i data-lucide="award" class="w-12 h-12 mx-auto text-rose-500 mb-3"></i>
+                    <h3 class="font-bold mb-2">🎉 คุณได้รับ Certificate!</h3>
+                    <p class="text-sm opacity-70 mb-4">คะแนนของคุณผ่านเกณฑ์ 80%</p>
+                    <button onclick="downloadCertificate()" class="px-6 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-500">
+                        <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                        Download Certificate
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="reviewAnswers()" class="flex-1 py-3 bg-white/5 border border-[var(--border-color)] rounded-xl hover:bg-white/10">
+                    <i data-lucide="eye" class="w-4 h-4 inline mr-2"></i> ดูเฉลย
+                </button>
+                <button onclick="retakeQuiz()" class="flex-1 py-3 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-xl font-bold hover:from-rose-500 hover:to-pink-500">
+                    <i data-lucide="refresh-cw" class="w-4 h-4 inline mr-2"></i> ทำใหม่
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function setTheme(theme) { document.body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
+        setTheme(localStorage.getItem('theme') || 'light');
+
+        let currentLevel = 'beginner';
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let startTime;
+        let timerInterval;
+
+        const quizData = {
+            beginner: [
+                { q: "AI ย่อมาจากอะไร?", choices: ["Artificial Intelligence", "Advanced Integration", "Automated Input", "Application Interface"], correct: 0 },
+                { q: "Machine Learning คืออะไร?", choices: ["การเขียนโค้ด", "การเรียนรู้ของเครื่อง", "การทำงานอัตโนมัติ", "การประมวลผลข้อมูล"], correct: 1 },
+                { q: "Supervised Learning ต้องการอะไร?", choices: ["ข้อมูลที่มีคำตอบ", "ข้อมูลไม่จำกัด", "GPU", "Internet"], correct: 0 },
+                { q: "Deep Learning ใช้โครงสร้างอะไร?", choices: ["Decision Tree", "Neural Network", "Linear Regression", "K-Means"], correct: 1 },
+                { q: "CNN ย่อมาจากอะไร?", choices: ["Computer Neural Network", "Convolutional Neural Network", "Connected Neural Network", "Central Neural Network"], correct: 1 },
+                { q: "ข้อใดไม่ใช่ประเภทของ Machine Learning?", choices: ["Supervised", "Unsupervised", "Reinforcement", "Distributed"], correct: 3 },
+                { q: "Overfitting คืออะไร?", choices: ["โมเดลเรียนรู้มากเกินไป", "โมเดลเร็วเกินไป", "ข้อมูลมากเกินไป", "ความแม่นยำสูง"], correct: 0 },
+                { q: "Activation Function ทำหน้าที่อะไร?", choices: ["เพิ่มข้อมูล", "ทำให้เป็น non-linear", "ลดขนาด", "เพิ่มความเร็ว"], correct: 1 },
+                { q: "Transfer Learning คืออะไร?", choices: ["ส่งโมเดลไปที่อื่น", "ใช้โมเดลที่ฝึกแล้ว", "แปลงข้อมูล", "ถ่ายโอนข้อมูล"], correct: 1 },
+                { q: "Accuracy วัดอะไร?", choices: ["ความเร็ว", "ความแม่นยำ", "ขนาดโมเดล", "จำนวนข้อมูล"], correct: 1 }
+            ]
+        };
+
+        function startQuiz(level) {
+            currentLevel = level;
+            currentQuestion = 0;
+            userAnswers = [];
+            startTime = Date.now();
+            
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            
+            loadQuestion();
+            startTimer();
+        }
+
+        function loadQuestion() {
+            const questions = quizData[currentLevel];
+            const q = questions[currentQuestion];
+            
+            document.getElementById('question').innerText = q.q;
+            document.getElementById('questionCounter').innerText = `คำถามที่ ${currentQuestion + 1}/${questions.length}`;
+            document.getElementById('progressBar').style.width = ((currentQuestion + 1) / questions.length * 100) + '%';
+            
+            const choicesHTML = q.choices.map((choice, i) => `
+                <button onclick="selectChoice(${i})" class="choice-btn w-full p-4 rounded-xl text-left" data-choice="${i}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 border-2 border-current rounded-full flex items-center justify-center font-bold">${String.fromCharCode(65 + i)}</div>
+                        <span>${choice}</span>
+                    </div>
+                </button>
+            `).join('');
+            
+            document.getElementById('choices').innerHTML = choicesHTML;
+            
+            if(userAnswers[currentQuestion] !== undefined) {
+                document.querySelector(`[data-choice="${userAnswers[currentQuestion]}"]`).classList.add('selected');
+            }
+            
+            document.getElementById('btnPrev').disabled = currentQuestion === 0;
+            lucide.createIcons();
+        }
+
+        function selectChoice(choice) {
+            document.querySelectorAll('.choice-btn').forEach(btn => btn.classList.remove('selected'));
+            document.querySelector(`[data-choice="${choice}"]`).classList.add('selected');
+            userAnswers[currentQuestion] = choice;
+        }
+
+        function nextQuestion() {
+            const questions = quizData[currentLevel];
+            if(currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function previousQuestion() {
+            if(currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+            }
+        }
+
+        function startTimer() {
+            let seconds = 0;
+            timerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                document.getElementById('timer').innerText = `⏱️ ${mins}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            
+            const questions = quizData[currentLevel];
+            let correct = 0;
+            questions.forEach((q, i) => {
+                if(userAnswers[i] === q.correct) correct++;
+            });
+            
+            const score = Math.round((correct / questions.length) * 100);
+            const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+            const mins = Math.floor(timeSpent / 60);
+            const secs = timeSpent % 60;
+            
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            
+            document.getElementById('scoreDisplay').innerText = score + '%';
+            document.getElementById('scoreDetail').innerText = `${correct}/${questions.length} ข้อ`;
+            document.getElementById('correctCount').innerText = correct;
+            document.getElementById('wrongCount').innerText = questions.length - correct;
+            document.getElementById('timeSpent').innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
+            
+            if(score >= 80) {
+                document.getElementById('certificateSection').classList.remove('hidden');
+                showConfetti();
+            }
+            
+            lucide.createIcons();
+        }
+
+        function showConfetti() {
+            const colors = ['#f43f5e', '#fb7185', '#ec4899', '#f472b6'];
+            for(let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 50);
+            }
+        }
+
+        function reviewAnswers() {
+            alert('ฟีเจอร์ "ดูเฉลย" จะแสดงคำตอบที่ถูกต้องและคำอธิบายในเวอร์ชันเต็ม');
+        }
+
+        function retakeQuiz() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+
+        function downloadCertificate() {
+            alert('กำลังสร้าง Certificate...\n\nในเวอร์ชันเต็มจะได้ PDF พร้อมชื่อและคะแนน');
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

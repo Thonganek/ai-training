@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Project Templates - เทมเพลตโครงการ AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-main: #f8fafc; --bg-panel: rgba(255, 255, 255, 0.9); --text-main: #0f172a; --text-muted: #64748b; --border-color: rgba(0, 0, 0, 0.1); --accent-color: #6366f1; }
+        [data-theme="dark"] { --bg-main: #020617; --bg-panel: rgba(15, 23, 42, 0.6); --text-main: #e2e8f0; --text-muted: #94a3b8; --border-color: rgba(255, 255, 255, 0.08); --accent-color: #818cf8; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: all 0.5s; }
+        .glass-panel { background: var(--bg-panel); backdrop-filter: blur(12px); border: 1px solid var(--border-color); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); transition: all 0.3s; }
+        .glass-panel:hover { transform: translateY(-5px); box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1); }
+        .animate-float { animation: float 8s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } }
+        .tag { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+        .tag-beginner { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .tag-intermediate { background: rgba(249, 115, 22, 0.2); color: #f97316; }
+        .tag-advanced { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        pre { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; overflow-x: auto; }
+        code { font-family: 'Courier New', monospace; font-size: 12px; }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden" data-theme="light">
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
+    </div>
+
+    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel sticky top-0">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-400 rounded-xl shadow-lg"><i data-lucide="folder-code" class="w-6 h-6 text-white"></i></a>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">AI Project Templates</h1>
+                    <p class="text-[10px] opacity-60">เทมเพลตโครงการพร้อมใช้</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="flex bg-[var(--bg-main)] rounded-lg p-1 border border-[var(--border-color)]">
+                    <button onclick="setTheme('dark')" class="p-1.5 rounded hover:bg-slate-800 hover:text-white text-[var(--text-muted)]"><i data-lucide="moon" class="w-4 h-4"></i></button>
+                    <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]"><i data-lucide="sun" class="w-4 h-4"></i></button>
+                </div>
+                <a href="index.html" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i> กลับหน้าหลัก</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
+        <div class="text-center mb-8">
+            <div class="inline-block p-4 bg-indigo-500/20 rounded-full mb-4">
+                <i data-lucide="rocket" class="w-12 h-12 text-indigo-500"></i>
+            </div>
+            <h1 class="text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">AI Project Templates</h1>
+            <p class="text-lg opacity-70">เริ่มต้นโปรเจค AI ได้ทันทีด้วยเทมเพลตพร้อมใช้</p>
+        </div>
+
+        <!-- Filter -->
+        <div class="glass-panel p-4 rounded-xl mb-8 flex flex-wrap gap-2 justify-center">
+            <button onclick="filterTemplates('all')" class="filter-btn px-4 py-2 rounded-lg text-sm bg-indigo-600 text-white" data-filter="all">ทั้งหมด</button>
+            <button onclick="filterTemplates('beginner')" class="filter-btn px-4 py-2 rounded-lg text-sm bg-white/5" data-filter="beginner">Beginner</button>
+            <button onclick="filterTemplates('intermediate')" class="filter-btn px-4 py-2 rounded-lg text-sm bg-white/5" data-filter="intermediate">Intermediate</button>
+            <button onclick="filterTemplates('advanced')" class="filter-btn px-4 py-2 rounded-lg text-sm bg-white/5" data-filter="advanced">Advanced</button>
+        </div>
+
+        <!-- Templates Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="templatesGrid">
+            <!-- Chatbot -->
+            <div class="glass-panel p-6 rounded-2xl cursor-pointer" data-level="beginner" onclick="viewTemplate('chatbot')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="message-circle" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">AI Chatbot</h3>
+                            <p class="text-xs opacity-60">Customer Support</p>
+                        </div>
+                    </div>
+                    <span class="tag tag-beginner">Beginner</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">สร้าง Chatbot สำหรับตอบคำถามลูกค้าแบบอัตโนมัติ</p>
+                <div class="flex gap-2 mb-4 flex-wrap">
+                    <span class="px-2 py-1 bg-blue-500/10 text-blue-500 rounded text-xs">Python</span>
+                    <span class="px-2 py-1 bg-green-500/10 text-green-500 rounded text-xs">Flask</span>
+                    <span class="px-2 py-1 bg-purple-500/10 text-purple-500 rounded text-xs">GPT API</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="opacity-60">⏱️ 2 hours</span>
+                    <span class="text-indigo-500 font-semibold">View Template →</span>
+                </div>
+            </div>
+
+            <!-- Image Classifier -->
+            <div class="glass-panel p-6 rounded-2xl cursor-pointer" data-level="intermediate" onclick="viewTemplate('classifier')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="image" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">Image Classifier</h3>
+                            <p class="text-xs opacity-60">Computer Vision</p>
+                        </div>
+                    </div>
+                    <span class="tag tag-intermediate">Intermediate</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">จำแนกประเภทภาพด้วย CNN และ Transfer Learning</p>
+                <div class="flex gap-2 mb-4 flex-wrap">
+                    <span class="px-2 py-1 bg-blue-500/10 text-blue-500 rounded text-xs">TensorFlow</span>
+                    <span class="px-2 py-1 bg-orange-500/10 text-orange-500 rounded text-xs">Keras</span>
+                    <span class="px-2 py-1 bg-purple-500/10 text-purple-500 rounded text-xs">ResNet</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="opacity-60">⏱️ 4 hours</span>
+                    <span class="text-indigo-500 font-semibold">View Template →</span>
+                </div>
+            </div>
+
+            <!-- Sentiment Analysis -->
+            <div class="glass-panel p-6 rounded-2xl cursor-pointer" data-level="beginner" onclick="viewTemplate('sentiment')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="heart" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">Sentiment Analyzer</h3>
+                            <p class="text-xs opacity-60">NLP</p>
+                        </div>
+                    </div>
+                    <span class="tag tag-beginner">Beginner</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">วิเคราะห์ความรู้สึกจากข้อความ Reviews</p>
+                <div class="flex gap-2 mb-4 flex-wrap">
+                    <span class="px-2 py-1 bg-blue-500/10 text-blue-500 rounded text-xs">Python</span>
+                    <span class="px-2 py-1 bg-green-500/10 text-green-500 rounded text-xs">BERT</span>
+                    <span class="px-2 py-1 bg-purple-500/10 text-purple-500 rounded text-xs">HuggingFace</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="opacity-60">⏱️ 3 hours</span>
+                    <span class="text-indigo-500 font-semibold">View Template →</span>
+                </div>
+            </div>
+
+            <!-- Object Detection -->
+            <div class="glass-panel p-6 rounded-2xl cursor-pointer" data-level="advanced" onclick="viewTemplate('detection')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="scan" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">Object Detection</h3>
+                            <p class="text-xs opacity-60">Real-time Vision</p>
+                        </div>
+                    </div>
+                    <span class="tag tag-advanced">Advanced</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">ตรวจจับวัตถุแบบ Real-time ด้วย YOLO</p>
+                <div class="flex gap-2 mb-4 flex-wrap">
+                    <span class="px-2 py-1 bg-blue-500/10 text-blue-500 rounded text-xs">PyTorch</span>
+                    <span class="px-2 py-1 bg-orange-500/10 text-orange-500 rounded text-xs">YOLO v8</span>
+                    <span class="px-2 py-1 bg-purple-500/10 text-purple-500 rounded text-xs">OpenCV</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="opacity-60">⏱️ 6 hours</span>
+                    <span class="text-indigo-500 font-semibold">View Template →</span>
+                </div>
+            </div>
+
+            <!-- Recommendation System -->
+            <div class="glass-panel p-6 rounded-2xl cursor-pointer" data-level="intermediate" onclick="viewTemplate('recommendation')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="star" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">Recommendation Engine</h3>
+                            <p class="text-xs opacity-60">ML System</p>
+                        </div>
+                    </div>
+                    <span class="tag tag-intermediate">Intermediate</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">ระบบแนะนำสินค้าแบบ Collaborative Filtering</p>
+                <div class="flex gap-2 mb-4 flex-wrap">
+                    <span class="px-2 py-1 bg-blue-500/10 text-blue-500 rounded text-xs">Python</span>
+                    <span class="px-2 py-1 bg-green-500/10 text-green-500 rounded text-xs">scikit-learn</span>
+                    <span class="px-2 py-1 bg-purple-500/10 text-purple-500 rounded text-xs">Pandas</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="opacity-60">⏱️ 5 hours</span>
+                    <span class="text-indigo-500 font-semibold">View Template →</span>
+                </div>
+            </div>
+
+            <!-- Voice Assistant -->
+            <div class="glass-panel p-6 rounded-2xl cursor-pointer" data-level="advanced" onclick="viewTemplate('voice')">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-400 rounded-xl flex items-center justify-center">
+                            <i data-lucide="mic" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">Voice Assistant</h3>
+                            <p class="text-xs opacity-60">Speech Recognition</p>
+                        </div>
+                    </div>
+                    <span class="tag tag-advanced">Advanced</span>
+                </div>
+                <p class="text-sm opacity-70 mb-4">ผู้ช่วยเสียงที่ใช้ Speech-to-Text และ TTS</p>
+                <div class="flex gap-2 mb-4 flex-wrap">
+                    <span class="px-2 py-1 bg-blue-500/10 text-blue-500 rounded text-xs">Python</span>
+                    <span class="px-2 py-1 bg-green-500/10 text-green-500 rounded text-xs">Whisper</span>
+                    <span class="px-2 py-1 bg-purple-500/10 text-purple-500 rounded text-xs">gTTS</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="opacity-60">⏱️ 7 hours</span>
+                    <span class="text-indigo-500 font-semibold">View Template →</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="templateModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/70 backdrop-blur-sm px-4" onclick="closeModal()">
+        <div class="glass-panel p-8 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative" onclick="event.stopPropagation()">
+            <button onclick="closeModal()" class="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-lg">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        function setTheme(theme) { document.body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
+        setTheme(localStorage.getItem('theme') || 'light');
+
+        function filterTemplates(level) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white');
+                btn.classList.add('bg-white/5');
+                if(btn.dataset.filter === level) {
+                    btn.classList.add('bg-indigo-600', 'text-white');
+                    btn.classList.remove('bg-white/5');
+                }
+            });
+
+            document.querySelectorAll('[data-level]').forEach(card => {
+                if(level === 'all' || card.dataset.level === level) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function viewTemplate(id) {
+            const templates = {
+                chatbot: {
+                    title: 'AI Chatbot',
+                    description: 'สร้าง Chatbot สำหรับตอบคำถามลูกค้าแบบอัตโนมัติด้วย GPT API',
+                    features: ['ตอบคำถามอัตโนมัติ', 'เรียนรู้จากประวัติการสนทนา', 'รองรับหลายภาษา', 'API Integration'],
+                    code: `# Simple Chatbot with GPT API
+import openai
+
+openai.api_key = "YOUR_API_KEY"
+
+def chatbot(user_input):
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "คุณคือผู้ช่วยตอบคำถาม"},
+            {"role": "user", "content": user_input}
+        ]
+    )
+    return response.choices[0].message.content
+
+# ใช้งาน
+answer = chatbot("สินค้าส่งฟรีไหม?")
+print(answer)`,
+                    requirements: ['Python 3.8+', 'OpenAI API Key', 'Flask (for web interface)']
+                },
+                classifier: {
+                    title: 'Image Classifier',
+                    description: 'จำแนกประเภทภาพด้วย CNN และ Transfer Learning (ResNet)',
+                    features: ['Transfer Learning', 'Data Augmentation', 'Fine-tuning', 'Model Export'],
+                    code: `# Image Classification with Transfer Learning
+import tensorflow as tf
+from tensorflow.keras.applications import ResNet50
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+from tensorflow.keras.models import Model
+
+# Load pre-trained ResNet50
+base_model = ResNet50(weights='imagenet', include_top=False)
+
+# Add custom layers
+x = base_model.output
+x = GlobalAveragePooling2D()(x)
+x = Dense(1024, activation='relu')(x)
+predictions = Dense(10, activation='softmax')(x)
+
+model = Model(inputs=base_model.input, outputs=predictions)
+
+# Compile and train
+model.compile(optimizer='adam', 
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])`,
+                    requirements: ['TensorFlow 2.0+', 'Keras', 'NumPy', 'GPU recommended']
+                },
+                sentiment: {
+                    title: 'Sentiment Analyzer',
+                    description: 'วิเคราะห์ความรู้สึกจากข้อความ Reviews ด้วย BERT',
+                    features: ['Positive/Negative/Neutral', 'Multi-language support', 'Confidence score', 'Batch processing'],
+                    code: `# Sentiment Analysis with BERT
+from transformers import pipeline
+
+# Load pre-trained model
+classifier = pipeline('sentiment-analysis', 
+                     model='nlptown/bert-base-multilingual-uncased-sentiment')
+
+# Analyze sentiment
+texts = [
+    "สินค้าดีมาก บริการเยี่ยม",
+    "ผิดหวังมาก ส่งช้า"
+]
+
+results = classifier(texts)
+for text, result in zip(texts, results):
+    print(f"{text} → {result['label']} ({result['score']:.2f})")`,
+                    requirements: ['transformers', 'torch', 'Python 3.7+']
+                }
+            };
+
+            const template = templates[id] || templates.chatbot;
+
+            document.getElementById('modalContent').innerHTML = `
+                <h2 class="text-3xl font-bold mb-2">${template.title}</h2>
+                <p class="opacity-70 mb-6">${template.description}</p>
+
+                <div class="mb-6">
+                    <h3 class="font-bold mb-3">✨ Features</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        ${template.features.map(f => `<div class="flex items-center gap-2 text-sm"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> ${f}</div>`).join('')}
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-bold mb-3">📋 Requirements</h3>
+                    <div class="flex flex-wrap gap-2">
+                        ${template.requirements.map(r => `<span class="px-3 py-1 bg-indigo-500/10 text-indigo-500 rounded text-sm">${r}</span>`).join('')}
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-bold mb-3">💻 Sample Code</h3>
+                    <pre><code>${template.code}</code></pre>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="downloadTemplate('${id}')" class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold hover:from-indigo-500 hover:to-purple-500">
+                        <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                        Download Template
+                    </button>
+                    <button onclick="copyCode()" class="px-6 py-3 bg-white/5 border border-[var(--border-color)] rounded-xl hover:bg-white/10">
+                        <i data-lucide="copy" class="w-4 h-4 inline mr-2"></i>
+                        Copy Code
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('templateModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('templateModal').classList.add('hidden');
+        }
+
+        function downloadTemplate(id) {
+            alert(`กำลังดาวน์โหลด ${id} template...\n\nในเวอร์ชันเต็มจะได้ไฟล์ ZIP พร้อมโค้ด dataset และเอกสาร`);
+        }
+
+        function copyCode() {
+            const code = document.querySelector('pre code').textContent;
+            navigator.clipboard.writeText(code);
+            alert('คัดลอกโค้ดแล้ว!');
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
