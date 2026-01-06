@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Architect By TON Pro: Hybrid AI Suite v3</title>
+    <title>LLM Architect By TON Pro: Hybrid AI Suite v3 Enhanced</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -127,6 +127,21 @@
             outline: 2px solid var(--accent-primary);
             background: rgba(0,0,0,0.2);
         }
+
+        /* Layer badge animation */
+        .layer-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Network visualization improvements */
+        .network-stats {
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+        }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden selection:bg-blue-500 selection:text-white" data-theme="midnight">
@@ -139,8 +154,8 @@
                     <i data-lucide="network" class="w-6 h-6 text-white"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight">LLM Architect <span class="text-xs align-top px-1.5 py-0.5 bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] rounded border border-[var(--accent-primary)]/30">PRO v3</span></h1>
-                    <p class="text-xs text-[var(--text-muted)] font-mono">Hybrid AI Suite: Enhanced N-Gram + Cloud</p>
+                    <h1 class="text-xl font-bold tracking-tight">LLM Architect By TON <span class="text-xs align-top px-1.5 py-0.5 bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] rounded border border-[var(--accent-primary)]/30">PRO v3+</span></h1>
+                    <p class="text-xs text-[var(--text-muted)] font-mono">Hybrid AI Suite: Enhanced N-Gram + Cloud + Smart Response</p>
                 </div>
             </div>
             
@@ -240,13 +255,23 @@
                     </div>
                 </div>
 
-                <!-- Hyperparameters (Enhanced with Smoothing) -->
+                <!-- Hyperparameters (Enhanced with Layer Control) -->
                 <div id="local-params-panel" class="glass-panel rounded-xl p-6 flex-1 transition-all">
                     <h2 class="text-base font-bold mb-6 flex items-center gap-2" style="color: var(--accent-secondary)">
                         <i data-lucide="sliders"></i> Hyperparameters
                     </h2>
                     
                     <div class="space-y-6">
+                        <!-- Network Layers (NEW) -->
+                        <div class="space-y-2 pb-4 border-b border-[var(--border-color)]">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--text-muted)]">Network Layers</span>
+                                <span id="val-layers" class="font-mono text-cyan-400">5</span>
+                            </div>
+                            <input type="range" id="param-layers" min="3" max="10" value="5" class="control-slider" oninput="updateLayersDisplay(this.value)">
+                            <p class="text-[10px] text-[var(--text-muted)] mt-1">จำนวนชั้น Layer ของ Neural Network (3-10 ชั้น)</p>
+                        </div>
+
                         <!-- N-Gram -->
                         <div class="space-y-2 pb-4 border-b border-[var(--border-color)]">
                             <div class="flex justify-between text-sm">
@@ -277,14 +302,24 @@
                             <p class="text-[10px] text-[var(--text-muted)] mt-1">ตัดตัวเลือกเหลือเฉพาะ K คำที่มีโอกาสสูงสุด (ลดคำมั่ว)</p>
                         </div>
 
-                        <!-- Laplace Smoothing (New) -->
+                        <!-- Laplace Smoothing -->
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm">
                                 <span class="text-[var(--text-muted)]">Laplace Smoothing (α)</span>
                                 <span id="val-laplace" class="font-mono text-purple-500">0.1</span>
                             </div>
                             <input type="range" id="param-laplace" min="0.01" max="1.0" step="0.01" value="0.1" class="control-slider" oninput="updateDisplay('val-laplace', this.value)">
-                            <p class="text-[10px] text-[var(--text-muted)] mt-1">เพิ่มความน่าจะเป็นให้คำใหม่ (ป้องกัน Zero Probability, ทำให้ AI ฉลาดขึ้น)</p>
+                            <p class="text-[10px] text-[var(--text-muted)] mt-1">เพิ่มความน่าจะเป็นให้คำใหม่ (ป้องกัน Zero Probability)</p>
+                        </div>
+
+                        <!-- Relevance Threshold (NEW) -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-[var(--text-muted)]">Relevance Threshold</span>
+                                <span id="val-relevance" class="font-mono text-yellow-400">0.5</span>
+                            </div>
+                            <input type="range" id="param-relevance" min="0.1" max="1.0" step="0.1" value="0.5" class="control-slider" oninput="updateDisplay('val-relevance', this.value)">
+                            <p class="text-[10px] text-[var(--text-muted)] mt-1">ระดับความตรงประเด็น (สูง = ตอบตรงคำถามมากขึ้น)</p>
                         </div>
 
                         <!-- Max Tokens -->
@@ -303,7 +338,7 @@
             <!-- RIGHT COLUMN: Visualization & Inference -->
             <div class="col-span-12 lg:col-span-8 flex flex-col gap-6 h-full">
                 
-                <!-- Visualization Canvas (Enhanced with More Layers) -->
+                <!-- Visualization Canvas (Enhanced with Dynamic Layers) -->
                 <div class="glass-panel rounded-xl p-1 relative h-[300px] overflow-hidden group border border-[var(--border-color)]">
                     <div class="absolute top-4 left-4 z-10 space-y-2 pointer-events-none">
                         <div class="bg-[var(--bg-main)]/80 backdrop-blur border border-[var(--border-color)] px-3 py-1.5 rounded-full flex items-center gap-2 w-fit">
@@ -315,6 +350,36 @@
                             <span class="text-lg font-mono text-[var(--text-heading)]" id="vocab-count">0</span>
                         </div>
                     </div>
+                    
+                    <!-- Layer Info Badge (NEW) -->
+                    <div class="absolute top-4 right-4 z-10 pointer-events-none">
+                        <div class="bg-[var(--bg-main)]/80 backdrop-blur border border-[var(--border-color)] px-3 py-1.5 rounded-lg layer-badge">
+                            <span class="text-[10px] font-mono text-[var(--text-muted)] block">NETWORK LAYERS</span>
+                            <span class="text-lg font-mono text-cyan-400" id="layer-count">5</span>
+                            <span class="text-[10px] font-mono text-[var(--text-muted)]">layers</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Network Stats (NEW) -->
+                    <div class="absolute bottom-4 left-4 z-10 pointer-events-none hidden" id="network-stats">
+                        <div class="bg-[var(--bg-main)]/80 backdrop-blur border border-[var(--border-color)] px-3 py-2 rounded-lg network-stats">
+                            <div class="flex gap-4">
+                                <div>
+                                    <span class="text-[var(--text-muted)]">Nodes:</span>
+                                    <span id="node-count" class="text-[var(--accent-primary)]">0</span>
+                                </div>
+                                <div>
+                                    <span class="text-[var(--text-muted)]">Connections:</span>
+                                    <span id="conn-count" class="text-[var(--accent-secondary)]">0</span>
+                                </div>
+                                <div>
+                                    <span class="text-[var(--text-muted)]">Signals:</span>
+                                    <span id="signal-count" class="text-green-400">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <canvas id="nn-canvas" class="w-full h-full object-cover bg-[var(--console-bg)] rounded-lg"></canvas>
                 </div>
 
@@ -380,30 +445,32 @@
                         <li><strong>Dynamic Tokenization:</strong> เก็บข้อมูลทุกระดับความลึก (Unigrams, Bigrams, Trigrams...)</li>
                         <li><strong>Markov Assumption:</strong> หลักการที่ว่า "คำถัดไป" ขึ้นอยู่กับ "ประวัติคำก่อนหน้า"</li>
                         <li><strong>Robust Storage:</strong> จัดเก็บโครงสร้างความน่าจะเป็นที่ครอบคลุมทุกรูปแบบประโยคที่เคยเห็น</li>
-                        <li><strong>New: Laplace Smoothing:</strong> เพิ่ม alpha เพื่อจัดการ Zero Probability ทำให้ AI ฉลาดและไม่ตันง่าย</li>
+                        <li><strong>New: Keyword Extraction:</strong> ระบบดึงคีย์เวิร์ดสำคัญจากคำถามเพื่อตอบตรงประเด็น</li>
                     </ul>
                 </div>
 
                 <div class="space-y-4">
-                    <h4 class="font-bold text-[var(--accent-secondary)] text-base">2. ตรรกะอัจฉริยะ (Smart Backoff Logic)</h4>
-                    <p>เพิ่มความฉลาดในการตอบโต้ด้วยเทคนิค Backoff & Smoothing:</p>
+                    <h4 class="font-bold text-[var(--accent-secondary)] text-base">2. ตรรกะอัจฉริยะ (Smart Response Logic)</h4>
+                    <p>เพิ่มความฉลาดในการตอบโต้ด้วยเทคนิค Context-Aware Backoff:</p>
                     <div class="bg-[var(--code-bg)] p-3 rounded border border-[var(--border-color)] font-mono text-xs opacity-90">
-                        If Context(N) not found -> Try Context(N-1) -> ... -> Smoothed Fallback
+                        Query → Keyword Extract → Context Match → Relevance Filter → Smart Backoff
                     </div>
                     <ul class="list-disc pl-4 space-y-2 opacity-80">
-                        <li><strong>Backoff Strategy:</strong> หากไม่เจอรูปแบบยาว (3 คำ) จะถอยมาดูรูปแบบสั้น (2 คำ หรือ 1 คำ) ทำให้ AI ไม่ "ตัน" ง่ายๆ</li>
-                        <li><strong>Adaptive Temperature:</strong> ปรับความน่าจะเป็นตามค่า Slider เพื่อควบคุมความคิดสร้างสรรค์</li>
-                        <li><strong>New: Hybrid Mode:</strong> ผสม Local N-Gram กับ Cloud เพื่อผลลัพธ์ที่ดีที่สุด</li>
+                        <li><strong>Context-Aware:</strong> วิเคราะห์บริบทของคำถามก่อนตอบ</li>
+                        <li><strong>Relevance Scoring:</strong> ให้คะแนนความเกี่ยวข้องของแต่ละคำตอบ</li>
+                        <li><strong>Dynamic Layers:</strong> ปรับจำนวน Layer ได้ตามต้องการ (3-10 ชั้น)</li>
+                        <li><strong>Sentence Completion:</strong> ตรวจจับและจบประโยคอย่างเหมาะสม</li>
                     </ul>
                 </div>
 
                 <div class="space-y-4">
-                    <h4 class="font-bold text-orange-400 text-base">3. การแสดงผลเชิงภาพ (Visualization)</h4>
-                    <p>การจำลองการทำงานของการส่งสัญญาณประสาท (Neural Signal Propagation):</p>
+                    <h4 class="font-bold text-orange-400 text-base">3. การแสดงผลเชิงภาพ (Dynamic Visualization)</h4>
+                    <p>การจำลองการทำงานของการส่งสัญญาณประสาทแบบปรับได้:</p>
                     <ul class="list-disc pl-4 space-y-2 opacity-80">
-                        <li><strong>Nodes (โหนด):</strong> ตัวแทนจำลองของกลุ่มเซลล์ประสาท (Neuron Clusters) ในแต่ละชั้น (Layer)</li>
-                        <li><strong>Signals (สัญญาณ):</strong> ภาพเคลื่อนไหวที่แสดงถึงข้อมูลที่กำลังไหลผ่านเครือข่าย (Forward Pass)</li>
-                        <li><strong>New: More Layers:</strong> เพิ่มชั้น layer เพื่อจำลอง Deep Network ทำให้ visualization สมจริงขึ้น</li>
+                        <li><strong>Dynamic Layers:</strong> ปรับจำนวน layer ได้แบบ real-time (3-10 layers)</li>
+                        <li><strong>Adaptive Nodes:</strong> จำนวน nodes ปรับตามความซับซ้อนของ layer</li>
+                        <li><strong>Live Statistics:</strong> แสดงสถิติ Nodes, Connections, Signals แบบ real-time</li>
+                        <li><strong>Smart Connections:</strong> การเชื่อมต่อแบบ probabilistic ที่สมจริง</li>
                     </ul>
                 </div>
             </div>
@@ -435,13 +502,24 @@
     let animationId;
     let engine; 
     let canvas, ctx;
+    let currentLayers = 5; // Default layers
 
-    // --- 2. ENGINE CLASS (Enhanced with Laplace Smoothing & Hybrid) ---
+    // --- 2. ENGINE CLASS (Enhanced with Smart Response) ---
     class AdvancedNGramEngine {
         constructor() {
             this.ngrams = new Map();
             this.vocab = new Set();
             this.isTrained = false;
+            this.sentences = []; // Store complete sentences for better context
+            this.wordIndex = new Map(); // Word to sentence index mapping
+            this.stopWords = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 
+                                      'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 
+                                      'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 
+                                      'ought', 'used', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 
+                                      'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above', 
+                                      'below', 'between', 'under', 'again', 'further', 'then', 'once',
+                                      'ที่', 'ของ', 'และ', 'ใน', 'มี', 'เป็น', 'ได้', 'จะ', 'ว่า', 'กับ',
+                                      'ให้', 'ไม่', 'แต่', 'ก็', 'หรือ', 'ถ้า', 'นี้', 'นั้น', 'อยู่', 'จาก']);
         }
 
         preprocess(text) {
@@ -453,13 +531,35 @@
                        .filter(t => t.length > 0);
         }
 
+        extractKeywords(text) {
+            // Extract important keywords from query
+            const tokens = this.preprocess(text.toLowerCase());
+            return tokens.filter(t => !this.stopWords.has(t) && t.length > 1);
+        }
+
         train(text, n, append = false) {
             if (!append) {
                 this.ngrams.clear();
                 this.vocab.clear();
+                this.sentences = [];
+                this.wordIndex.clear();
             }
+            
             const tokens = this.preprocess(text);
             tokens.forEach(t => this.vocab.add(t));
+
+            // Store sentences for context-aware responses
+            const sentenceList = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+            sentenceList.forEach((sentence, idx) => {
+                this.sentences.push(sentence.trim());
+                const words = this.preprocess(sentence.toLowerCase());
+                words.forEach(word => {
+                    if (!this.wordIndex.has(word)) {
+                        this.wordIndex.set(word, []);
+                    }
+                    this.wordIndex.get(word).push(idx);
+                });
+            });
 
             // INTELLIGENT TRAINING: Learn ALL contexts from size 1 up to N
             for (let i = 0; i < tokens.length - 1; i++) {
@@ -476,11 +576,63 @@
             }
 
             this.isTrained = true;
-            return { vocabSize: this.vocab.size, tokenCount: tokens.length };
+            return { vocabSize: this.vocab.size, tokenCount: tokens.length, sentenceCount: this.sentences.length };
         }
 
-        predict(contextTokens, n, temp, topK, alpha) {
+        findRelevantContext(query, relevanceThreshold) {
+            // Find sentences most relevant to the query
+            const keywords = this.extractKeywords(query);
+            if (keywords.length === 0) return null;
+
+            const sentenceScores = new Map();
+            
+            keywords.forEach(keyword => {
+                if (this.wordIndex.has(keyword)) {
+                    this.wordIndex.get(keyword).forEach(sentIdx => {
+                        sentenceScores.set(sentIdx, (sentenceScores.get(sentIdx) || 0) + 1);
+                    });
+                }
+            });
+
+            // Find best matching sentence
+            let bestScore = 0;
+            let bestSentenceIdx = -1;
+            
+            sentenceScores.forEach((score, idx) => {
+                const normalizedScore = score / keywords.length;
+                if (normalizedScore >= relevanceThreshold && score > bestScore) {
+                    bestScore = score;
+                    bestSentenceIdx = idx;
+                }
+            });
+
+            if (bestSentenceIdx >= 0) {
+                return this.sentences[bestSentenceIdx];
+            }
+            return null;
+        }
+
+        predict(contextTokens, n, temp, topK, alpha, relevanceThreshold = 0.5, query = '') {
             let candidates = null;
+
+            // Try to find context-relevant candidates first
+            if (query && relevanceThreshold > 0) {
+                const relevantSentence = this.findRelevantContext(query, relevanceThreshold);
+                if (relevantSentence) {
+                    const relevantTokens = this.preprocess(relevantSentence);
+                    // Use relevant sentence tokens to boost prediction
+                    for (let i = 0; i < relevantTokens.length - 1; i++) {
+                        const lastToken = contextTokens[contextTokens.length - 1];
+                        if (relevantTokens[i].toLowerCase() === lastToken?.toLowerCase()) {
+                            // Found matching context in relevant sentence
+                            const nextWord = relevantTokens[i + 1];
+                            if (nextWord) {
+                                return nextWord;
+                            }
+                        }
+                    }
+                }
+            }
 
             // SMART BACKOFF
             for (let currentN = n; currentN >= 1; currentN--) {
@@ -540,6 +692,15 @@
             }
             return items[0].word;
         }
+
+        // Check if we should stop (sentence boundary detection)
+        shouldStop(token, tokenCount) {
+            const endPunctuation = ['.', '!', '?', '。', '！', '？'];
+            if (endPunctuation.includes(token) && tokenCount > 10) {
+                return Math.random() > 0.3; // 70% chance to stop at sentence end
+            }
+            return false;
+        }
     }
 
     // --- 3. UI LOGIC & MODES ---
@@ -582,6 +743,13 @@
             cloudConfig.classList.remove('hidden');
             localPanel.classList.remove('opacity-50', 'pointer-events-none');
         }
+    }
+
+    function updateLayersDisplay(val) {
+        $('val-layers').innerText = val;
+        $('layer-count').innerText = val;
+        currentLayers = parseInt(val);
+        initNetwork(); // Reinitialize network with new layer count
     }
 
     function handleEdit() {
@@ -634,12 +802,12 @@
         
         if (size < 100) {
             recN = 2; recTemp = 0.7;
-            txt.innerText = `Small Corpus (${size} words). Recommending N=2, Temp=0.7 for stability.`;
+            txt.innerText = `Small Corpus (${size} words). Recommending N=2, Temp=0.7, Relevance=0.3 for stability.`;
         } else if (size > 1000) {
             recN = 5; recTemp = 1.3;
-            txt.innerText = `Large Corpus (${size} words). Recommending N=5, Temp=1.3 for creativity.`;
+            txt.innerText = `Large Corpus (${size} words). Recommending N=5, Temp=1.3, Relevance=0.7 for creativity.`;
         } else {
-            txt.innerText = `Medium Corpus (${size} words). Recommending N=3, Temp=1.0 (Balanced).`;
+            txt.innerText = `Medium Corpus (${size} words). Recommending N=3, Temp=1.0, Relevance=0.5 (Balanced).`;
         }
     }
 
@@ -657,13 +825,15 @@
         if (!engine.isTrained) return alert("Train model first.");
         const data = {
             ngrams: Array.from(engine.ngrams.entries()),
-            vocab: Array.from(engine.vocab)
+            vocab: Array.from(engine.vocab),
+            sentences: engine.sentences,
+            wordIndex: Array.from(engine.wordIndex.entries())
         };
         const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'ngram_model.json';
+        a.download = 'ngram_model_enhanced.json';
         a.click();
     }
 
@@ -678,6 +848,8 @@
                 const data = JSON.parse(ev.target.result);
                 engine.ngrams = new Map(data.ngrams);
                 engine.vocab = new Set(data.vocab);
+                engine.sentences = data.sentences || [];
+                engine.wordIndex = new Map(data.wordIndex || []);
                 engine.isTrained = true;
                 $('vocab-count').innerText = engine.vocab.size;
                 $('vocab-stat').classList.remove('hidden');
@@ -700,7 +872,15 @@
     // --- 4. CORE FUNCTIONS ---
 
     function loadPresetData() {
-        const demoText = `Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to the natural intelligence displayed by humans or animals. Leading AI textbooks define the field as the study of "intelligent agents": any system that perceives its environment and takes actions that maximize its chance of achieving its goals. Some popular accounts use the term "artificial intelligence" to describe machines that mimic "cognitive" functions that humans associate with the human mind, such as "learning" and "problem solving". As machines become increasingly capable, tasks considered to require "intelligence" are often removed from the definition of AI, a phenomenon known as the AI effect.`;
+        const demoText = `Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to the natural intelligence displayed by humans or animals. Leading AI textbooks define the field as the study of "intelligent agents": any system that perceives its environment and takes actions that maximize its chance of achieving its goals. 
+
+Machine learning is a subset of artificial intelligence. It focuses on the development of computer programs that can access data and use it to learn for themselves. The process of learning begins with observations or data, such as examples, direct experience, or instruction.
+
+Deep learning is part of a broader family of machine learning methods. It is based on artificial neural networks with representation learning. Deep learning architectures such as deep neural networks, recurrent neural networks, and convolutional neural networks have been applied to many fields.
+
+Natural language processing (NLP) is a subfield of linguistics, computer science, and artificial intelligence concerned with the interactions between computers and human language. It involves programming computers to process and analyze large amounts of natural language data.
+
+Computer vision is an interdisciplinary scientific field that deals with how computers can gain high-level understanding from digital images or videos. It seeks to understand and automate tasks that the human visual system can do.`;
         $('corpus-input').value = demoText;
     }
 
@@ -721,11 +901,12 @@
             const stats = engine.train(text, ngramN);
             
             isTraining = false;
-            btn.innerHTML = `<i data-lucide="check-circle-2"></i> Trained`;
+            btn.innerHTML = `<i data-lucide="check-circle-2"></i> Trained (${stats.sentenceCount} sentences)`;
             
             $('vocab-stat').classList.remove('hidden');
             $('vocab-count').innerText = stats.vocabSize;
             $('btn-show-tokens').classList.remove('hidden');
+            $('network-stats').classList.remove('hidden');
             
             updateRecs(stats.vocabSize);
             lucide.createIcons();
@@ -747,6 +928,7 @@
         const topK = parseInt($('param-topk').value);
         const n = parseInt($('param-ngram').value);
         const alpha = parseFloat($('param-laplace').value);
+        const relevance = parseFloat($('param-relevance').value);
 
         $('teach-overlay').classList.add('hidden');
 
@@ -759,6 +941,13 @@
                 alert("Please train the Local Model first.");
                 return;
             }
+            
+            // Check for relevant context first
+            const relevantContext = engine.findRelevantContext(seed, relevance);
+            if (relevantContext && relevance >= 0.5) {
+                outputConsole.innerHTML += `<br><span style="color: ${accentColor}; opacity: 0.7;">[Context Found]</span> `;
+            }
+            
             let currentTokens = engine.preprocess(seed);
             if (currentTokens.length === 0) {
                 const randomStart = Array.from(engine.vocab)[Math.floor(Math.random() * engine.vocab.size)];
@@ -769,10 +958,24 @@
             $('status-dot').style.backgroundColor = accentColor;
             $('status-text').innerText = "Local Inference...";
 
+            let tokenCount = 0;
             for (let i = 0; i < maxTokens; i++) {
                 await new Promise(r => setTimeout(r, 5)); // Faster for long gens
-                const nextWord = engine.predict(currentTokens, n, temp, topK, alpha);
+                const nextWord = engine.predict(currentTokens, n, temp, topK, alpha, relevance, seed);
                 if (!nextWord) break;
+                
+                tokenCount++;
+                
+                // Check for sentence completion
+                if (engine.shouldStop(nextWord, tokenCount)) {
+                    const span = document.createElement('span');
+                    span.className = "token-highlight ml-1";
+                    span.style.color = textColor;
+                    span.innerText = nextWord;
+                    outputConsole.appendChild(span);
+                    break;
+                }
+                
                 triggerSignal();
                 const span = document.createElement('span');
                 span.className = "token-highlight ml-1";
@@ -784,7 +987,7 @@
             }
 
             $('status-dot').style.backgroundColor = '#22c55e';
-            $('status-text').innerText = "Local Complete.";
+            $('status-text').innerText = `Local Complete. (${tokenCount} tokens)`;
             if (currentMode === 'local') return;
         }
 
@@ -829,11 +1032,27 @@
         $('teach-overlay').classList.add('hidden');
     }
 
-    // --- 5. VISUALIZATION & INIT ---
+    // --- 5. VISUALIZATION & INIT (Enhanced with Dynamic Layers) ---
+    function generateLayerConfig(numLayers) {
+        // Generate a bell-curve like distribution of nodes per layer
+        const config = [];
+        const midPoint = Math.floor(numLayers / 2);
+        const maxNodes = 14;
+        const minNodes = 6;
+        
+        for (let i = 0; i < numLayers; i++) {
+            const distFromMid = Math.abs(i - midPoint);
+            const nodeCount = Math.round(maxNodes - (distFromMid * (maxNodes - minNodes) / midPoint));
+            config.push(Math.max(minNodes, Math.min(maxNodes, nodeCount)));
+        }
+        return config;
+    }
+
     function initNetwork() {
         if (!canvas) return;
         nodes = []; connections = [];
-        const layers = [8, 12, 12, 12, 8]; // More layers for deeper viz
+        
+        const layers = generateLayerConfig(currentLayers);
         const layerX = canvas.width / (layers.length + 1);
         const style = getComputedStyle(document.body);
         const accent = style.getPropertyValue('--accent-primary').trim();
@@ -844,11 +1063,18 @@
                 nodes.push({ x: layerX * (lIndex + 1), y: layerY * (i + 1), layer: lIndex, active: 0 });
             }
         });
+        
         nodes.forEach(n1 => {
             nodes.forEach(n2 => {
-                if (n2.layer === n1.layer + 1 && Math.random() > 0.3) connections.push({ from: n1, to: n2 });
+                if (n2.layer === n1.layer + 1 && Math.random() > 0.3) {
+                    connections.push({ from: n1, to: n2 });
+                }
             });
         });
+
+        // Update stats display
+        if ($('node-count')) $('node-count').innerText = nodes.length;
+        if ($('conn-count')) $('conn-count').innerText = connections.length;
     }
 
     function animate() {
@@ -875,6 +1101,9 @@
             ctx.globalAlpha = 1.0;
         });
 
+        // Update signal count
+        if ($('signal-count')) $('signal-count').innerText = signals.length;
+
         for (let i = signals.length - 1; i >= 0; i--) {
             let s = signals[i]; s.progress += 0.08;
             const cx = s.from.x + (s.to.x - s.from.x) * s.progress;
@@ -884,7 +1113,7 @@
             ctx.shadowBlur = 10; ctx.shadowColor = accent; ctx.fill(); ctx.shadowBlur = 0;
             if (s.progress >= 1) {
                 s.to.active = 1.0;
-                if (s.to.layer < layers.length - 1) {
+                if (s.to.layer < currentLayers - 1) {
                     const nextLinks = connections.filter(c => c.from === s.to);
                     if (nextLinks.length > 0) {
                         const nextLink = nextLinks[Math.floor(Math.random() * nextLinks.length)];
