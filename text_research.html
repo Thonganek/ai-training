@@ -282,7 +282,7 @@
 
 <script>
     const API_KEYS = [
-        "AIzaSyDiqXPAnfMICeehtGSC6VwDJaH9HqTIa-E",
+        "AIzaSyCDAQzYH_RpLwBWShtrYss0RcmyHAb1j0A",
         "AIzaSyAuGmhGGfVIgdcBS-bDPu06I_fQpIy2Sng",
         "AIzaSyAXn2RnKle5RdJsD74PHVQbQAcOkPffkb4",
     ];
@@ -564,7 +564,7 @@
                     }
                 }
 
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-exp:generateContent?key=${apiKey}`, {
                     method: 'POST', 
                     headers: {'Content-Type':'application/json'},
                     body: JSON.stringify(payload)
