@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI For Research And Health Care By TON</title>
+    <title>Text Research - AI Training Suite</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Sarabun', 'sans-serif'] },
+                    fontFamily: { sans: ['Sarabun', 'sans-serif'], mono: ['Fira Code', 'monospace'] },
                 }
             }
         }
@@ -28,7 +31,6 @@
             --border-color: rgba(0, 0, 0, 0.1);
             --accent-color: #0284c7;
         }
-
         [data-theme="dark"] {
             --bg-main: #020617;
             --bg-panel: rgba(15, 23, 42, 0.6);
@@ -37,34 +39,79 @@
             --border-color: rgba(255, 255, 255, 0.08);
             --accent-color: #0ea5e9;
         }
-
-        body { 
-            font-family: 'Sarabun', sans-serif; 
-            background-color: var(--bg-main); 
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-main);
             color: var(--text-main);
             transition: background-color 0.5s, color 0.5s;
         }
-        
         .glass-panel {
             background: var(--bg-panel);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.05);
+            transition: background 0.5s, border 0.5s;
         }
-
-        .glass-panel:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
-        }
-
         .animate-float { animation: float 8s ease-in-out infinite; }
         @keyframes float {
-            0% { transform: translate(0, 0px); }
-            50% { transform: translate(0, -20px); }
+            0%   { transform: translate(0, 0px); }
+            50%  { transform: translate(0, -20px); }
             100% { transform: translate(0, 0px); }
         }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
+        .scroller {
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) transparent;
+        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .status-ready   { background-color: #94a3b8; }
+        .status-working { background-color: #fbbf24; box-shadow: 0 0 8px #fbbf24; animation: pulse 1s infinite; }
+        .status-active  { background-color: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .status-dead    { background-color: #ef4444; }
+
+        /* Model badge */
+        #current-model-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #6366f1, #0ea5e9);
+            color: white;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
+        /* Prose in chat */
+        .prose-chat h1, .prose-chat h2, .prose-chat h3 { font-weight: 700; margin-bottom: 4px; }
+        .prose-chat p  { margin-bottom: 8px; }
+        .prose-chat ul { list-style: disc; padding-left: 16px; margin-bottom: 8px; }
+        .prose-chat ol { list-style: decimal; padding-left: 16px; margin-bottom: 8px; }
+        .prose-chat code {
+            background: rgba(0,0,0,0.15);
+            border-radius: 4px;
+            padding: 0 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
+        }
+        .prose-chat pre {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 10px;
+            overflow-x: auto;
+            margin-bottom: 8px;
+        }
+        .prose-chat blockquote {
+            border-left: 3px solid var(--accent-color);
+            padding-left: 10px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+        select option { background: #1e293b; color: #e2e8f0; }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden selection:bg-cyan-500 selection:text-white" data-theme="light">
@@ -72,237 +119,971 @@
     <!-- Ambient Background -->
     <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] animate-float"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[120px] animate-float" style="animation-delay:2s"></div>
     </div>
 
-    <!-- Header -->
-    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="p-2.5 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/20">
-                    <i data-lucide="brain-circuit" class="w-6 h-6 text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-                        AI For Research And Health Care By TON
-                    </h1>
-                    <div class="flex items-center gap-2">
-                        <p class="text-[10px] opacity-60 uppercase tracking-widest font-semibold">Jarunyoo Thonganek</p>
-                        <span class="w-1 h-1 bg-current rounded-full opacity-50"></span>
-                        <p class="text-[10px] text-cyan-500">นายจรัญญู ทองเอนก</p>
-                    </div>
+    <!-- Navbar -->
+    <nav class="relative z-50 px-6 py-4 border-b border-[var(--border-color)] glass-panel flex flex-col md:flex-row justify-between items-center sticky top-0 gap-4 md:gap-0">
+        <div class="flex items-center gap-3 w-full md:w-auto">
+            <a href="index.html" class="p-2.5 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/20">
+                <i data-lucide="brain-circuit" class="w-6 h-6 text-white"></i>
+            </a>
+            <div>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">Text Research</h1>
+                <div class="flex items-center gap-2">
+                    <p class="text-[10px] opacity-60 uppercase tracking-widest font-semibold">Jarunyoo Thonganek</p>
+                    <span class="w-1 h-1 bg-current rounded-full opacity-50"></span>
+                    <p class="text-[10px] text-cyan-500">นายจรัญญู ทองเอนก</p>
                 </div>
             </div>
-            
+        </div>
+        
+        <div class="flex flex-wrap justify-center items-center gap-3">
+            <!-- Model Selector -->
+            <div class="flex items-center bg-[var(--bg-main)] rounded-lg border border-[var(--border-color)] px-2 py-1 gap-2">
+                <i data-lucide="cpu" class="w-3 h-3 text-purple-400 flex-shrink-0"></i>
+                <select id="model-selector" onchange="onModelChange(this)"
+                    class="bg-transparent text-xs font-bold outline-none cursor-pointer text-[var(--text-main)]">
+                    <!-- gemini-3 group -->
+                    <optgroup label="── Gemini 3 ──">
+                        <option value="gemini-3-pro">gemini-3-pro</option>
+                        <option value="gemini-3-flash">gemini-3-flash</option>
+                        <option value="gemini-3-flash-preview">gemini-3-flash-preview</option>
+                    </optgroup>
+                    <!-- gemini-2.5 group -->
+                    <optgroup label="── Gemini 2.5 ──">
+                        <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+                        <option value="gemini-2.5-flash" selected>gemini-2.5-flash ✦</option>
+                        <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite</option>
+                    </optgroup>
+                    <!-- gemini-1.5 group -->
+                    <optgroup label="── Gemini 1.5 ──">
+                        <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                        <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <button onclick="toggleAPIModal()"
+                class="flex items-center gap-2 px-3 py-1.5 bg-slate-800/10 border border-[var(--border-color)] rounded-lg text-xs font-bold hover:bg-slate-800/20 transition-all text-[var(--text-main)]">
+                <i data-lucide="activity" class="w-4 h-4 text-green-500"></i>
+                <span class="hidden lg:inline">API Status</span>
+            </button>
+
             <div class="flex bg-[var(--bg-main)] rounded-lg p-1 border border-[var(--border-color)]">
-                <button onclick="setTheme('dark')" class="p-1.5 rounded hover:bg-slate-800 hover:text-white text-[var(--text-muted)]" title="Dark Mode">
-                    <i data-lucide="moon" class="w-4 h-4"></i>
-                </button>
-                <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]" title="Light Mode">
-                    <i data-lucide="sun" class="w-4 h-4"></i>
-                </button>
+                <button onclick="setTheme('dark')"  class="p-1.5 rounded hover:bg-slate-800 hover:text-white text-[var(--text-muted)]"><i data-lucide="moon" class="w-4 h-4"></i></button>
+                <button onclick="setTheme('light')" class="p-1.5 rounded hover:bg-slate-200 hover:text-black text-[var(--text-muted)]"><i data-lucide="sun"  class="w-4 h-4"></i></button>
             </div>
+
+            <a href="index.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-2">
+                <i data-lucide="home" class="w-4 h-4"></i>
+                <span>กลับหน้าหลัก</span>
+            </a>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="relative z-10 container mx-auto px-4 py-12 max-w-6xl">
-        <div class="text-center mb-12">
-            <h2 class="text-4xl font-bold mb-4">Welcome to AI Learnin And AI Training Suite</h2>
-            <p class="text-lg opacity-70">ระบบฝึกอบรมและทดสอบ AI แบบครบวงจร</p>
-            <p class="text-lg opacity-70">
-            <a href="https://thonganek.github.io/ai-workshop/" 
-                target="_blank" 
-                class="text-blue-500 hover:text-blue-600 underline font-medium">
-                เรียนรู้ AI อย่างเป็นระบบ ตั้งแต่พื้นฐานถึงใช้งานจริง AI Workshop
-            </a>
-            </p>
+    <main class="relative z-10 p-4 md:p-8 container mx-auto max-w-[1600px] min-h-[calc(100vh-100px)]">
+        <div class="grid grid-cols-12 gap-6 h-full">
 
-        </div>
+            <!-- ===== LEFT PANEL: Knowledge Pipeline ===== -->
+            <div class="col-span-12 lg:col-span-4 flex flex-col gap-5 h-full">
+                <div class="glass-panel p-6 rounded-2xl relative flex flex-col h-full">
+                    <h2 class="text-lg font-bold mb-1 flex items-center gap-2">
+                        <i data-lucide="book-open-check" class="text-emerald-400"></i> Knowledge Pipeline
+                    </h2>
+                    <p class="text-xs opacity-60 mb-4">เชื่อมต่อข้อมูลงานวิจัยและสถิติเข้าสู่ระบบ (Supports: .txt, .csv, .json, .md)</p>
 
-        <!-- Module Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Text Research -->
-            <a href="text_research.html" class="glass-panel p-6 rounded-2xl block group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-emerald-500/20 rounded-xl group-hover:bg-emerald-500/30 transition-colors">
-                        <i data-lucide="database" class="w-6 h-6 text-emerald-500"></i>
-                    </div>
-                    <h3 class="text-xl font-bold">Text Research</h3>
-                </div>
-                <p class="text-sm opacity-70 mb-4">ฝึกอบรม AI ด้วยข้อมูลงานวิจัย สถิติ และเอกสาร พร้อมระบบแชทอัจฉริยะ</p>
-                <div class="flex items-center text-sm text-emerald-500 font-semibold">
-                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-                </div>
-            </a>
+                    <!-- File Controls -->
+                    <div class="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)] mb-4">
+                        <div class="flex gap-2">
+                            <button onclick="document.getElementById('local-file-upload').click()"
+                                class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs border border-[var(--border-color)] transition-colors text-[var(--text-main)]">
+                                <i data-lucide="paperclip" class="w-3 h-3 text-blue-400"></i> Attach File
+                            </button>
+                            <input type="file" id="local-file-upload" class="hidden" accept=".txt,.csv,.json,.md" onchange="handleFileUpload(this)">
 
-            <!-- Deep Visual -->
-            <a href="deep_visual.html" class="glass-panel p-6 rounded-2xl block group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-blue-500/20 rounded-xl group-hover:bg-blue-500/30 transition-colors">
-                        <i data-lucide="scan-face" class="w-6 h-6 text-blue-500"></i>
+                            <button onclick="handleSheetImport()"
+                                class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs border border-[var(--border-color)] transition-colors text-[var(--text-main)]">
+                                <i data-lucide="link" class="w-3 h-3 text-green-400"></i> Link URL
+                            </button>
+                        </div>
+                        <!-- Memory Stats -->
+                        <div class="mt-3 flex items-center justify-between text-[10px] opacity-60">
+                            <span id="memory-stats">Memory: 0 documents</span>
+                            <button onclick="clearMemory()" class="text-red-400 hover:underline flex items-center gap-1">
+                                <i data-lucide="trash" class="w-3 h-3"></i> Clear Memory
+                            </button>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold">Deep Visual</h3>
-                </div>
-                <p class="text-sm opacity-70 mb-4">ฝึกอบรม AI ด้วยรูปภาพ ใช้ CNN ในการจดจำและทำนายผล</p>
-                <div class="flex items-center text-sm text-blue-500 font-semibold">
-                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-                </div>
-            </a>
 
-            <!-- LLM Architect -->
-            <a href="llm_architect.html" class="glass-panel p-6 rounded-2xl block group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-purple-500/20 rounded-xl group-hover:bg-purple-500/30 transition-colors">
-                        <i data-lucide="network" class="w-6 h-6 text-purple-500"></i>
+                    <!-- Text Input -->
+                    <div class="relative flex-1 min-h-[200px]">
+                        <textarea id="knowledge-input"
+                            class="w-full h-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl p-4 font-mono text-sm focus:border-cyan-500 outline-none resize-none leading-relaxed transition-all placeholder-slate-500"
+                            placeholder="วางข้อมูลงานวิจัย, สถิติ หรือแนบไฟล์ที่นี่..."
+                            oninput="updateCharCount(this)"></textarea>
+                        <div class="absolute bottom-2 right-2 text-[10px] opacity-50 bg-[var(--bg-main)] px-2 rounded border border-[var(--border-color)]" id="token-count">0 chars</div>
                     </div>
-                    <h3 class="text-xl font-bold">LLM Architect</h3>
-                </div>
-                <p class="text-sm opacity-70 mb-4">สร้างและทดสอบ Neural Network สำหรับ Text Generation</p>
-                <div class="flex items-center text-sm text-purple-500 font-semibold">
-                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-                </div>
-            </a>
 
-            <!-- AI Training Center -->
-            <a href="ai_training_center.html" class="glass-panel p-6 rounded-2xl block group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-orange-500/20 rounded-xl group-hover:bg-orange-500/30 transition-colors">
-                        <i data-lucide="graduation-cap" class="w-6 h-6 text-orange-500"></i>
-                    </div>
-                    <h3 class="text-xl font-bold">AI Training Center</h3>
-                </div>
-                <p class="text-sm opacity-70 mb-4">ศูนย์ฝึกอบรมและจัดการข้อมูล AI แบบรวมศูนย์</p>
-                <div class="flex items-center text-sm text-orange-500 font-semibold">
-                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-                </div>
-            </a>
+                    <!-- NLP Visualizer -->
+                    <div id="nlp-visualizer" class="hidden mt-4 p-4 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)]">
+                        <h4 class="text-xs font-bold text-purple-400 mb-2 flex justify-between items-center">
+                            <span><i data-lucide="cpu" class="w-3 h-3 inline mr-1"></i> NLP Training Core</span>
+                            <span class="text-[10px] opacity-50" id="proc-speed">0 words/s</span>
+                        </h4>
 
-            <!-- AI Complete Guide -->
-            <a href="ai_guide.html" class="glass-panel p-6 rounded-2xl block group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-pink-500/20 rounded-xl group-hover:bg-pink-500/30 transition-colors">
-                        <i data-lucide="book-open" class="w-6 h-6 text-pink-500"></i>
-                    </div>
-                    <h3 class="text-xl font-bold">AI Complete Guide</h3>
-                </div>
-                <p class="text-sm opacity-70 mb-4">คู่มือสมบูรณ์: อธิบายการสร้าง AI อย่างละเอียดทุกขั้นตอน</p>
-                <div class="flex items-center text-sm text-pink-500 font-semibold">
-                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-                </div>
-            </a>
+                        <div class="mb-3">
+                            <div class="flex justify-between text-[10px] opacity-60 mb-1">
+                                <span>1. Tokenization &amp; Extraction</span>
+                                <span id="step-1-status" class="text-yellow-500">Waiting...</span>
+                            </div>
+                            <div id="vis-tokens" class="h-24 bg-black/30 rounded-lg p-2 overflow-y-auto flex flex-wrap content-start gap-1 scroller border border-[var(--border-color)] font-mono text-[10px]"></div>
+                        </div>
 
-            <!-- AI Playground -->
-            <a href="ai_playground.html" class="glass-panel p-6 rounded-2xl block group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-violet-500/20 rounded-xl group-hover:bg-violet-500/30 transition-colors">
-                        <i data-lucide="play-circle" class="w-6 h-6 text-violet-500"></i>
-                    </div>
-                    <h3 class="text-xl font-bold">AI Playground</h3>
-                </div>
-                <p class="text-sm opacity-70 mb-4">ทดลอง AI แบบ Interactive ไม่ต้องเขียนโค้ด</p>
-                <div class="flex items-center text-sm text-violet-500 font-semibold">
-                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-                </div>
-            </a>
+                        <div>
+                            <div class="flex justify-between text-[10px] opacity-60 mb-1">
+                                <span>2. Vector Embedding (1024-dim)</span>
+                                <span id="step-2-status" class="text-slate-500">...</span>
+                            </div>
+                            <div id="vis-vectors" class="h-20 bg-black/40 rounded-lg p-2 overflow-hidden font-mono text-[8px] text-green-500/80 leading-none break-all relative border border-[var(--border-color)]"></div>
+                        </div>
 
-            <!-- AI Model Zoo -->
-            <a href="ai_model_zoo.html" class="glass-panel p-6 rounded-2xl block group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-teal-500/20 rounded-xl group-hover:bg-teal-500/30 transition-colors">
-                        <i data-lucide="package" class="w-6 h-6 text-teal-500"></i>
+                        <div id="train-confirm-area" class="hidden mt-4 pt-3 border-t border-[var(--border-color)] text-center">
+                            <p class="text-xs text-green-400 mb-2 font-bold"><i data-lucide="check-circle" class="w-3 h-3 inline"></i> Deep Learning Complete</p>
+                            <button onclick="confirmTraining()" class="w-full py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-lg text-sm font-bold shadow-lg animate-pulse transition-all">
+                                Save Model to Memory
+                            </button>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold">AI Model Zoo</h3>
-                </div>
-                <p class="text-sm opacity-70 mb-4">คลังโมเดล AI สำเร็จรูป พร้อมดาวน์โหลดและใช้งาน</p>
-                <div class="flex items-center text-sm text-teal-500 font-semibold">
-                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-                </div>
-            </a>
 
-            <!-- AI Dashboard -->
-            <a href="ai_dashboard.html" class="glass-panel p-6 rounded-2xl block group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-blue-600/20 rounded-xl group-hover:bg-blue-600/30 transition-colors">
-                        <i data-lucide="bar-chart-3" class="w-6 h-6 text-blue-600"></i>
-                    </div>
-                    <h3 class="text-xl font-bold">AI Dashboard</h3>
-                </div>
-                <p class="text-sm opacity-70 mb-4">วิเคราะห์และติดตามประสิทธิภาพ AI แบบ Real-time</p>
-                <div class="flex items-center text-sm text-blue-600 font-semibold">
-                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-                </div>
-            </a>
-
-            <!-- AI Project Templates -->
-            <a href="ai_templates.html" class="glass-panel p-6 rounded-2xl block group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-indigo-500/20 rounded-xl group-hover:bg-indigo-500/30 transition-colors">
-                        <i data-lucide="folder-code" class="w-6 h-6 text-indigo-500"></i>
-                    </div>
-                    <h3 class="text-xl font-bold">AI Project Templates</h3>
-                </div>
-                <p class="text-sm opacity-70 mb-4">เทมเพลตโครงการ AI พร้อมใช้ ประหยัดเวลาพัฒนา</p>
-                <div class="flex items-center text-sm text-indigo-500 font-semibold">
-                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-                </div>
-            </a>
-
-            <!-- AI Quiz -->
-            <a href="ai_quiz.html" class="glass-panel p-6 rounded-2xl block group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-rose-500/20 rounded-xl group-hover:bg-rose-500/30 transition-colors">
-                        <i data-lucide="brain-circuit" class="w-6 h-6 text-rose-500"></i>
-                    </div>
-                    <h3 class="text-xl font-bold">AI Quiz & Assessment</h3>
-                </div>
-                <p class="text-sm opacity-70 mb-4">ทดสอบความรู้ AI แบบ Interactive พร้อม Certificate</p>
-                <div class="flex items-center text-sm text-rose-500 font-semibold">
-                    เข้าสู่ระบบ <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-                </div>
-            </a>
-        </div>
-
-        <!-- Features -->
-        <div class="glass-panel p-8 rounded-2xl">
-            <h3 class="text-2xl font-bold mb-6 text-center">คุณสมบัติหลัก</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="text-center">
-                    <div class="inline-block p-4 bg-blue-500/10 rounded-full mb-3">
-                        <i data-lucide="zap" class="w-8 h-8 text-blue-500"></i>
-                    </div>
-                    <h4 class="font-bold mb-2">ฝึกอบรมรวดเร็ว</h4>
-                    <p class="text-sm opacity-70">ระบบประมวลผลที่รวดเร็ว รองรับข้อมูลขนาดใหญ่</p>
-                </div>
-                <div class="text-center">
-                    <div class="inline-block p-4 bg-emerald-500/10 rounded-full mb-3">
-                        <i data-lucide="brain" class="w-8 h-8 text-emerald-500"></i>
-                    </div>
-                    <h4 class="font-bold mb-2">AI ฉลาด</h4>
-                    <p class="text-sm opacity-70">ใช้ Gemini Pro API พร้อมระบบ Memory ขั้นสูง</p>
-                </div>
-                <div class="text-center">
-                    <div class="inline-block p-4 bg-purple-500/10 rounded-full mb-3">
-                        <i data-lucide="eye" class="w-8 h-8 text-purple-500"></i>
-                    </div>
-                    <h4 class="font-bold mb-2">Visual Training</h4>
-                    <p class="text-sm opacity-70">ฝึก AI ด้วยภาพและวิดีโอแบบ Real-time</p>
+                    <button onclick="startTextTraining()" id="btn-start-train"
+                        class="w-full mt-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg transition-all flex justify-center items-center gap-2">
+                        <i data-lucide="zap"></i> Start Training Process
+                    </button>
                 </div>
             </div>
+
+            <!-- ===== RIGHT PANEL: Chat ===== -->
+            <div class="col-span-12 lg:col-span-8 flex flex-col h-[calc(100vh-140px)]">
+                <div class="glass-panel flex-1 rounded-2xl flex flex-col overflow-hidden relative">
+
+                    <!-- Chat Header -->
+                    <div class="p-4 border-b border-[var(--border-color)] flex items-center justify-between z-10 bg-[var(--bg-panel)] flex-wrap gap-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-indigo-500/20 rounded-full flex items-center justify-center border border-indigo-500/30">
+                                <i data-lucide="bot" class="text-indigo-400 w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm flex items-center gap-2">
+                                    AI Research Assistant
+                                    <span id="current-model-badge">gemini-2.5-flash</span>
+                                </h3>
+                                <p class="text-[10px] opacity-60 flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                    <span id="status-label">Gemini Active</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <!-- Source Selector -->
+                            <div class="flex items-center bg-[var(--bg-main)] rounded-lg border border-[var(--border-color)] px-2 py-1">
+                                <span class="text-[10px] opacity-60 mr-2">Source:</span>
+                                <select id="chat-source" onchange="handleSourceChange(this)"
+                                    class="bg-transparent text-xs font-bold outline-none cursor-pointer text-[var(--text-main)] max-w-[120px] md:max-w-[160px]">
+                                    <option value="api">🌐 General AI</option>
+                                    <option value="hybrid">🧠 Hybrid (AI + Memory)</option>
+                                    <option value="strict">🔒 Only Trained Data</option>
+                                    <option value="offline">🚫 Offline / Keyword</option>
+                                </select>
+                            </div>
+
+                            <!-- Length Selector -->
+                            <div class="flex items-center bg-[var(--bg-main)] rounded-lg border border-[var(--border-color)] px-2 py-1">
+                                <i data-lucide="scissors" class="w-3 h-3 opacity-60 mr-2 flex-shrink-0"></i>
+                                <select id="chat-length" class="bg-transparent text-xs font-bold outline-none cursor-pointer text-[var(--text-main)]">
+                                    <option value="short">⚡ Short</option>
+                                    <option value="medium" selected>📝 Normal</option>
+                                    <option value="long">📚 Detailed</option>
+                                </select>
+                            </div>
+
+                            <!-- Clear Chat -->
+                            <button onclick="clearChat()" class="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg flex items-center gap-2 text-xs font-bold transition-all">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                <span class="hidden md:inline">New Chat</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 bg-[var(--bg-main)]/50 scroller">
+                        <div class="flex gap-4 animate-fade-in">
+                            <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 flex-shrink-0">
+                                <i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i>
+                            </div>
+                            <div class="glass-panel p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm">
+                                สวัสดีครับ ผมคือ AI ผู้ช่วยวิจัย ที่คุณต้น จรัญญู ทองเอนก เป็นคนสร้างผมขึ้นมา<br>
+                                พร้อมช่วยงานวิจัย สถิติ ให้คำแนะนำและวิเคราะห์ข้อมูลทางการแพทย์ครับ<br>
+                                <span class="text-[10px] opacity-50 mt-1 block">รองรับ Gemini 3 / 2.5 / 1.5 ทุก Model ครับ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="p-4 border-t border-[var(--border-color)] z-10 bg-[var(--bg-panel)]">
+                        <!-- File Attachment Preview -->
+                        <div id="chat-attachment-preview" class="hidden mb-2 px-3 py-1.5 text-xs text-blue-500 bg-blue-500/10 rounded-lg border border-blue-500/20 flex justify-between items-center w-fit max-w-full">
+                            <div class="flex items-center gap-2 overflow-hidden">
+                                <i data-lucide="file" class="w-3 h-3 flex-shrink-0"></i>
+                                <span id="chat-file-name" class="truncate font-semibold">filename</span>
+                            </div>
+                            <button onclick="clearChatAttachment()" class="ml-2 hover:text-red-500">
+                                <i data-lucide="x" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+
+                        <form onsubmit="handleChatSubmit(event)" class="flex gap-2 items-center">
+                            <button type="button" onclick="document.getElementById('chat-file-upload').click()"
+                                class="p-3 bg-[var(--bg-main)] hover:bg-[var(--accent-color)] hover:text-white border border-[var(--border-color)] rounded-xl transition-all text-[var(--text-muted)]" title="Attach File">
+                                <i data-lucide="paperclip" class="w-5 h-5"></i>
+                            </button>
+                            <input type="file" id="chat-file-upload" class="hidden" onchange="handleChatFileSelect(this)">
+
+                            <input type="text" id="user-input"
+                                class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all"
+                                placeholder="ถามคำถามวิจัยทั่วไป (General Knowledge)...">
+
+                            <button type="submit" class="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-all" title="Send">
+                                <i data-lucide="send" class="w-5 h-5"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
-    <script>
-        function setTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
+    <!-- API Status Modal -->
+    <div id="api-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+        <div class="glass-panel p-6 rounded-2xl max-w-lg w-full shadow-2xl relative">
+            <button onclick="toggleAPIModal()" class="absolute top-4 right-4 hover:text-red-500 transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            <h3 class="text-lg font-bold mb-1 flex items-center gap-2">
+                <i data-lucide="activity" class="text-green-500"></i> API Health Monitor
+            </h3>
+            <p class="text-[10px] opacity-50 mb-4">ระบบหมุนเวียน API Key อัตโนมัติเมื่อเกิด Error / Quota Exceeded</p>
+
+            <!-- Key Status -->
+            <div class="space-y-2 max-h-[200px] overflow-y-auto scroller pr-2 mb-4" id="api-status-list"></div>
+
+            <!-- Model Status Table -->
+            <div>
+                <h4 class="text-xs font-bold mb-2 opacity-70 flex items-center gap-1">
+                    <i data-lucide="cpu" class="w-3 h-3"></i> Model Registry
+                </h4>
+                <div class="space-y-1 max-h-[200px] overflow-y-auto scroller pr-1" id="model-status-list"></div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-[var(--border-color)] text-[10px] opacity-60 text-center">
+                Auto-rotate: Keys → if all fail → try next Model automatically
+            </div>
+        </div>
+    </div>
+
+<script>
+// ─────────────────────────────────────────────
+// 1. CONFIG
+// ─────────────────────────────────────────────
+const API_KEYS = [
+    "AIzaSyCWLJT4VknnhsKz_M0pP-ruWpkjLpYls2w",
+    "AIzaSyAuGmhGGfVIgdcBS-bDPu06I_fQpIy2Sng",
+    "AIzaSyAXn2RnKle5RdJsD74PHVQbQAcOkPffkb4",
+];
+
+// Ordered list – fallback cascades from top to bottom
+const GEMINI_MODELS = [
+    { id: "gemini-3-pro",             label: "Gemini 3 Pro",           endpoint: "gemini-3-pro" },
+    { id: "gemini-3-flash",           label: "Gemini 3 Flash",         endpoint: "gemini-3-flash" },
+    { id: "gemini-3-flash-preview",   label: "Gemini 3 Flash Preview", endpoint: "gemini-3-flash-preview" },
+    { id: "gemini-2.5-pro",           label: "Gemini 2.5 Pro",         endpoint: "gemini-2.5-pro" },
+    { id: "gemini-2.5-flash",         label: "Gemini 2.5 Flash",       endpoint: "gemini-2.5-flash" },
+    { id: "gemini-2.5-flash-lite",    label: "Gemini 2.5 Flash Lite",  endpoint: "gemini-2.5-flash-lite" },
+    { id: "gemini-1.5-pro",           label: "Gemini 1.5 Pro",         endpoint: "gemini-1.5-pro" },
+    { id: "gemini-1.5-flash",         label: "Gemini 1.5 Flash",       endpoint: "gemini-1.5-flash" },
+];
+
+// ─────────────────────────────────────────────
+// 2. STATE
+// ─────────────────────────────────────────────
+let keyHealth = API_KEYS.map((k, i) => ({
+    id: i + 1, key: k, status: 'ready', msg: 'Ready', calls: 0
+}));
+
+let modelHealth = GEMINI_MODELS.map(m => ({
+    ...m, status: 'ready', msg: 'Ready'
+}));
+
+let currentKeyIndex   = 0;
+let selectedModelId   = "gemini-2.5-flash";   // default
+let memory            = ["คุณคือ AI ผู้ช่วยวิจัย ที่พัฒนาโดย นายจรัญญู ทองเอนก"];
+let currentChatFile   = null;
+let lastUserQuestion  = "";
+
+// ─────────────────────────────────────────────
+// 3. MEMORY
+// ─────────────────────────────────────────────
+function loadMemory() {
+    try {
+        const s = localStorage.getItem('ai_memory');
+        if (s) { const p = JSON.parse(s); if (p.length > 0) memory = p; }
+    } catch(e) {}
+    updateMemoryStats();
+}
+
+function saveMemoryToStorage() {
+    localStorage.setItem('ai_memory', JSON.stringify(memory));
+    updateMemoryStats();
+}
+
+function clearMemory() {
+    if (!confirm("ล้าง Memory ทั้งหมด? (ยกเว้น System Prompt)")) return;
+    memory = ["คุณคือ AI ผู้ช่วยวิจัย ที่พัฒนาโดย นายจรัญญู ทองเอนก"];
+    saveMemoryToStorage();
+    showToast("Memory cleared", "success");
+}
+
+function updateMemoryStats() {
+    const docs = memory.length - 1; // exclude system prompt
+    document.getElementById('memory-stats').textContent = `Memory: ${docs} document${docs !== 1 ? 's' : ''}`;
+}
+
+window.addEventListener('storage', (e) => {
+    if (e.key === 'ai_memory') {
+        loadMemory();
+        showToast("ได้รับข้อมูลใหม่จาก Training Center", "info");
+    }
+});
+
+loadMemory();
+
+// ─────────────────────────────────────────────
+// 4. THEME
+// ─────────────────────────────────────────────
+function setTheme(t) {
+    document.body.setAttribute('data-theme', t);
+    localStorage.setItem('theme', t);
+}
+document.body.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
+
+// ─────────────────────────────────────────────
+// 5. MODEL SELECTOR
+// ─────────────────────────────────────────────
+function onModelChange(sel) {
+    selectedModelId = sel.value;
+    document.getElementById('current-model-badge').textContent = selectedModelId;
+    document.getElementById('status-label').textContent = `${selectedModelId} Active`;
+    // Reset model health on manual change
+    modelHealth.forEach(m => {
+        if (m.id === selectedModelId) { m.status = 'ready'; m.msg = 'Selected'; }
+    });
+    renderAPIStatus();
+    showToast(`Model changed → ${selectedModelId}`, "info");
+}
+
+// ─────────────────────────────────────────────
+// 6. API CALL — with key rotation + model fallback
+// ─────────────────────────────────────────────
+
+/**
+ * Build the Gemini REST endpoint URL.
+ * Gemini 2.5-flash uses generateContent; others too.
+ * The "exp" suffix is stripped — use plain model id.
+ */
+function buildURL(modelId, apiKey) {
+    return `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
+}
+
+async function callGeminiAPI(payload, loadingId) {
+    // Determine model order: start from selectedModelId, then fallback
+    const selectedIdx = GEMINI_MODELS.findIndex(m => m.id === selectedModelId);
+    const modelOrder  = [
+        ...GEMINI_MODELS.slice(selectedIdx),
+        ...GEMINI_MODELS.slice(0, selectedIdx)
+    ];
+
+    let lastError = null;
+
+    for (const model of modelOrder) {
+        const mh = modelHealth.find(m => m.id === model.id);
+        if (mh && mh.status === 'dead') continue; // skip known-dead
+
+        // Try all API keys for this model
+        for (let ki = 0; ki < API_KEYS.length; ki++) {
+            const actualKeyIdx = (currentKeyIndex + ki) % API_KEYS.length;
+            const kh = keyHealth[actualKeyIdx];
+            if (kh.status === 'dead') continue;
+
+            kh.status = 'working';
+            kh.msg    = `Calling ${model.id}...`;
+            if (mh) { mh.status = 'working'; mh.msg = `Key #${kh.id}`; }
+            renderAPIStatus();
+            updateLoadingMsg(loadingId, `Key #${kh.id} → ${model.label || model.id}...`);
+
+            try {
+                const res = await fetch(buildURL(model.endpoint, kh.key), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.status === 429) throw new Error("Quota Exceeded (429)");
+                if (res.status === 404) throw new Error("Model Not Found (404)");
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err?.error?.message || `HTTP ${res.status}`);
+                }
+
+                const data = await res.json();
+
+                // Mark key + model as active
+                kh.status = 'active'; kh.msg = `OK · ${model.id}`; kh.calls++;
+                if (mh) { mh.status = 'active'; mh.msg = 'Success'; }
+
+                // Reset others that aren't this key
+                keyHealth.forEach((k, i) => {
+                    if (i !== actualKeyIdx && k.status === 'active') { k.status = 'ready'; k.msg = 'Ready'; }
+                });
+
+                currentKeyIndex  = actualKeyIdx;
+                selectedModelId  = model.id;
+
+                // Update badge in case we fell back to another model
+                document.getElementById('current-model-badge').textContent = model.id;
+                document.getElementById('status-label').textContent         = `${model.id} Active`;
+                const sel = document.getElementById('model-selector');
+                if (sel) sel.value = model.id;
+
+                renderAPIStatus();
+                return data;
+
+            } catch (e) {
+                lastError = e;
+                const msg = e.message.includes('429') ? 'Quota Exceeded'
+                          : e.message.includes('404') ? 'Model N/A'
+                          : 'Error';
+
+                kh.status = (msg === 'Quota Exceeded') ? 'dead' : 'dead';
+                kh.msg    = msg;
+                if (mh && msg === 'Model N/A') { mh.status = 'dead'; mh.msg = 'Not Available'; }
+
+                console.warn(`[${model.id}] Key #${kh.id} → ${e.message}`);
+                renderAPIStatus();
+                updateLoadingMsg(loadingId, `⚠️ Key #${kh.id} failed (${msg}) — trying next...`);
+                await sleep(800);
+            }
         }
 
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.body.setAttribute('data-theme', savedTheme);
+        // All keys exhausted for this model — mark model dead if 404
+        if (mh && mh.status !== 'dead') { mh.status = 'dead'; mh.msg = 'All Keys Failed'; }
+    }
 
-        lucide.createIcons();
-    </script>
+    throw new Error(`All models & keys exhausted. Last: ${lastError?.message}`);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function updateLoadingMsg(loadingId, text) {
+    if (!loadingId) return;
+    const el = document.querySelector(`#${loadingId} .loading-text`);
+    if (el) el.textContent = text;
+}
+
+// ─────────────────────────────────────────────
+// 7. KNOWLEDGE PIPELINE
+// ─────────────────────────────────────────────
+function updateCharCount(el) {
+    document.getElementById('token-count').textContent = el.value.length + ' chars';
+}
+
+function handleFileUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const ta   = document.getElementById('knowledge-input');
+        const time = new Date().toLocaleTimeString();
+        ta.value  += (ta.value ? "\n\n" : "") + `[File: ${file.name} @ ${time}]\n` + e.target.result;
+        updateCharCount(ta);
+        showToast(`Loaded: ${file.name}`, "success");
+    };
+    reader.readAsText(file, 'utf-8');
+    input.value = "";
+}
+
+function handleSheetImport() {
+    const url = prompt("Enter URL to a text/CSV resource:");
+    if (!url) return;
+    const ta = document.getElementById('knowledge-input');
+    ta.value += (ta.value ? "\n\n" : "") + `[Linked URL: ${url}]\n(Content would be fetched server-side in production)`;
+    updateCharCount(ta);
+}
+
+async function startTextTraining() {
+    const input = document.getElementById('knowledge-input').value.trim();
+    if (!input) { showToast("Please enter data first", "error"); return; }
+
+    document.getElementById('nlp-visualizer').classList.remove('hidden');
+    document.getElementById('btn-start-train').disabled = true;
+    document.getElementById('btn-start-train').textContent = 'Processing...';
+
+    const visTokens = document.getElementById('vis-tokens');
+    visTokens.innerHTML = '';
+    document.getElementById('vis-vectors').innerHTML = '';
+    document.getElementById('train-confirm-area').classList.add('hidden');
+
+    let tokens = input.split(/[\s\n]+/).filter(Boolean);
+    const totalTokens = tokens.length;
+    let processed = 0;
+    const startTime = Date.now();
+    const chunkSize = 25;
+    let index = 0;
+
+    document.getElementById('step-1-status').innerHTML = `<span class="animate-pulse text-yellow-500">Initializing...</span>`;
+
+    function processChunk() {
+        const end = Math.min(index + chunkSize, totalTokens);
+        const frag = document.createDocumentFragment();
+
+        for (let i = index; i < end; i++) {
+            const token = tokens[i];
+            if (!token) continue;
+            const span    = document.createElement('span');
+            const isBig   = token.length > 4 || /[\u0E00-\u0E7F]/.test(token);
+            span.className = isBig
+                ? "inline-block px-1.5 py-0.5 m-0.5 bg-blue-500/20 text-blue-300 text-[10px] rounded border border-blue-500/30 animate-fade-in"
+                : "inline-block px-1 m-0.5 text-slate-500 text-[10px]";
+            span.textContent = token;
+            frag.appendChild(span);
+        }
+
+        visTokens.appendChild(frag);
+        visTokens.scrollTop = visTokens.scrollHeight;
+
+        // Keep DOM lean
+        while (visTokens.children.length > 400) visTokens.removeChild(visTokens.firstChild);
+
+        processed = end;
+        const elapsed = (Date.now() - startTime) / 1000 || 1;
+        document.getElementById('proc-speed').textContent = Math.round(processed / elapsed) + ' words/s';
+        document.getElementById('step-1-status').innerHTML =
+            `<span class="text-yellow-500">Tokenizing: ${processed}/${totalTokens}</span>`;
+
+        index += chunkSize;
+        if (index < totalTokens) { requestAnimationFrame(processChunk); }
+        else {
+            document.getElementById('step-1-status').innerHTML =
+                `<span class="text-green-500 font-bold">Complete (${totalTokens} tokens)</span>`;
+            startDeepVectorization();
+        }
+    }
+
+    processChunk();
+}
+
+function startDeepVectorization() {
+    const visVectors = document.getElementById('vis-vectors');
+    document.getElementById('step-2-status').innerHTML =
+        `<span class="animate-pulse text-blue-400">Generating Embeddings...</span>`;
+    visVectors.innerHTML = '';
+    let progress = 0;
+
+    const interval = setInterval(() => {
+        const chunk = Array.from({ length: 10 }, () => (Math.random() * 2 - 1).toFixed(5)).join(' ');
+        const row   = document.createElement('div');
+        row.className = 'text-[8px] whitespace-nowrap text-emerald-500 font-mono animate-fade-in';
+        row.textContent = `[VEC-${String(progress).padStart(3,'0')}] ${chunk} ...`;
+        visVectors.appendChild(row);
+        visVectors.scrollTop = visVectors.scrollHeight;
+        progress += 5;
+
+        if (progress >= 100) {
+            clearInterval(interval);
+            document.getElementById('step-2-status').innerHTML =
+                `<span class="text-green-500 font-bold">1024-dim Vectors Ready</span>`;
+            document.getElementById('train-confirm-area').classList.remove('hidden');
+        }
+    }, 40);
+}
+
+function confirmTraining() {
+    const input = document.getElementById('knowledge-input').value;
+    memory.push(input);
+    saveMemoryToStorage();
+    showToast("Saved to Memory! AI จะใช้ข้อมูลนี้ในการตอบ", "success");
+
+    document.getElementById('knowledge-input').value = '';
+    document.getElementById('token-count').textContent = '0 chars';
+    document.getElementById('nlp-visualizer').classList.add('hidden');
+    document.getElementById('train-confirm-area').classList.add('hidden');
+    document.getElementById('btn-start-train').disabled = false;
+    document.getElementById('btn-start-train').innerHTML = '<i data-lucide="zap"></i> Start Training Process';
+    lucide.createIcons();
+}
+
+// ─────────────────────────────────────────────
+// 8. CHAT
+// ─────────────────────────────────────────────
+function handleChatFileSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    currentChatFile = file;
+    document.getElementById('chat-file-name').textContent = file.name;
+    const preview = document.getElementById('chat-attachment-preview');
+    preview.classList.remove('hidden');
+    preview.classList.add('flex');
+}
+
+function clearChatAttachment() {
+    currentChatFile = null;
+    document.getElementById('chat-file-upload').value = '';
+    const preview = document.getElementById('chat-attachment-preview');
+    preview.classList.add('hidden');
+    preview.classList.remove('flex');
+}
+
+function handleSourceChange(sel) {
+    const input = document.getElementById('user-input');
+    const placeholders = {
+        api:     'ถามคำถามวิจัยทั่วไป (General Knowledge)...',
+        hybrid:  'ถามแบบผสมผสาน AI + Trained Memory...',
+        strict:  'ถามเฉพาะข้อมูลที่ Train เข้ามา (Strict)...',
+        offline: 'ค้นหาคำเป๊ะๆ จาก Memory (Offline Keyword)...',
+    };
+    input.placeholder = placeholders[sel.value] || placeholders.api;
+}
+
+async function handleChatSubmit(e) {
+    e.preventDefault();
+    const input      = document.getElementById('user-input');
+    const msg        = input.value.trim();
+    const source     = document.getElementById('chat-source').value;
+    const lengthMode = document.getElementById('chat-length').value;
+
+    if (!msg && !currentChatFile) return;
+
+    let userDisplay = msg;
+    let contextMsg  = msg;
+
+    if (currentChatFile) {
+        userDisplay = (msg ? msg + '<br>' : '') +
+            `<span class='inline-flex items-center gap-1 bg-black/10 px-2 py-0.5 rounded text-[10px] mt-1'>
+                <i data-lucide='paperclip' class='w-3 h-3'></i>${currentChatFile.name}
+            </span>`;
+        contextMsg = (msg ? msg + '\n' : '') + `[Attached: ${currentChatFile.name}]`;
+    }
+
+    lastUserQuestion = contextMsg;
+    addMsg('user', userDisplay);
+    input.value = '';
+    clearChatAttachment();
+
+    // Guard: memory modes need data
+    if (source !== 'api' && memory.length <= 1) {
+        await sleep(300);
+        addMsg('ai',
+            `⚠️ **Memory Empty**\n\nยังไม่มีข้อมูลที่เทรนครับ กรุณาใช้ Knowledge Pipeline ทางซ้ายเพื่อเพิ่มข้อมูลก่อนนะครับ`);
+        return;
+    }
+
+    // Offline keyword mode — no API needed
+    if (source === 'offline') {
+        const tid  = addThinking('cpu', 'Searching Local Memory...');
+        await sleep(700);
+        removeThinking(tid);
+        const kws     = contextMsg.toLowerCase().split(/[\s,]+/).filter(k => k.length > 2);
+        const results = memory.filter(doc => kws.some(k => doc.toLowerCase().includes(k)));
+        if (results.length > 0) {
+            addMsg('ai', `**[OFFLINE MODE]** พบ ${results.length} รายการ:\n\n` +
+                results.map(r => `> ${r.substring(0, 200)}...`).join('\n\n') +
+                `\n\n*Keyword matching — ไม่ได้ใช้ AI เรียบเรียง*`);
+        } else {
+            addMsg('ai', `**[OFFLINE MODE]** ไม่พบข้อมูลตรงกับคีย์เวิร์ดนี้ใน Memory ครับ`);
+        }
+        return;
+    }
+
+    // Token limits per length mode
+    const tokenLimits = { short: 200, medium: 600, long: 2500 };
+    const styleGuides = {
+        short:  "Answer very concisely in 2-3 sentences. Thai preferred.",
+        medium: "Answer clearly and helpfully. Use Thai. Structure if needed.",
+        long:   "Answer in full detail. Use markdown headings, lists, code blocks if helpful. Thai preferred."
+    };
+
+    const context   = memory.join('\n\n--- NEXT DOCUMENT ---\n\n');
+    const maxTokens = tokenLimits[lengthMode];
+    const style     = styleGuides[lengthMode];
+    let prompt      = '';
+
+    if (source === 'strict') {
+        prompt = `You are a strict AI research assistant. Answer ONLY from the CONTEXT below.
+If the answer is not in the context, respond: "ไม่พบข้อมูลนี้ใน Trained Memory ครับ"
+
+STYLE: ${style}
+
+CONTEXT:
+${context}
+
+QUESTION: ${contextMsg}
+
+ANSWER:`;
+    } else if (source === 'hybrid') {
+        prompt = `You are a smart AI research assistant.
+Use the CONTEXT as primary truth. Supplement with general knowledge only when needed.
+
+STYLE: ${style}
+
+CONTEXT:
+${context}
+
+QUESTION: ${contextMsg}
+
+ANSWER:`;
+    } else {
+        prompt = `You are a helpful AI Research Assistant. Answer in Thai when possible.
+
+STYLE: ${style}
+
+QUESTION: ${contextMsg}
+
+ANSWER:`;
+    }
+
+    const tid = addThinking('bot', 'Connecting to Gemini...');
+
+    try {
+        const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+                maxOutputTokens: maxTokens,
+                temperature: 0.7,
+                topP: 0.95
+            }
+        };
+
+        const data = await callGeminiAPI(payload, tid);
+        removeThinking(tid);
+
+        if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+            addMsg('ai', data.candidates[0].content.parts[0].text);
+        } else {
+            const blockReason = data?.promptFeedback?.blockReason || 'Unknown';
+            addMsg('ai', `⚠️ AI ไม่ส่งผลลัพธ์กลับมา (Block: ${blockReason})\n\nลองเปลี่ยน Model หรือแก้ไขคำถามครับ`);
+        }
+    } catch (err) {
+        removeThinking(tid);
+        addMsg('ai', `❌ **Connection Failed**\n\n${err.message}\n\nลองเปลี่ยน Model ใน Navbar หรือตรวจสอบ API Keys ครับ`);
+    }
+}
+
+// ─────────────────────────────────────────────
+// 9. CHAT UI HELPERS
+// ─────────────────────────────────────────────
+function addThinking(icon, text) {
+    const tid = 'thinking-' + Date.now();
+    const box = document.getElementById('chat-box');
+    const div = document.createElement('div');
+    div.id        = tid;
+    div.className = 'flex gap-4 animate-fade-in';
+    div.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0 border border-indigo-500/30">
+            <i data-lucide="${icon}" class="w-4 h-4 text-indigo-400"></i>
+        </div>
+        <div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm opacity-70 flex items-center gap-2">
+            <i data-lucide="loader-2" class="w-3 h-3 animate-spin flex-shrink-0"></i>
+            <span class="loading-text">${text}</span>
+        </div>`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    lucide.createIcons();
+    return tid;
+}
+
+function removeThinking(tid) {
+    const el = document.getElementById(tid);
+    if (el) el.remove();
+}
+
+function addMsg(role, text) {
+    const box   = document.getElementById('chat-box');
+    const div   = document.createElement('div');
+    const msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2,6);
+
+    const actionButtons = role === 'ai' ? `
+        <div class="flex justify-end gap-3 mt-2 pt-2 border-t border-[var(--border-color)]">
+            <button onclick="enableEdit('${msgId}')" class="text-[10px] text-blue-400 hover:underline flex items-center gap-1">
+                <i data-lucide="edit-3" class="w-3 h-3"></i> แก้ไข/สอน
+            </button>
+            <button onclick="copyMsg('${msgId}')" class="text-[10px] opacity-50 hover:opacity-100 flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i> Copy
+            </button>
+        </div>` : '';
+
+    div.className = `flex gap-4 animate-fade-in ${role === 'user' ? 'flex-row-reverse' : ''}`;
+    div.innerHTML = `
+        <div class="w-8 h-8 rounded-full ${role === 'user' ? 'bg-blue-500' : 'bg-indigo-500/20 border border-indigo-500/30'} flex items-center justify-center flex-shrink-0">
+            <i data-lucide="${role === 'user' ? 'user' : 'bot'}" class="w-4 h-4 ${role === 'user' ? 'text-white' : 'text-indigo-400'}"></i>
+        </div>
+        <div class="glass-panel p-4 rounded-2xl ${role === 'user' ? 'bg-blue-600 border-none text-white' : 'rounded-tl-none'} max-w-[85%] text-sm">
+            <div id="${msgId}-content" class="prose-chat">${marked.parse(text)}</div>
+            <div id="${msgId}-edit-area" class="hidden mt-2">
+                <textarea id="${msgId}-textarea" class="w-full bg-black/20 border border-[var(--border-color)] rounded-lg p-2 text-xs mb-2 h-28 font-mono resize-none"></textarea>
+                <div class="flex gap-2">
+                    <button onclick="saveCorrection('${msgId}')" class="px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-lg text-xs font-bold">💾 Save &amp; Teach AI</button>
+                    <button onclick="cancelEdit('${msgId}')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs">Cancel</button>
+                </div>
+            </div>
+            ${actionButtons}
+        </div>`;
+
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    lucide.createIcons();
+}
+
+function enableEdit(msgId) {
+    const content = document.getElementById(`${msgId}-content`);
+    const area    = document.getElementById(`${msgId}-edit-area`);
+    const ta      = document.getElementById(`${msgId}-textarea`);
+    ta.value = content.innerText.trim();
+    content.classList.add('hidden');
+    area.classList.remove('hidden');
+}
+
+function cancelEdit(msgId) {
+    document.getElementById(`${msgId}-content`).classList.remove('hidden');
+    document.getElementById(`${msgId}-edit-area`).classList.add('hidden');
+}
+
+function saveCorrection(msgId) {
+    const newText = document.getElementById(`${msgId}-textarea`).value.trim();
+    if (!newText) return;
+    document.getElementById(`${msgId}-content`).innerHTML = marked.parse(newText);
+    cancelEdit(msgId);
+    const entry = `[Human Correction]\nQ: ${lastUserQuestion}\nA: ${newText}`;
+    memory.push(entry);
+    saveMemoryToStorage();
+    showToast("AI เรียนรู้คำตอบใหม่แล้ว! บันทึกลง Memory เรียบร้อย", "success");
+}
+
+function copyMsg(msgId) {
+    const text = document.getElementById(`${msgId}-content`)?.innerText || '';
+    navigator.clipboard.writeText(text).then(() => showToast("Copied!", "success"));
+}
+
+function clearChat() {
+    document.getElementById('chat-box').innerHTML = `
+        <div class="flex gap-4 animate-fade-in">
+            <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 flex-shrink-0">
+                <i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i>
+            </div>
+            <div class="glass-panel p-4 rounded-2xl rounded-tl-none max-w-[85%] text-sm">
+                เริ่มบทสนทนาใหม่แล้วครับ 🙏<br>
+                <span class="text-[10px] opacity-50">หน่วยความจำที่ Train ไว้ยังคงอยู่</span>
+            </div>
+        </div>`;
+    clearChatAttachment();
+    lucide.createIcons();
+}
+
+// ─────────────────────────────────────────────
+// 10. API STATUS MODAL
+// ─────────────────────────────────────────────
+function toggleAPIModal() {
+    const modal = document.getElementById('api-modal');
+    if (modal.classList.contains('hidden')) {
+        renderAPIStatus();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function renderAPIStatus() {
+    // Keys
+    const list = document.getElementById('api-status-list');
+    list.innerHTML = '';
+    keyHealth.forEach(k => {
+        const colorClass = { ready:'status-ready', working:'status-working', active:'status-active', dead:'status-dead' }[k.status];
+        const textClass  = { ready:'text-[var(--text-muted)]', working:'text-yellow-400', active:'text-green-400', dead:'text-red-400 line-through opacity-50' }[k.status];
+        const masked     = k.key.slice(0, 6) + '••••••••' + k.key.slice(-4);
+        const div        = document.createElement('div');
+        div.className    = 'flex items-center justify-between p-2 rounded-lg bg-black/10 border border-[var(--border-color)]';
+        div.innerHTML    = `
+            <div class="flex items-center gap-3">
+                <div class="status-dot ${colorClass}"></div>
+                <div>
+                    <div class="text-xs font-bold ${textClass}">Key #${k.id}</div>
+                    <div class="text-[10px] opacity-40 font-mono">${masked}</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="text-[10px] font-bold ${textClass}">${k.msg}</div>
+                <div class="text-[9px] opacity-40">${k.calls} calls</div>
+            </div>`;
+        list.appendChild(div);
+    });
+
+    // Models
+    const mlist = document.getElementById('model-status-list');
+    mlist.innerHTML = '';
+    modelHealth.forEach(m => {
+        const isSelected = m.id === selectedModelId;
+        const colorClass = { ready:'status-ready', working:'status-working', active:'status-active', dead:'status-dead' }[m.status] || 'status-ready';
+        const div        = document.createElement('div');
+        div.className    = `flex items-center justify-between p-1.5 rounded-lg border ${isSelected ? 'border-blue-500/40 bg-blue-500/5' : 'border-[var(--border-color)] bg-black/5'}`;
+        div.innerHTML    = `
+            <div class="flex items-center gap-2">
+                <div class="status-dot ${colorClass}"></div>
+                <span class="text-[11px] font-mono ${isSelected ? 'text-blue-400 font-bold' : ''}">${m.id}</span>
+                ${isSelected ? '<span class="text-[8px] bg-blue-500 text-white px-1 rounded">ACTIVE</span>' : ''}
+            </div>
+            <span class="text-[10px] opacity-50">${m.msg}</span>`;
+        mlist.appendChild(div);
+    });
+}
+
+// ─────────────────────────────────────────────
+// 11. TOAST NOTIFICATION
+// ─────────────────────────────────────────────
+function showToast(msg, type = "info") {
+    const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600', warn: 'bg-yellow-600' };
+    const icons  = { success: 'check-circle', error: 'alert-circle', info: 'info', warn: 'alert-triangle' };
+
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-2xl text-white text-sm font-semibold animate-fade-in ${colors[type] || colors.info}`;
+    toast.style.whiteSpace = 'nowrap';
+    toast.innerHTML = `<i data-lucide="${icons[type] || 'info'}" class="w-4 h-4"></i>${msg}`;
+    document.body.appendChild(toast);
+    lucide.createIcons();
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.4s';
+        setTimeout(() => toast.remove(), 400);
+    }, 2800);
+}
+
+// ─────────────────────────────────────────────
+// 12. INIT
+// ─────────────────────────────────────────────
+lucide.createIcons();
+renderAPIStatus();
+</script>
 </body>
 </html>
